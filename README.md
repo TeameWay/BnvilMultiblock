@@ -1,5 +1,11 @@
 # BnvilMultiblock
 
+> 您暂时不应该把此模组加入您的整合包。
+> 此模组还处于早期开发阶段，大部分功能由 AI 生成。
+> 作者虽然经过简单测试，确认没有崩溃问题 (复杂情景还没测)(其他问题有没有也不知道)。
+> 在完全测试完成前，仅作为 vibe/wish coding 产物。
+> 总之爆了自己解决，总之爆了自己解决，总之爆了自己解决。
+
 NeoForge 多方块机器框架，从 [NoWay-Core](https://github.com/TeameWay/NoWay-Core) 中拆分而来，可作为独立模组安装，也可作为前置被其他模组依赖。
 
 ## 功能
@@ -12,46 +18,6 @@ NeoForge 多方块机器框架，从 [NoWay-Core](https://github.com/TeameWay/No
 
 ## 开发
 
-### 环境
-
-| 项 | 版本 |
-| --- | --- |
-| Minecraft | 26.3 |
-| NeoForge | 26.3.0.101 |
-| Java | 25 |
-| ModDevGradle | 2.0.148 |
-
-### 常用命令
-
-```bash
-./gradlew build          # 构建
-./gradlew runClient      # 启动客户端
-./gradlew runData        # 数据生成，输出到 src/generated/resources
-./gradlew runServer      # 启动服务端
-```
-
-### 目录结构
-
-```
-src/main/java/com/teameway/bnvilmb/
-├── BnvilMultiBlock.java          # 主类
-├── BnvilRegistrum.java           # Registrum 扩展，多方块专用注册入口
-├── client/                       # 客户端配方索引维护
-├── common/multiblock/
-│   ├── controller/               # 控制器方块、方块实体、界面
-│   ├── machine/                  # 运行时、匹配、执行、资源快照
-│   └── port/                     # 端口抽象、端口表、扫描器与方块实体
-├── datagen/                      # 结构定义与界面文本的数据生成
-├── event/multiblock/             # 控制器登记与配方索引事件
-├── gui/                          # 界面主题
-├── init/                         # 注册入口与创造模式页签
-├── integration/jei/              # JEI 配方分类与结构预览
-├── ldlib/slot/                   # 支持超长数量的物品槽
-├── recipe/                       # 多方块配方与配方索引
-├── resource/                     # 配方资源模型（物品/流体/能量）
-└── util/                         # 数字格式化
-```
-
 ### 加一台新机器
 
 1. 在 `init/multiblock` 注册控制器方块、方块实体、控制器、机器声明与机器类型。
@@ -62,11 +28,11 @@ src/main/java/com/teameway/bnvilmb/
 
 ## 依赖
 
-| 依赖 | 用途 | 说明 |
-| --- | --- | --- |
+| 依赖                                              | 用途                                                 | 说明          |
+|---------------------------------------------------|------------------------------------------------------|---------------|
 | [AnvilLib](https://github.com/Anvil-Dev/AnvilLib) | `AbstractRegistrum` 注册体系、多方块定义与控制器 API | 必需，MPL-2.0 |
-| [LDLib2](https://github.com/Low-Drag-MC/LDLib2) | 界面框架 | 必需 |
-| [JEI](https://github.com/mezz/JustEnoughItems) | 配方查看 | 可选 |
+| [LDLib2](https://github.com/Low-Drag-MC/LDLib2)   | 界面框架                                             | 必需          |
+| [JEI](https://github.com/mezz/JustEnoughItems)    | 配方查看                                             | 可选          |
 
 ## 许可证
 
