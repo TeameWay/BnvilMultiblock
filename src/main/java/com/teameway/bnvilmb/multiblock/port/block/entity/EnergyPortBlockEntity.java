@@ -10,7 +10,6 @@ import com.teameway.bnvilmb.multiblock.port.PortTier;
 import com.teameway.bnvilmb.multiblock.port.block.AbstractPortBlock;
 import com.teameway.bnvilmb.resource.ingredient.LongEnergyHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -22,7 +21,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
  *
  * <p>储量由端口方块每 10 tick 采样一次，经托管字段同步到客户端。</p>
  */
-public class EnergyPortBlockEntity extends BlockEntity implements EnergyPort, ISyncPersistRPCBlockEntity {
+public class EnergyPortBlockEntity extends AbstractPortBlockEntity implements EnergyPort, ISyncPersistRPCBlockEntity {
     private static final int SAMPLE_INTERVAL = 10;
 
     private final FieldManagedStorage syncStorage = new FieldManagedStorage(this);

@@ -170,7 +170,10 @@ public class ControllerUI {
      */
     private static Component stateText(ControllerBlockEntity controller) {
         if (controller.machineType().isEmpty()) {
-            return Component.translatable("gui.bnvil_multiblock.controller.state.unformed");
+            String error = controller.structureError();
+            return error.isEmpty()
+                   ? Component.translatable("gui.bnvil_multiblock.controller.state.unformed")
+                   : Component.literal(error);
         }
         return Component.translatable(
             controller.working()

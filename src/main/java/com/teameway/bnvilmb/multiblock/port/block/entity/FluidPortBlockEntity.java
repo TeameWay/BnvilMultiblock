@@ -5,7 +5,6 @@ import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.PortTier;
 import com.teameway.bnvilmb.multiblock.port.block.AbstractPortBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -17,7 +16,7 @@ import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
 /**
  * 流体端口方块实体
  */
-public class FluidPortBlockEntity extends BlockEntity implements FluidPort {
+public class FluidPortBlockEntity extends AbstractPortBlockEntity implements FluidPort {
     private final PortTier tier;
     private final FluidStacksResourceHandler handler;
 

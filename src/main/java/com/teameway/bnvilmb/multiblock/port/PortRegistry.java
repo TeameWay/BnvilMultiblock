@@ -4,7 +4,9 @@ import com.teameway.bnvilmb.BnvilMultiBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -55,6 +57,22 @@ public class PortRegistry {
      */
     public static boolean isPort(BlockState state) {
         return DESCRIPTORS.containsKey(state.getBlock());
+    }
+
+    /**
+     * 列出某端口种类的全部方块，供 JEI 预览与数据生成使用
+     *
+     * @param kind 端口种类
+     * @return 方块集合，按注册顺序
+     */
+    public static Set<Block> blocks(PortKind kind) {
+        Set<Block> blocks = new LinkedHashSet<>();
+        DESCRIPTORS.forEach((block, descriptor) -> {
+            if (descriptor.kind() == kind) {
+                blocks.add(block);
+            }
+        });
+        return blocks;
     }
 
     /**

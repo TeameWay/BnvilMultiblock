@@ -22,6 +22,16 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 compileJava.options.encoding = 'UTF-8'
 
+test {
+    useJUnitPlatform()
+}
+
+if (gradle.startParameter.offline) {
+    configurations.testRuntimeClasspath {
+        resolutionStrategy.force 'net.neoforged.fancymodloader:junit-fml:12.0.0'
+    }
+}
+
 lombok.version = "1.18.44"
 
 allprojects {

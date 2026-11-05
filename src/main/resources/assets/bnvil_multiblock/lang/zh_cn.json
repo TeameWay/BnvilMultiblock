@@ -64,5 +64,13 @@
   "gui.bnvil_multiblock.jei.no_structure": "结构预览不可用",
   "gui.bnvil_multiblock.jei.multiblock_info": "多方块结构",
   "gui.bnvil_multiblock.jei.chance": "概率：%s",
-  "gui.bnvil_multiblock.slot.count": "数量：%s"
+  "gui.bnvil_multiblock.slot.count": "数量：%s",
+  "structure.bnvil_multiblock.problem.fixed": "位置 %s,%s,%s 的方块不符合结构",
+  "structure.bnvil_multiblock.problem.slot": "位置 %s,%s,%s 不是允许的端口或替代方块",
+  "structure.bnvil_multiblock.problem.port_not_allowed": "位置 %s,%s,%s 的端口不允许放在这里",
+  "structure.bnvil_multiblock.problem.port_claimed": "位置 %s,%s,%s 的端口已属于另一台控制器",
+  "structure.bnvil_multiblock.problem.role_min": "%s 不足：%s（至少 %s）",
+  "structure.bnvil_multiblock.problem.role_max": "%s 过多：%s（最多 %s）",
+  "structure.bnvil_multiblock.problem.unloaded": "结构所在区域未完全加载",
+  "structure.bnvil_multiblock.problem.pattern": "结构未满足角色数量约束"
 }

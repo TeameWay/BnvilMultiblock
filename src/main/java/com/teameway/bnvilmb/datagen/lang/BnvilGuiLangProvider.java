@@ -55,5 +55,13 @@ public class BnvilGuiLangProvider {
         provider.add("gui.bnvil_multiblock.jei.multiblock_info", "Multiblock Structure");
         provider.add("gui.bnvil_multiblock.jei.chance", "Chance: %s");
         provider.add("gui.bnvil_multiblock.slot.count", "Count: %s");
+        provider.add("structure.bnvil_multiblock.problem.fixed", "Block at %s,%s,%s does not match the structure");
+        provider.add("structure.bnvil_multiblock.problem.slot", "Block at %s,%s,%s is not a valid port or substitute");
+        provider.add("structure.bnvil_multiblock.problem.port_not_allowed", "Port at %s,%s,%s is not allowed here");
+        provider.add("structure.bnvil_multiblock.problem.port_claimed", "Port at %s,%s,%s belongs to another controller");
+        provider.add("structure.bnvil_multiblock.problem.role_min", "Not enough %s: %s (need %s)");
+        provider.add("structure.bnvil_multiblock.problem.role_max", "Too many %s: %s (max %s)");
+        provider.add("structure.bnvil_multiblock.problem.unloaded", "Structure area is not fully loaded");
+        provider.add("structure.bnvil_multiblock.problem.pattern", "Structure does not satisfy its role counts");
     }
 }

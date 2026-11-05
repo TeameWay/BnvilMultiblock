@@ -10,8 +10,8 @@ NeoForge 多方块机器框架，从 [NoWay-Core](https://github.com/TeameWay/No
 
 ## 功能
 
-- **结构定义走数据包**：结构形状由 anvillib 的 `anvillib:definitions` 数据包注册表承载，加机器只需加 JSON 与 tag，无需写代码。
-- **控制器 + 端口**：控制器方块负责成型判定与运行；端口分为物品总线、流体仓、能量端口、并行仓与线程仓，容量按等级决定。
+- **结构定义走数据包**：结构形状由 `bnvil_multiblock:structure_patterns` 数据包注册表承载；网格里的槽位只声明允许的角色与全局数量，端口位置可以互换。
+- **控制器 + 端口**：控制器方块负责结构生命周期与运行，可配置为无朝向或水平四向；端口分为物品总线、流体仓、能量端口、并行仓与线程仓，容量按等级决定。端口有归属，一个端口只属于一台控制器。
 - **配方索引**：服务端与客户端各自维护 `MultiblockRecipeIndex` 快照，按机器类型与形态做位图筛选，配方重载后整表替换。
 - **并行与多线程**：一个控制器可同时跑多条配方，每条线程按并行倍数结算，跨线程用预留账本避免重复占用同一批材料。
 - **界面与 JEI**：控制器与端口都有 LDLib2 界面；JEI 按机器类型注册配方分类，并带结构预览。
@@ -21,10 +21,46 @@ NeoForge 多方块机器框架，从 [NoWay-Core](https://github.com/TeameWay/No
 ### 加一台新机器
 
 1. 在 `init/multiblock` 注册控制器方块、方块实体、控制器、机器声明与机器类型。
-2. 在 `BnvilMultiblockDefinitions` 里用 `MultiblockDefinition.builder()` 声明形状。
-3. 运行 `./gradlew runData` 生成 `data/bnvil_multiblock/anvillib/definitions/<name>.json`。
-4. 在 `data/bnvil_multiblock/tags/anvillib/definitions/<name>.json` 里登记定义 ID。
+2. 在 `BnvilMultiblockDefinitions` 里用 `StructurePattern.builder()` 声明网格：`layer(...)` 写层，`where(...)` 写固定方块，`slot(...)` 写槽位，`role(...)` 写角色与数量。
+3. 运行 `./gradlew runData` 生成 `data/bnvil_multiblock/bnvil_multiblock/structure_patterns/<name>.json`。
+4. 在 `data/bnvil_multiblock/tags/bnvil_multiblock/structure_patterns/<name>.json` 里登记结构 ID；`cooled` 这类形态标签也放在这里。
 5. 在 `data/bnvil_multiblock/recipe/` 下写 `bnvil_multiblock:multiblock` 配方，`machine` 字段填机器类型 ID。
+
+槽位示例：
+
+```json
+{
+  "grid": [["AAA", "AAA", "AAA"], ["$B$", "B0B", "$B$"]],
+  "mapping": {
+    "0": { "blocks": "bnvil_multiblock:simple_controller" },
+    "A": { "blocks": "minecraft:iron_block" },
+    "B": { "blocks": "minecraft:gold_block" }
+  },
+  "slots": {
+    "$": { "roles": ["item_input", "item_output", "fluid_input", "parallel"] }
+  },
+  "roles": {
+    "item_input": { "port_kinds": ["item_input"], "min": 0, "max": 2 },
+    "item_output": { "port_kinds": ["item_output"], "min": 1 },
+    "fluid_input": { "port_kinds": ["fluid_input"], "min": 1, "max": 2 },
+    "parallel": {
+      "port_kinds": ["parallel"],
+      "substitutes": [
+        { "predicate": { "blocks": "minecraft:gold_block" }, "parallels": 0 },
+        { "predicate": { "blocks": "minecraft:iron_block" }, "parallels": 0 }
+      ]
+    }
+  }
+}
+```
+
+> 旧版本使用 `anvillib:definitions` 的固定坐标格式；本版本已替换为 `bnvil_multiblock:structure_patterns`。旧存档中的 anvillib 多方块状态不再兼容，请使用新世界或自行清理对应 SavedData。
+
+## 测试
+
+- `src/test/java` 放纯 JUnit 测试，运行 `./gradlew test`。
+- GameTest 在 `src/main/java/.../gametest`，默认不注册；只有带 `-Dbnvil_multiblock.tests=true` 时才注册。IDEA 的 `GameTestServer` 运行配置已经设置该属性。
+- 普通客户端不会注册测试实例，避免登录时同步 `minecraft:test_instance` 报 `Direct holder` 错误。
 
 ## 依赖
 

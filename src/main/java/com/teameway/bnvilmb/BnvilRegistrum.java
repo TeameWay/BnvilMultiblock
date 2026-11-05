@@ -1,9 +1,9 @@
 package com.teameway.bnvilmb;
 
+import com.teameway.bnvilmb.init.BnvilRegistries;
 import com.teameway.bnvilmb.multiblock.MultiblockMachine;
 import com.teameway.bnvilmb.multiblock.MultiblockType;
-import com.teameway.bnvilmb.init.BnvilRegistries;
-import dev.anvilcraft.lib.v2.multiblock.dynamic.controller.IController;
+import com.teameway.bnvilmb.multiblock.StructureController;
 import dev.anvilcraft.lib.v2.registrum.AbstractRegistrum;
 import dev.anvilcraft.lib.v2.registrum.builders.NoConfigBuilder;
 import dev.anvilcraft.lib.v2.util.nullness.NonNullSupplier;
@@ -64,7 +64,7 @@ public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
      * @param <T>     控制器类型
      * @return 构建器，{@code register()} 得到 {@code RegistryEntry}
      */
-    public <T extends IController> NoConfigBuilder<IController, T, BnvilRegistrum> multiblockController(
+    public <T extends StructureController> NoConfigBuilder<StructureController, T, BnvilRegistrum> multiblockController(
         String name,
         NonNullSupplier<? extends Block> block,
         BiFunction<Block, Identifier, T> factory

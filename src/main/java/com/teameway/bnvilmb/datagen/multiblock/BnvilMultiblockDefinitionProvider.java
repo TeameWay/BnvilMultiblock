@@ -1,9 +1,8 @@
 package com.teameway.bnvilmb.datagen.multiblock;
 
-import com.teameway.bnvilmb.multiblock.MultiblockMachine;
 import com.teameway.bnvilmb.init.BnvilRegistries;
-import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
-import dev.anvilcraft.lib.v2.multiblock.init.LibRegistries;
+import com.teameway.bnvilmb.multiblock.MultiblockMachine;
+import com.teameway.bnvilmb.multiblock.structure.StructurePattern;
 import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
@@ -19,10 +18,10 @@ import java.util.concurrent.CompletableFuture;
 import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
 
 /**
- * 多方块定义数据生成器
+ * 结构模板数据生成器
  *
- * <p>遍历 {@code bnvil_multiblock:multiblocks} 注册表，输出路径由注册表 {@code anvillib:definitions} 推导，
- * 即 data/&lt;namespace&gt;/anvillib/definitions/&lt;path&gt;.json。</p>
+ * <p>遍历 {@code bnvil_multiblock:multiblocks} 注册表，输出到
+ * {@code data/<namespace>/bnvil_multiblock/structure_patterns/<path>.json}。</p>
  */
 public class BnvilMultiblockDefinitionProvider implements DataProvider {
     private static final Logger LOGGER = LogManager.getLogger(BnvilMultiblockDefinitionProvider.class);
@@ -42,20 +41,19 @@ public class BnvilMultiblockDefinitionProvider implements DataProvider {
         MultiblockMachine machine
     ) {
         Identifier id = machine.id();
-        return DataProvider.saveStable(
-            cache, registries, MultiblockDefinition.CODEC.codec(), machine.definition().get(), pathProvider.json(id)
-        );
+        StructurePattern pattern = machine.pattern().get();
+        return DataProvider.saveStable(cache, registries, StructurePattern.CODEC, pattern, pathProvider.json(id));
     }
 
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
-        PackOutput.PathProvider pathProvider = this.output.createRegistryElementsPathProvider(LibRegistries.DEFINITIONS_KEY);
+        PackOutput.PathProvider pathProvider = this.output.createRegistryElementsPathProvider(BnvilRegistries.STRUCTURE_PATTERNS);
         return this.registries.thenCompose(lookup -> {
             List<MultiblockMachine> machines = REGISTRUM.getAll(BnvilRegistries.MULTIBLOCKS)
                 .stream()
                 .map(RegistryEntry::get)
                 .toList();
-            LOGGER.info("Generating {} multiblock definition(s)", machines.size());
+            LOGGER.info("Generating {} structure pattern(s)", machines.size());
             CompletableFuture<?>[] futures = machines.stream()
                 .map(machine -> save(cache, lookup, pathProvider, machine))
                 .toArray(CompletableFuture[]::new);
@@ -65,6 +63,6 @@ public class BnvilMultiblockDefinitionProvider implements DataProvider {
 
     @Override
     public String getName() {
-        return "BnvilMultiBlock Multiblock Definitions";
+        return "BnvilMultiBlock Structure Patterns";
     }
 }

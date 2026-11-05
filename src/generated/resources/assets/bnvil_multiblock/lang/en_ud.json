@@ -64,5 +64,14 @@
   "item.bnvil_multiblock.parallel_port": "ʇɹoԀ ꞁǝꞁꞁɐɹɐԀ",
   "item.bnvil_multiblock.simple_controller": "ɹǝꞁꞁoɹʇuoƆ ǝꞁdɯᴉS",
   "item.bnvil_multiblock.thread_port": "ʇɹoԀ pɐǝɹɥ⟘",
-  "itemGroup.bnvil_multiblock.multiblock": "ʞɔoꞁqᴉʇꞁnWꞁᴉʌuᗺ"
+  "itemGroup.bnvil_multiblock.multiblock": "ʞɔoꞁqᴉʇꞁnWꞁᴉʌuᗺ",
+  "itemGroup.bnvil_multiblock.multiblock_controller": "ɹǝꞁꞁoɹʇuoƆ - ʞɔoꞁqᴉʇꞁnWꞁᴉʌuᗺ",
+  "structure.bnvil_multiblock.problem.fixed": "ǝɹnʇɔnɹʇs ǝɥʇ ɥɔʇɐɯ ʇou sǝop %s'%s'%s ʇɐ ʞɔoꞁᗺ",
+  "structure.bnvil_multiblock.problem.pattern": "sʇunoɔ ǝꞁoɹ sʇᴉ ʎɟsᴉʇɐs ʇou sǝop ǝɹnʇɔnɹʇS",
+  "structure.bnvil_multiblock.problem.port_claimed": "ɹǝꞁꞁoɹʇuoɔ ɹǝɥʇouɐ oʇ sᵷuoꞁǝq %s'%s'%s ʇɐ ʇɹoԀ",
+  "structure.bnvil_multiblock.problem.port_not_allowed": "ǝɹǝɥ pǝʍoꞁꞁɐ ʇou sᴉ %s'%s'%s ʇɐ ʇɹoԀ",
+  "structure.bnvil_multiblock.problem.role_max": "(%s xɐɯ) %s :%s ʎuɐɯ oo⟘",
+  "structure.bnvil_multiblock.problem.role_min": "(%s pǝǝu) %s :%s ɥᵷnouǝ ʇoN",
+  "structure.bnvil_multiblock.problem.slot": "ǝʇnʇᴉʇsqns ɹo ʇɹod pᴉꞁɐʌ ɐ ʇou sᴉ %s'%s'%s ʇɐ ʞɔoꞁᗺ",
+  "structure.bnvil_multiblock.problem.unloaded": "pǝpɐoꞁ ʎꞁꞁnɟ ʇou sᴉ ɐǝɹɐ ǝɹnʇɔnɹʇS"
 }

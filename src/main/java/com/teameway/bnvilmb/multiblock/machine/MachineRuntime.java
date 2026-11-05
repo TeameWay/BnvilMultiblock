@@ -1,12 +1,12 @@
 package com.teameway.bnvilmb.multiblock.machine;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
+import com.teameway.bnvilmb.init.BnvilRegistries;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPortTable;
+import com.teameway.bnvilmb.multiblock.structure.StructurePattern;
 import com.teameway.bnvilmb.recipe.CompiledRecipe;
 import com.teameway.bnvilmb.recipe.MultiblockRecipeIndex;
 import com.teameway.bnvilmb.recipe.TypeIndex;
-import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
-import dev.anvilcraft.lib.v2.multiblock.init.LibRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +28,7 @@ public class MachineRuntime {
     private static final int FAILED_COOLDOWN = 100;
 
     private final Identifier machine;
-    private final Holder.Reference<MultiblockDefinition> definition;
+    private final Holder.Reference<StructurePattern> pattern;
     private final List<MachineJob> jobs = new ArrayList<>();
     private Set<Identifier> variants = Set.of();
     private long indexVersion = -1L;
@@ -38,11 +38,11 @@ public class MachineRuntime {
 
     /**
      * @param machine    机器类型
-     * @param definition 当前结构定义
+     * @param pattern 当前结构模板
      */
-    public MachineRuntime(Identifier machine, Holder.Reference<MultiblockDefinition> definition) {
+    public MachineRuntime(Identifier machine, Holder.Reference<StructurePattern> pattern) {
         this.machine = machine;
-        this.definition = definition;
+        this.pattern = pattern;
     }
 
     /**
@@ -175,7 +175,7 @@ public class MachineRuntime {
         Set<Identifier> collected = new HashSet<>();
         for (CompiledRecipe recipe : type.recipes()) {
             for (Identifier variant : recipe.variants()) {
-                if (this.definition.is(TagKey.create(LibRegistries.DEFINITIONS_KEY, variant))) {
+                if (this.pattern.is(TagKey.create(BnvilRegistries.STRUCTURE_PATTERNS, variant))) {
                     collected.add(variant);
                 }
             }

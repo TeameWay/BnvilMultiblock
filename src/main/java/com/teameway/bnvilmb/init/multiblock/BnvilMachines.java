@@ -11,7 +11,7 @@ import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
  * 多方块机器与控制器的注册
  *
  * <p>控制器进入 {@code bnvil_multiblock:multiblock_controllers}，机器声明进入 {@code bnvil_multiblock:multiblocks}，
- * datagen 直接遍历后者输出定义 JSON。</p>
+ * datagen 直接遍历后者输出结构模板 JSON。</p>
  */
 @EventBusSubscriber(modid = BnvilMultiBlock.MODID)
 public class BnvilMachines {
@@ -19,7 +19,7 @@ public class BnvilMachines {
     public static final RegistryEntry<MultiblockMachine, MultiblockMachine> SIMPLE_PROCESSOR = REGISTRUM.multiblock(
         "simple_processor",
         () -> MultiblockMachine.builder(BnvilControllers.SIMPLE_PROCESSOR_CONTROLLER)
-            .definition(() -> BnvilMultiblockDefinitions.SIMPLE_PROCESSOR)
+            .pattern(() -> BnvilMultiblockDefinitions.SIMPLE_PROCESSOR)
             .build()
     ).register();
 

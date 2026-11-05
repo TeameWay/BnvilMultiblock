@@ -64,5 +64,14 @@
   "item.bnvil_multiblock.parallel_port": "Parallel Port",
   "item.bnvil_multiblock.simple_controller": "Simple Controller",
   "item.bnvil_multiblock.thread_port": "Thread Port",
-  "itemGroup.bnvil_multiblock.multiblock": "BnvilMultiblock"
+  "itemGroup.bnvil_multiblock.multiblock": "BnvilMultiblock",
+  "itemGroup.bnvil_multiblock.multiblock_controller": "BnvilMultiblock - Controller",
+  "structure.bnvil_multiblock.problem.fixed": "Block at %s,%s,%s does not match the structure",
+  "structure.bnvil_multiblock.problem.pattern": "Structure does not satisfy its role counts",
+  "structure.bnvil_multiblock.problem.port_claimed": "Port at %s,%s,%s belongs to another controller",
+  "structure.bnvil_multiblock.problem.port_not_allowed": "Port at %s,%s,%s is not allowed here",
+  "structure.bnvil_multiblock.problem.role_max": "Too many %s: %s (max %s)",
+  "structure.bnvil_multiblock.problem.role_min": "Not enough %s: %s (need %s)",
+  "structure.bnvil_multiblock.problem.slot": "Block at %s,%s,%s is not a valid port or substitute",
+  "structure.bnvil_multiblock.problem.unloaded": "Structure area is not fully loaded"
 }

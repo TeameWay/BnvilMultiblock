@@ -32,11 +32,12 @@ public class MultiblockPortTable {
     private final List<EnergyHandler> energyInputs;
     private final List<EnergyHandler> energyOutputs;
 
-    private MultiblockPortTable(Map<PortKind, List<MultiblockPort>> byKind, int portCount) {
+    private MultiblockPortTable(Map<PortKind, List<MultiblockPort>> byKind, int portCount,
+                                int parallelsBonus, int threadsBonus) {
         this.byKind = byKind;
         this.portCount = portCount;
-        this.threads = 1 + sumDelta(byKind.getOrDefault(PortKind.THREAD, List.of()), true);
-        this.parallels = Math.max(1, sumDelta(byKind.getOrDefault(PortKind.PARALLEL, List.of()), false));
+        this.threads = Math.max(1, 1 + sumDelta(byKind.getOrDefault(PortKind.THREAD, List.of()), true) + threadsBonus);
+        this.parallels = Math.max(1, sumDelta(byKind.getOrDefault(PortKind.PARALLEL, List.of()), false) + parallelsBonus);
 
         List<ResourceHandler<ItemResource>> itemIn = new ArrayList<>();
         List<ResourceHandler<ItemResource>> itemOut = new ArrayList<>();
@@ -103,11 +104,23 @@ public class MultiblockPortTable {
      * @return 端口表
      */
     public static MultiblockPortTable of(Collection<MultiblockPort> ports) {
+        return of(ports, 0, 0);
+    }
+
+    /**
+     * 由端口集合与替代物加成构建端口表
+     *
+     * @param ports           端口集合
+     * @param parallelsBonus  替代物并行加成
+     * @param threadsBonus    替代物线程加成
+     * @return 端口表
+     */
+    public static MultiblockPortTable of(Collection<MultiblockPort> ports, int parallelsBonus, int threadsBonus) {
         Map<PortKind, List<MultiblockPort>> byKind = new EnumMap<>(PortKind.class);
         for (MultiblockPort port : ports) {
             byKind.computeIfAbsent(port.portKind(), ignored -> new ArrayList<>()).add(port);
         }
-        return new MultiblockPortTable(byKind, ports.size());
+        return new MultiblockPortTable(byKind, ports.size(), parallelsBonus, threadsBonus);
     }
 
     private static int sumDelta(List<MultiblockPort> ports, boolean threads) {

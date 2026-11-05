@@ -1,9 +1,9 @@
 package com.teameway.bnvilmb.multiblock.port;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
+import com.teameway.bnvilmb.multiblock.structure.StructureMatch;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 端口扫描
  *
- * <p>只在成型/部件变化时调用，不要每 tick 扫。</p>
+ * <p>只扫描结构匹配器确认过的槽位，成型/槽位变化时调用，不要每 tick 扫。</p>
  */
 public class MultiblockPortScanner {
     private MultiblockPortScanner() {
@@ -21,23 +21,22 @@ public class MultiblockPortScanner {
     /**
      * 扫描结构中所有端口
      *
-     * @param level         世界
-     * @param controllerPos 控制器位置
-     * @param definition    结构定义
+     * @param level 服务端世界
+     * @param match 结构匹配结果
      * @return 端口表
      */
-    public static MultiblockPortTable scan(Level level, BlockPos controllerPos, MultiblockDefinition definition) {
+    public static MultiblockPortTable scan(ServerLevel level, StructureMatch match) {
         List<MultiblockPort> ports = new ArrayList<>();
-        for (BlockPos pos : definition.toGlobal(controllerPos).keySet()) {
+        for (BlockPos pos : match.portPositions()) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof MultiblockPort port) {
                 ports.add(port);
             }
         }
-        MultiblockPortTable table = MultiblockPortTable.of(ports);
+        MultiblockPortTable table = MultiblockPortTable.of(ports, match.parallelsBonus(), match.threadsBonus());
         BnvilMultiBlock.LOGGER.debug(
             "Scanned multiblock at {}: {} port(s), {} thread(s), {} parallel(s)",
-            controllerPos, table.portCount(), table.threads(), table.parallels()
+            match.controllerPos(), table.portCount(), table.threads(), table.parallels()
         );
         return table;
     }

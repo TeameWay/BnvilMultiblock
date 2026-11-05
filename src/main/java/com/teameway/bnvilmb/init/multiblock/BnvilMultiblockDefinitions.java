@@ -1,33 +1,42 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
-import net.minecraft.core.Vec3i;
+import com.teameway.bnvilmb.multiblock.port.PortKind;
+import com.teameway.bnvilmb.multiblock.structure.StructureOrientation;
+import com.teameway.bnvilmb.multiblock.structure.StructurePattern;
+import com.teameway.bnvilmb.multiblock.structure.StructureRole;
+import com.teameway.bnvilmb.multiblock.structure.Substitute;
+import dev.anvilcraft.lib.v2.util.predicate.BlockStatePredicate;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.List;
+
+/**
+ * 模组内置结构模板
+ */
 public class BnvilMultiblockDefinitions {
-    public static final MultiblockDefinition SIMPLE_PROCESSOR = MultiblockDefinition.builder()
-        // 控制器固定在本地坐标 (0, 0, 0)
-        .addController(BnvilControllerBlocks.SIMPLE_CONTROLLER.get())
-        // 底座：控制器正下方 3×3 铁块
-        .add(new Vec3i(-1, -1, -1), Blocks.IRON_BLOCK)
-        .add(new Vec3i(0, -1, -1), Blocks.IRON_BLOCK)
-        .add(new Vec3i(1, -1, -1), Blocks.IRON_BLOCK)
-        .add(new Vec3i(-1, -1, 0), Blocks.IRON_BLOCK)
-        .add(new Vec3i(0, -1, 0), Blocks.IRON_BLOCK)
-        .add(new Vec3i(1, -1, 0), Blocks.IRON_BLOCK)
-        .add(new Vec3i(-1, -1, 1), Blocks.IRON_BLOCK)
-        .add(new Vec3i(0, -1, 1), Blocks.IRON_BLOCK)
-        .add(new Vec3i(1, -1, 1), Blocks.IRON_BLOCK)
-        // 控制器同层：前后左右各一块金块
-        .add(new Vec3i(-1, 0, 0), Blocks.GOLD_BLOCK)
-        .add(new Vec3i(1, 0, 0), Blocks.GOLD_BLOCK)
-        .add(new Vec3i(0, 0, -1), Blocks.GOLD_BLOCK)
-        .add(new Vec3i(0, 0, 1), Blocks.GOLD_BLOCK)
-        // 四角：输入总线 / 输出总线 / 输入仓 / 并行仓
-        .add(new Vec3i(-1, 0, -1), BnvilPorts.ITEM_INPUT.get())
-        .add(new Vec3i(1, 0, -1), BnvilPorts.ITEM_OUTPUT.get())
-        .add(new Vec3i(-1, 0, 1), BnvilPorts.FLUID_INPUT.get())
-        .add(new Vec3i(1, 0, 1), BnvilPorts.PARALLEL.get())
+    private static final Substitute GOLD = new Substitute(
+        BlockStatePredicate.builder().of(Blocks.GOLD_BLOCK).build(), 0, 0
+    );
+    private static final Substitute IRON = new Substitute(
+        BlockStatePredicate.builder().of(Blocks.IRON_BLOCK).build(), 0, 0
+    );
+
+    public static final StructurePattern SIMPLE_PROCESSOR = StructurePattern.builder()
+        .orientation(StructureOrientation.HORIZONTAL)
+        .canonicalFront(Direction.NORTH)
+        .layer("AAA", "AAA", "AAA")
+        .layer("$B$", "B0B", "$B$")
+        .where('A', Blocks.IRON_BLOCK)
+        .where('B', Blocks.GOLD_BLOCK)
+        .controller('0', BnvilControllerBlocks.SIMPLE_CONTROLLER.get())
+        .slot('$', List.of("item_input", "item_output", "fluid_input", "parallel"), false)
+        .role("item_input", new StructureRole(List.of(PortKind.ITEM_INPUT), List.of(), 0, 2))
+        .role("item_output", new StructureRole(List.of(PortKind.ITEM_OUTPUT), List.of(), 1, -1))
+        .role("fluid_input", new StructureRole(List.of(PortKind.FLUID_INPUT), List.of(), 1, 2))
+        .role("parallel", new StructureRole(List.of(PortKind.PARALLEL), List.of(GOLD, IRON), 0, -1))
         .build();
 
+    private BnvilMultiblockDefinitions() {
+    }
 }

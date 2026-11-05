@@ -5,7 +5,6 @@ import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.PortTier;
 import com.teameway.bnvilmb.multiblock.port.block.AbstractPortBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -17,7 +16,7 @@ import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 /**
  * 物品端口方块实体
  */
-public class ItemPortBlockEntity extends BlockEntity implements ItemPort {
+public class ItemPortBlockEntity extends AbstractPortBlockEntity implements ItemPort {
     private final PortTier tier;
     private final ItemStacksResourceHandler handler;
 

@@ -25,6 +25,8 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // 测试实例只在 GameTestServer 注册，普通客户端不能注册，否则登录同步会报 Direct holder
+            systemProperty 'bnvil_multiblock.tests', 'true'
         }
 
         data {
@@ -37,6 +39,11 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
     }
 }
 
