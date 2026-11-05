@@ -1,0 +1,20 @@
+tasks.register('sourcesJar', Jar) {
+    from delombok.outputs.files
+    dependsOn delombok
+    archiveClassifier = "sources"
+}
+
+tasks.named('jar', Jar) {
+    exclude '/.cache'
+}
+
+jar {
+    from(project.file("LICENSE")) {
+        rename { "${it}_${mod_id}" }
+    }
+    from(project.file("README.md")) {
+        rename { "${it}_${mod_id}" }
+    }
+}
+
+base.archivesName = "${mod_id}-${mod_version}-neoforge-${libs.versions.minecraft.get()}"

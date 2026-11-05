@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bnvil_multiblock:simple_controller"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "bnvil_multiblock:blocks/simple_controller"
+}

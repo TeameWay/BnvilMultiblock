@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "bnvil_multiblock:block/energy_input_port"
+    }
+  }
+}

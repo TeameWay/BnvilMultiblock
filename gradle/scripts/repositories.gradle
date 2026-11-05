@@ -1,0 +1,22 @@
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven { // JEI
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+        content {
+            includeGroup "mezz.jei"
+        }
+    }
+    maven { // Registrate
+        url "https://maven.gegy.dev/releases"
+    }
+    maven {// LDLib
+        url "https://maven.firstdarkdev.xyz/snapshots"
+    }
+
+    maven {// Cj
+        url "https://server.cjsah.net:1002/maven/"
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "bnvil_multiblock:multiblock",
+  "machine": "bnvil_multiblock:simple_processor",
+  "time": 80,
+  "priority": 2,
+  "inputs": [
+    {
+      "type": "item",
+      "items": {
+        "items": "minecraft:gold_ingot",
+        "count": 4
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "type": "item",
+      "item": "minecraft:gold_block",
+      "count": 1
+    }
+  ]
+}

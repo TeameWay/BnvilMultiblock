@@ -1,0 +1,25 @@
+{
+  "type": "bnvil_multiblock:multiblock",
+  "machine": "bnvil_multiblock:simple_processor",
+  "variants": [
+    "bnvil_multiblock:cooled"
+  ],
+  "time": 60,
+  "priority": 1,
+  "inputs": [
+    {
+      "type": "item",
+      "items": {
+        "items": "minecraft:iron_ingot",
+        "count": 2
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "type": "item",
+      "item": "minecraft:iron_block",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# User-specific stuff
+.idea/
+!/.idea/icon.svg
+
+*.iml
+*.ipr
+*.iws
+
+# IntelliJ
+out/
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files #
+*.jar
+*.zip
+*.tar.gz
+# Avoid ignoring Gradle wrapper jar file
+!gradle/wrapper/gradle-wrapper.jar
+
+# virtual machine crash logs
+hs_err_pid*
+replay_pid*
+
+# General
+.DS_Store
+Thumbs.db
+[Pp]esktop.ini
+
+# Gradle
+.gradle
+build/
+**/build/
+**/.cache/
+patchedSrc/
+.gradletasknamecache
+gradle-app.setting
+
+# Common working directory
+run/
+runs/
+
+# datagen cache
+**/src/generated/**/.cache/
+
+# Publishing
+repo/
+
+# Reference sources (see skill rules: must never be committed)
+ref/
+reference/
+
+# Local agent workspace
+.claude/
+/AGENT.md

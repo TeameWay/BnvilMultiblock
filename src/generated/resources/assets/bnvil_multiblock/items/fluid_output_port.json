@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "bnvil_multiblock:block/fluid_output_port"
+  }
+}

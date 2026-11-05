@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "bnvil_multiblock:block/simple_controller"
+  }
+}
