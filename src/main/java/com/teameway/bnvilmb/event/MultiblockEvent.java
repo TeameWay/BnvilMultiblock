@@ -1,4 +1,4 @@
-package com.teameway.bnvilmb.event.multiblock;
+package com.teameway.bnvilmb.event;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
 import com.teameway.bnvilmb.init.BnvilRegistries;

@@ -1,7 +1,7 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.multiblock.controller.ControllerBlock;
 import com.teameway.bnvilmb.init.BnvilCreativeTabs;
+import com.teameway.bnvilmb.multiblock.controller.ControllerBlock;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntry;
 
 import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
@@ -13,10 +13,6 @@ public class BnvilControllerBlocks {
         .properties(properties -> properties.strength(3.5F).requiresCorrectToolForDrops())
         .simpleItem()
         .register();
-
-    static {
-        REGISTRUM.defaultCreativeTab(BnvilCreativeTabs.MULTIBLOCK);
-    }
 
     public static void register() {
     }

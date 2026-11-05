@@ -13,8 +13,13 @@ import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
  */
 public class BnvilCreativeTabs {
     public static final RegistryEntry<CreativeModeTab, CreativeModeTab> MULTIBLOCK = REGISTRUM
-        .creativeTab("multiblock", BnvilControllerBlocks.SIMPLE_CONTROLLER::get)
+        .creativeTab("multiblock", BnvilControllerBlocks.SIMPLE_CONTROLLER)
         .lang(_ -> "itemGroup.bnvil_multiblock.multiblock", "BnvilMultiblock")
+        .register();
+
+    public static final RegistryEntry<CreativeModeTab, CreativeModeTab> MULTIBLOCK_CONTROLLER = REGISTRUM
+        .creativeTab("multiblock_controller", BnvilControllerBlocks.SIMPLE_CONTROLLER)
+        .lang(_ -> "itemGroup.bnvil_multiblock.multiblock_controller", "BnvilMultiblock - Controller")
         .register();
 
     public static void register() {

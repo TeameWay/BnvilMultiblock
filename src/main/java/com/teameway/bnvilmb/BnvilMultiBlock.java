@@ -29,18 +29,16 @@ public class BnvilMultiBlock {
     public static final String MOD_NAME = "BnvilMultiblock";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    /**
-     * 全模组统一的 Registrum 实例，多方块机器、类型与控制器经由它登记
-     */
     public static BnvilRegistrum REGISTRUM = BnvilRegistrum.create(MODID);
 
     public BnvilMultiBlock(IEventBus modEventBus, ModContainer modContainer) {
-        // 触发类加载，让静态注册项在构造期完成注册
         BnvilRegistries.register();
         BnvilRecipeTypes.register(modEventBus);
         BnvilRecipeSerializers.register(modEventBus);
 
         BnvilCreativeTabs.register();
+        addTab();
+        
         BnvilControllerBlocks.register();
         BnvilControllerBlockEntities.register();
         BnvilControllers.register();
@@ -59,5 +57,9 @@ public class BnvilMultiBlock {
      */
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MODID, path);
+    }
+
+    private static void addTab() {
+        REGISTRUM.defaultCreativeTab(BnvilCreativeTabs.MULTIBLOCK);
     }
 }

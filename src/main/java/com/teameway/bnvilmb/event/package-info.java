@@ -1,4 +1,4 @@
 @NullMarked
-package com.teameway.bnvilmb.event.multiblock;
+package com.teameway.bnvilmb.event;
 
 import org.jspecify.annotations.NullMarked;

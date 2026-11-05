@@ -15,6 +15,9 @@ jar {
     from(project.file("README.md")) {
         rename { "${it}_${mod_id}" }
     }
+    manifest {
+        attributes('Automatic-Module-Name': "com.teameway.${mod_id}")
+    }
 }
 
-base.archivesName = "${mod_id}-${mod_version}-neoforge-${libs.versions.minecraft.get()}"
+base.archivesName = "${mod_name}-neoforge"
