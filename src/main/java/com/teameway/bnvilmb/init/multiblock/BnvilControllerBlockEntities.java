@@ -1,6 +1,6 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.controller.ControllerBlockEntity;
+import com.teameway.bnvilmb.multiblock.controller.ControllerBlockEntity;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntityEntry;
 
 import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;

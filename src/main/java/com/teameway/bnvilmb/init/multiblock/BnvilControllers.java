@@ -1,6 +1,6 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.controller.SimpleProcessorController;
+import com.teameway.bnvilmb.multiblock.controller.SimpleProcessorController;
 import dev.anvilcraft.lib.v2.multiblock.dynamic.controller.IController;
 import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 

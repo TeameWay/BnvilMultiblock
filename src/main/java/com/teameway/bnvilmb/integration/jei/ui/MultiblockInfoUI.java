@@ -9,7 +9,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Scene;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO;
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.gui.BnvilTheme;
 import com.teameway.bnvilmb.integration.jei.layout.JeiLayout;
 import com.teameway.bnvilmb.integration.jei.layout.StructureLayout;

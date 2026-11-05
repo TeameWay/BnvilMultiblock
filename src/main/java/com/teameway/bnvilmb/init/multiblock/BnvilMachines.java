@@ -1,7 +1,7 @@
 package com.teameway.bnvilmb.init.multiblock;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import com.teameway.bnvilmb.common.multiblock.MultiblockMachine;
+import com.teameway.bnvilmb.multiblock.MultiblockMachine;
 import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 import net.neoforged.fml.common.EventBusSubscriber;
 

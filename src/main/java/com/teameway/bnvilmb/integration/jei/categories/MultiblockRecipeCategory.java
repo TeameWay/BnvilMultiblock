@@ -1,7 +1,7 @@
 package com.teameway.bnvilmb.integration.jei.categories;
 
 import com.lowdragmc.lowdraglib2.integration.xei.jei.ModularUIRecipeCategory;
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.integration.jei.layout.JeiLayout;
 import com.teameway.bnvilmb.integration.jei.layout.RecipeLayout;
 import com.teameway.bnvilmb.integration.jei.ui.MultiblockRecipeUI;

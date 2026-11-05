@@ -2,7 +2,7 @@ package com.teameway.bnvilmb.integration.jei.ui;
 
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Scene;
 import com.lowdragmc.lowdraglib2.utils.virtuallevel.TrackedDummyWorld;
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
 import dev.anvilcraft.lib.v2.multiblock.init.LibRegistries;
 import dev.anvilcraft.lib.v2.util.predicate.BlockStatePredicate;

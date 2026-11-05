@@ -1,6 +1,6 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 
 import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;

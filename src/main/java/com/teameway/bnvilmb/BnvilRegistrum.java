@@ -1,7 +1,7 @@
 package com.teameway.bnvilmb;
 
-import com.teameway.bnvilmb.common.multiblock.MultiblockMachine;
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockMachine;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.init.BnvilRegistries;
 import dev.anvilcraft.lib.v2.multiblock.dynamic.controller.IController;
 import dev.anvilcraft.lib.v2.registrum.AbstractRegistrum;

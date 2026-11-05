@@ -1,6 +1,6 @@
 package com.teameway.bnvilmb.datagen.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.MultiblockMachine;
+import com.teameway.bnvilmb.multiblock.MultiblockMachine;
 import com.teameway.bnvilmb.init.BnvilRegistries;
 import dev.anvilcraft.lib.v2.multiblock.dynamic.definition.MultiblockDefinition;
 import dev.anvilcraft.lib.v2.multiblock.init.LibRegistries;

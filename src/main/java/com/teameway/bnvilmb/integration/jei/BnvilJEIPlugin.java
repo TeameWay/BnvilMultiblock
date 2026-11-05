@@ -1,7 +1,7 @@
 package com.teameway.bnvilmb.integration.jei;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import com.teameway.bnvilmb.common.multiblock.MultiblockType;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.init.BnvilRegistries;
 import com.teameway.bnvilmb.integration.jei.categories.MultiblockInfoRecipeCategory;
 import com.teameway.bnvilmb.integration.jei.categories.MultiblockRecipeCategory;

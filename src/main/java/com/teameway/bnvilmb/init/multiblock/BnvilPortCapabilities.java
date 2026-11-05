@@ -1,9 +1,9 @@
 package com.teameway.bnvilmb.init.multiblock;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.EnergyPortBlockEntity;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.FluidPortBlockEntity;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.ItemPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.EnergyPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.FluidPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.ItemPortBlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;

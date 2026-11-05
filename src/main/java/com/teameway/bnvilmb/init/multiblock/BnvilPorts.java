@@ -1,16 +1,16 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.port.PortKind;
-import com.teameway.bnvilmb.common.multiblock.port.PortRegistry;
-import com.teameway.bnvilmb.common.multiblock.port.PortTier;
-import com.teameway.bnvilmb.common.multiblock.port.block.ControlPortBlock;
-import com.teameway.bnvilmb.common.multiblock.port.block.EnergyPortBlock;
-import com.teameway.bnvilmb.common.multiblock.port.block.FluidPortBlock;
-import com.teameway.bnvilmb.common.multiblock.port.block.ItemPortBlock;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.ControlPortBlockEntity;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.EnergyPortBlockEntity;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.FluidPortBlockEntity;
-import com.teameway.bnvilmb.common.multiblock.port.block.entity.ItemPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.PortKind;
+import com.teameway.bnvilmb.multiblock.port.PortRegistry;
+import com.teameway.bnvilmb.multiblock.port.PortTier;
+import com.teameway.bnvilmb.multiblock.port.block.ControlPortBlock;
+import com.teameway.bnvilmb.multiblock.port.block.EnergyPortBlock;
+import com.teameway.bnvilmb.multiblock.port.block.FluidPortBlock;
+import com.teameway.bnvilmb.multiblock.port.block.ItemPortBlock;
+import com.teameway.bnvilmb.multiblock.port.block.entity.ControlPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.EnergyPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.FluidPortBlockEntity;
+import com.teameway.bnvilmb.multiblock.port.block.entity.ItemPortBlockEntity;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntityEntry;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntry;
 

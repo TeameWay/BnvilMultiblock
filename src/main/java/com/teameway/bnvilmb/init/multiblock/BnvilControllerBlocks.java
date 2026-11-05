@@ -1,6 +1,6 @@
 package com.teameway.bnvilmb.init.multiblock;
 
-import com.teameway.bnvilmb.common.multiblock.controller.ControllerBlock;
+import com.teameway.bnvilmb.multiblock.controller.ControllerBlock;
 import com.teameway.bnvilmb.init.BnvilCreativeTabs;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntry;
 
