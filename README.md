@@ -78,3 +78,5 @@ NeoForge 多方块机器框架，从 [NoWay-Core](https://github.com/TeameWay/No
 ## 致谢
 
 本项目的多方块实现最初写在 [NoWay-Core](https://github.com/TeameWay/NoWay-Core) 中，现拆分至此仓库独立维护。
+
+特别感谢[铁砧工艺开发组](https://github.com/Anvil-Dev)和[古镇天](https://github.com/Gu-ZT)，他们为此项目提供了依赖支持以及 AI 支持。
