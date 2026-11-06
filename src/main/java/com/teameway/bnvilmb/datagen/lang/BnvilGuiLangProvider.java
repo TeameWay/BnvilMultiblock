@@ -52,6 +52,14 @@ public class BnvilGuiLangProvider {
         provider.add("gui.bnvil_multiblock.jei.energy_total", "Total: %s FE");
         provider.add("gui.bnvil_multiblock.jei.energy_rate", "Power: %s FE/t");
         provider.add("gui.bnvil_multiblock.jei.no_structure", "Structure preview unavailable");
+        provider.add("gui.bnvil_multiblock.jei.required.exact", "Exactly %s");
+        provider.add("gui.bnvil_multiblock.jei.required.min", "At least %s");
+        provider.add("gui.bnvil_multiblock.jei.required.max", "At most %s");
+        provider.add("gui.bnvil_multiblock.jei.required.range", "%s ~ %s");
+        provider.add("gui.bnvil_multiblock.jei.layer.all", "ALL");
+        provider.add("gui.bnvil_multiblock.jei.layer.count", "H%s");
+        provider.add("gui.bnvil_multiblock.jei.highlight.on", "Highlight: On");
+        provider.add("gui.bnvil_multiblock.jei.highlight.off", "Highlight: Off");
         provider.add("gui.bnvil_multiblock.jei.multiblock_info", "Multiblock Structure");
         provider.add("gui.bnvil_multiblock.jei.chance", "Chance: %s");
         provider.add("gui.bnvil_multiblock.slot.count", "Count: %s");

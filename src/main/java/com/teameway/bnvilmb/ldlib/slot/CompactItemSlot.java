@@ -161,11 +161,22 @@ public class CompactItemSlot extends ItemSlot {
         return this;
     }
 
+    /**
+     * 悬浮提示
+     *
+     * <p>只有显式调用过 {@link #setAmount(long)} 的格子才追加数量行；沿用堆栈自带数量时数量已在格子上画出，
+     * 再补一行“数量：-1”只会误导。</p>
+     *
+     * @param withItemTooltips 是否附带物品自身的原版提示
+     * @return 提示文本
+     */
     @Override
     public List<Component> getFullTooltipTexts(boolean withItemTooltips) {
         List<Component> tooltips = new ArrayList<>(super.getFullTooltipTexts(withItemTooltips));
-        tooltips.add(Component.translatable("gui.bnvil_multiblock.slot.count", NumberFormatUtil.grouped(amount))
-            .withStyle(ChatFormatting.GRAY));
+        if (this.amount >= 0L) {
+            tooltips.add(Component.translatable("gui.bnvil_multiblock.slot.count", NumberFormatUtil.grouped(this.amount))
+                .withStyle(ChatFormatting.GRAY));
+        }
         return tooltips;
     }
 

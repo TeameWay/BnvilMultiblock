@@ -1,10 +1,10 @@
 package com.teameway.bnvilmb.integration.jei;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.init.BnvilRegistries;
 import com.teameway.bnvilmb.integration.jei.categories.MultiblockInfoRecipeCategory;
 import com.teameway.bnvilmb.integration.jei.categories.MultiblockRecipeCategory;
+import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.recipe.CompiledRecipe;
 import com.teameway.bnvilmb.recipe.MultiblockRecipeIndex;
 import com.teameway.bnvilmb.recipe.TypeIndex;
@@ -74,7 +74,7 @@ public class BnvilJEIPlugin implements IModPlugin {
             MultiblockInfoRecipeCategory.RECIPE_TYPE,
             BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)
                 .stream()
-                .map(entry -> MultiblockInfoRecipeCategory.MultiblockInfo.of(entry.getId(), entry.get()))
+                .map(entry -> new MultiblockInfoRecipeCategory.MultiblockInfo(entry.getId(), entry.get()))
                 .toList()
         );
         for (RegistryEntry<MultiblockType, MultiblockType> entry : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {
