@@ -9,11 +9,7 @@ import net.minecraft.resources.Identifier;
 /**
  * 界面主题
  *
- * <p>全模组共用一份 {@code lss/bnvil.lss}：上半部分是基底控件外观，下半部分是本模组的界面规则，
- * 合并成一个文件是为了让配色只有一处可改。</p>
- *
- * <p>样式由 {@link StylesheetManager} 在资源重载时注册，改完按 {@code F3 + T} 生效。
- * 覆盖已有规则靠 id 或类权重，不靠书写顺序。</p>
+ * <p>{@code lss/bnvil.lss}：上半部分是基底控件外观，下半部分是本模组的界面规则</p>
  */
 public class BnvilTheme {
 

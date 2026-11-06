@@ -1,0 +1,304 @@
+package com.teameway.bnvilmb.dev.gametest;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.teameway.bnvilmb.BnvilMultiBlock;
+import com.teameway.bnvilmb.dev.init.multiblock.BnvilControllerBlocks;
+import com.teameway.bnvilmb.dev.init.multiblock.BnvilPorts;
+import com.teameway.bnvilmb.multiblock.StructureControllerRegistry;
+import com.teameway.bnvilmb.multiblock.controller.ControllerBlockEntity;
+import com.teameway.bnvilmb.multiblock.pattern.BlockPattern;
+import com.teameway.bnvilmb.multiblock.pattern.MultiblockPatternBuilder;
+import com.teameway.bnvilmb.multiblock.pattern.PatternState;
+import com.teameway.bnvilmb.multiblock.pattern.Predicates;
+import com.teameway.bnvilmb.multiblock.pattern.RelativeDirection;
+import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
+import dev.anvilcraft.lib.v2.util.predicate.BlockStatePredicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestInstance;
+import net.minecraft.gametest.framework.TestData;
+import net.minecraft.gametest.framework.TestEnvironmentDefinition;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.RegisterGameTestsEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * GameTest。
+ *
+ * <p>只有 {@code -Dbnvil_multiblock.tests=true} 的 GameTestServer 才注册。</p>
+ */
+@EventBusSubscriber(modid = BnvilMultiBlock.MODID)
+public final class StructureGameTests {
+    public static final String ENABLE_PROPERTY = "bnvil_multiblock.tests";
+
+    private static final BlockPos CONTROLLER = new BlockPos(2, 2, 2);
+    private static final BlockPos INPUT = new BlockPos(1, 2, 1);
+    private static final BlockPos OUTPUT = new BlockPos(3, 2, 1);
+    private static final BlockPos FLUID = new BlockPos(1, 2, 3);
+    private static final BlockPos PARALLEL = new BlockPos(3, 2, 3);
+
+    private StructureGameTests() {
+    }
+
+    @SubscribeEvent
+    public static void onRegister(RegisterEvent event) {
+        if (!Boolean.getBoolean(ENABLE_PROPERTY)) {
+            return;
+        }
+        event.register(Registries.TEST_INSTANCE_TYPE, BnvilMultiBlock.id("structure"), () -> StructureTest.CODEC);
+    }
+
+    @SubscribeEvent
+    public static void register(RegisterGameTestsEvent event) {
+        if (!Boolean.getBoolean(ENABLE_PROPERTY)) {
+            return;
+        }
+        Holder<TestEnvironmentDefinition<?>> environment = event.registerEnvironment(
+            BnvilMultiBlock.id("structure"), new TestEnvironmentDefinition.AllOf(List.of())
+        );
+        for (String name : List.of(
+            "forms_with_interchanged_ports",
+            "forms_with_swapped_ports",
+            "forms_with_substitute",
+            "rotation_follows_controller",
+            "orientation_changes_layout",
+            "substitute_bonuses",
+            "invalidates_after_block_break",
+            "rejects_too_many_inputs"
+        )) {
+            event.registerTest(BnvilMultiBlock.id("structure/" + name), new StructureTest(name, testData(environment)));
+        }
+    }
+
+    private static TestData<Holder<TestEnvironmentDefinition<?>>> testData(Holder<TestEnvironmentDefinition<?>> environment) {
+        return new TestData<>(environment, BnvilMultiBlock.id("empty5"), 200, 0, true);
+    }
+
+    private static void formsWithInterchangedPorts(GameTestHelper helper) {
+        helper.assertTrue(StructureControllerRegistry.get(BnvilControllerBlocks.SIMPLE_CONTROLLER.get()) != null, "controller registry empty");
+        placeFrame(helper);
+        helper.setBlock(INPUT, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(OUTPUT, BnvilPorts.ITEM_OUTPUT.get());
+        helper.setBlock(FLUID, BnvilPorts.FLUID_INPUT.get());
+        helper.setBlock(PARALLEL, BnvilPorts.PARALLEL.get());
+        helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+
+        helper.succeedWhen(() -> {
+            ControllerBlockEntity controller = controller(helper);
+            helper.assertTrue(controller != null && controller.runtime() != null,
+                "structure did not form: " + (controller == null ? "no controller" : controller.structureError()));
+            helper.assertTrue(controller.portCount() == 4, "expected four ports");
+            BlockPos controllerPos = helper.absolutePos(CONTROLLER);
+            for (BlockPos pos : List.of(INPUT, OUTPUT, FLUID, PARALLEL)) {
+                if (helper.getLevel().getBlockEntity(helper.absolutePos(pos)) instanceof MultiblockPort port) {
+                    helper.assertTrue(port.controllerPositions().contains(controllerPos), "port ownership not set");
+                }
+            }
+        });
+    }
+
+    private static void formsWithSwappedPorts(GameTestHelper helper) {
+        placeFrame(helper);
+        helper.setBlock(INPUT, BnvilPorts.ITEM_OUTPUT.get());
+        helper.setBlock(OUTPUT, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(FLUID, BnvilPorts.PARALLEL.get());
+        helper.setBlock(PARALLEL, BnvilPorts.FLUID_INPUT.get());
+        helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+
+        helper.succeedWhen(() -> {
+            ControllerBlockEntity controller = controller(helper);
+            helper.assertTrue(controller != null && controller.runtime() != null,
+                "swapped structure did not form: " + (controller == null ? "no controller" : controller.structureError()));
+            helper.assertTrue(controller.portCount() == 4, "expected four ports");
+        });
+    }
+
+    private static void formsWithSubstitute(GameTestHelper helper) {
+        placeFrame(helper);
+        helper.setBlock(INPUT, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(OUTPUT, BnvilPorts.ITEM_OUTPUT.get());
+        helper.setBlock(FLUID, BnvilPorts.FLUID_INPUT.get());
+        helper.setBlock(PARALLEL, Blocks.GOLD_BLOCK);
+        helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+
+        helper.succeedWhen(() -> {
+            ControllerBlockEntity controller = controller(helper);
+            helper.assertTrue(controller != null && controller.runtime() != null,
+                "substitute structure did not form: " + (controller == null ? "no controller" : controller.structureError()));
+        });
+    }
+
+    private static void rotationFollowsController(GameTestHelper helper) {
+        Vec3i north = new Vec3i(0, 0, -1);
+        helper.assertTrue(new Vec3i(1, 0, 0).equals(RelativeDirection.FRONT.getRelativeFacing(Direction.EAST, Direction.UP, false).getUnitVec3i()), "east rotation failed");
+        helper.assertTrue(new Vec3i(0, 0, 1).equals(RelativeDirection.FRONT.getRelativeFacing(Direction.SOUTH, Direction.UP, false).getUnitVec3i()), "south rotation failed");
+        helper.assertTrue(new Vec3i(-1, 0, 0).equals(RelativeDirection.FRONT.getRelativeFacing(Direction.WEST, Direction.UP, false).getUnitVec3i()), "west rotation failed");
+        helper.assertTrue(north.equals(RelativeDirection.FRONT.getRelativeFacing(Direction.NORTH, Direction.UP, false).getUnitVec3i()), "north rotation failed");
+        helper.assertTrue(new Vec3i(-1, 0, 0).equals(RelativeDirection.RIGHT.getRelativeFacing(Direction.NORTH, Direction.UP, true).getUnitVec3i()), "flip failed");
+        helper.succeed();
+    }
+
+    private static void orientationChangesLayout(GameTestHelper helper) {
+        BlockPattern pattern = MultiblockPatternBuilder.start(RelativeDirection.UP, RelativeDirection.FRONT, RelativeDirection.RIGHT)
+            .slice("0G")
+            .where('0', Predicates.controller(BnvilControllerBlocks.SIMPLE_CONTROLLER.get()))
+            .where('G', Predicates.blocks(Blocks.GOLD_BLOCK))
+            .build();
+        BlockPos origin = helper.absolutePos(CONTROLLER);
+        List<BlockPos> north = pattern.positions(origin, Direction.NORTH, Direction.UP, false);
+        List<BlockPos> east = pattern.positions(origin, Direction.EAST, Direction.UP, false);
+        helper.assertTrue(north.contains(origin.east()), "north layout should extend east");
+        helper.assertTrue(east.contains(origin.south()), "east layout should extend south");
+        helper.succeed();
+    }
+
+    private static void substituteBonusesAreReported(GameTestHelper helper) {
+        BlockPattern pattern = MultiblockPatternBuilder.start(RelativeDirection.UP, RelativeDirection.FRONT, RelativeDirection.RIGHT)
+            .slice("0G")
+            .where('0', Predicates.controller(BnvilControllerBlocks.SIMPLE_CONTROLLER.get()))
+            .where('G', Predicates.substitute(BlockStatePredicate.builder().of(Blocks.GOLD_BLOCK).build(), 2, 1))
+            .build();
+        helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+        helper.setBlock(new BlockPos(3, 2, 2), Blocks.GOLD_BLOCK);
+        ControllerBlockEntity controller = controller(helper);
+        helper.assertTrue(controller != null, "controller missing");
+        PatternState state = new PatternState(controller, pattern);
+        boolean valid = pattern.checkPatternFastAt(
+            helper.getLevel(), state, helper.absolutePos(CONTROLLER), Direction.NORTH, Direction.UP, false
+        );
+        helper.assertTrue(valid, "substitute structure should form");
+        helper.assertTrue(state.parallelBonus() == 2, "parallel bonus should be 2");
+        helper.assertTrue(state.threadBonus() == 1, "thread bonus should be 1");
+        helper.succeed();
+    }
+
+    private static void invalidatesAfterBlockBreak(GameTestHelper helper) {
+        int[] phase = {0};
+        helper.succeedWhen(() -> {
+            if (phase[0] == 0) {
+                placeFrame(helper);
+                helper.setBlock(INPUT, BnvilPorts.ITEM_INPUT.get());
+                helper.setBlock(OUTPUT, BnvilPorts.ITEM_OUTPUT.get());
+                helper.setBlock(FLUID, BnvilPorts.FLUID_INPUT.get());
+                helper.setBlock(PARALLEL, BnvilPorts.PARALLEL.get());
+                helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+                phase[0] = 1;
+                helper.assertTrue(false, "waiting for formation");
+                return;
+            }
+            ControllerBlockEntity controller = controller(helper);
+            if (phase[0] == 1) {
+                helper.assertTrue(controller != null && controller.runtime() != null, "structure did not form");
+                helper.setBlock(OUTPUT, Blocks.AIR);
+                phase[0] = 2;
+                helper.assertTrue(false, "waiting for invalidation");
+                return;
+            }
+            helper.assertTrue(controller == null || controller.runtime() == null, "structure stayed formed after break");
+        });
+    }
+
+    private static void rejectsTooManyInputsAndMissingOutput(GameTestHelper helper) {
+        placeFrame(helper);
+        helper.setBlock(INPUT, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(PARALLEL, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(FLUID, BnvilPorts.ITEM_INPUT.get());
+        helper.setBlock(OUTPUT, BnvilPorts.PARALLEL.get());
+        helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
+
+        int[] waited = {0};
+        helper.succeedWhen(() -> {
+            waited[0]++;
+            if (waited[0] < 40) {
+                helper.assertTrue(false, "waiting for validation");
+            }
+            ControllerBlockEntity controller = controller(helper);
+            helper.assertTrue(controller == null || controller.runtime() == null, "invalid structure formed");
+        });
+    }
+
+    private static void placeFrame(GameTestHelper helper) {
+        for (int x = 1; x <= 3; x++) {
+            for (int z = 1; z <= 3; z++) {
+                helper.setBlock(new BlockPos(x, 1, z), Blocks.IRON_BLOCK);
+            }
+        }
+        helper.setBlock(new BlockPos(1, 2, 2), Blocks.GOLD_BLOCK);
+        helper.setBlock(new BlockPos(3, 2, 2), Blocks.GOLD_BLOCK);
+        helper.setBlock(new BlockPos(2, 2, 1), Blocks.GOLD_BLOCK);
+        helper.setBlock(new BlockPos(2, 2, 3), Blocks.GOLD_BLOCK);
+    }
+
+    private static ControllerBlockEntity controller(GameTestHelper helper) {
+        return helper.getLevel().getBlockEntity(helper.absolutePos(CONTROLLER)) instanceof ControllerBlockEntity controller
+               ? controller
+               : null;
+    }
+
+    private static final class StructureTest extends GameTestInstance {
+        private static final Map<String, Consumer<GameTestHelper>> TESTS = Map.of(
+            "forms_with_interchanged_ports", StructureGameTests::formsWithInterchangedPorts,
+            "forms_with_swapped_ports", StructureGameTests::formsWithSwappedPorts,
+            "forms_with_substitute", StructureGameTests::formsWithSubstitute,
+            "rotation_follows_controller", StructureGameTests::rotationFollowsController,
+            "orientation_changes_layout", StructureGameTests::orientationChangesLayout,
+            "substitute_bonuses", StructureGameTests::substituteBonusesAreReported,
+            "invalidates_after_block_break", StructureGameTests::invalidatesAfterBlockBreak,
+            "rejects_too_many_inputs", StructureGameTests::rejectsTooManyInputsAndMissingOutput
+        );
+        public static final MapCodec<StructureTest> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.STRING.fieldOf("test").forGetter(StructureTest::testName),
+            TestData.CODEC.fieldOf("test_data").forGetter(StructureTest::data)
+        ).apply(instance, StructureTest::new));
+
+        private final String testName;
+        private final TestData<Holder<TestEnvironmentDefinition<?>>> data;
+
+        private StructureTest(String testName, TestData<Holder<TestEnvironmentDefinition<?>>> data) {
+            super(data);
+            this.testName = testName;
+            this.data = data;
+        }
+
+        private String testName() {
+            return this.testName;
+        }
+
+        private TestData<Holder<TestEnvironmentDefinition<?>>> data() {
+            return this.data;
+        }
+
+        @Override
+        public void run(GameTestHelper helper) {
+            Consumer<GameTestHelper> test = TESTS.get(this.testName);
+            if (test == null) {
+                throw helper.assertionException("Unknown structure test: " + this.testName);
+            }
+            test.accept(helper);
+        }
+
+        @Override
+        public MapCodec<? extends GameTestInstance> codec() {
+            return CODEC;
+        }
+
+        @Override
+        protected MutableComponent typeDescription() {
+            return Component.literal("BnvilMultiblock structure: " + this.testName);
+        }
+    }
+}

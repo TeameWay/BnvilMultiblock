@@ -7,7 +7,7 @@ import dev.anvilcraft.lib.v2.registrum.providers.RegistrumLangProvider;
  *
  * <p>键按前缀分组：{@code gui.bnvil_multiblock.controller.*} 是控制器状态、线程与配方信息，
  * {@code port_kind.*} 与 {@code port.*} 是端口名称与端口面板，{@code jei.*} 是 JEI 配方页，
- * {@code slot.count} 是物品槽标题，{@code structure.bnvil_multiblock.problem.*} 是结构成型失败的原因。</p>
+ * {@code slot.count} 是物品槽标题，{@code structure.bnvil_multiblock.error.*} 是结构成型失败的原因。</p>
  *
  * <p>文本里的 {@code %s} 在显示时由调用方填参；进度条目写作 {@code %s%%}，多出的那个百分号
  * 用来在结果里输出字面量 {@code %}。</p>
@@ -75,13 +75,13 @@ public class BnvilGuiLangProvider {
         provider.add("gui.bnvil_multiblock.jei.multiblock_info", "Multiblock Structure");
         provider.add("gui.bnvil_multiblock.jei.chance", "Chance: %s");
         provider.add("gui.bnvil_multiblock.slot.count", "Count: %s");
-        provider.add("structure.bnvil_multiblock.problem.fixed", "Block at %s,%s,%s does not match the structure");
-        provider.add("structure.bnvil_multiblock.problem.slot", "Block at %s,%s,%s is not a valid port or substitute");
-        provider.add("structure.bnvil_multiblock.problem.port_not_allowed", "Port at %s,%s,%s is not allowed here");
-        provider.add("structure.bnvil_multiblock.problem.port_claimed", "Port at %s,%s,%s belongs to another controller");
-        provider.add("structure.bnvil_multiblock.problem.role_min", "Not enough %s: %s (need %s)");
-        provider.add("structure.bnvil_multiblock.problem.role_max", "Too many %s: %s (max %s)");
-        provider.add("structure.bnvil_multiblock.problem.unloaded", "Structure area is not fully loaded");
-        provider.add("structure.bnvil_multiblock.problem.pattern", "Structure does not satisfy its role counts");
+        provider.add("structure.bnvil_multiblock.error.block", "Block at %s does not match %s");
+        provider.add("structure.bnvil_multiblock.error.port", "Block at %s is not one of %s");
+        provider.add("structure.bnvil_multiblock.error.shared", "Port at %s is not shareable");
+        provider.add("structure.bnvil_multiblock.error.count", "Not enough %s: %s (need %s)");
+        provider.add("structure.bnvil_multiblock.error.max", "Too many %s: %s (max %s)");
+        provider.add("structure.bnvil_multiblock.error.unloaded", "Structure area is not fully loaded");
+        provider.add("structure.bnvil_multiblock.error.controller", "Controller at %s is missing or invalid");
+        provider.add("structure.bnvil_multiblock.error.pattern", "Structure does not satisfy its pattern: %s");
     }
 }

@@ -14,11 +14,9 @@ import com.teameway.bnvilmb.multiblock.port.FluidPort;
 import com.teameway.bnvilmb.multiblock.port.ItemPort;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
-import com.teameway.bnvilmb.multiblock.port.block.entity.EnergyPortBlockEntity;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.transfer.ResourceHandler;
-import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
@@ -125,9 +123,7 @@ public class PortUI {
     }
 
     private static Body energyBody(EnergyPort port) {
-        EnergyHandler handler = port.energyHandler();
         long capacity = port.tier().energyCapacity();
-        EnergyPortBlockEntity synced = port instanceof EnergyPortBlockEntity energy ? energy : null;
 
         ProgressBar bar = new ProgressBar();
         bar.setRange(0.0F, 1.0F);
@@ -135,16 +131,14 @@ public class PortUI {
             if (capacity <= 0) {
                 return 0.0F;
             }
-            long stored = synced != null ? synced.energyStored() : handler.getAmountAsLong();
-            return Math.min(1.0F, (float) ((double) stored / (double) capacity));
+            return Math.min(1.0F, (float) ((double) port.storedEnergy() / (double) capacity));
         }));
         bar.layout(layout -> layout.widthPercent(100));
 
         Label info = new Label();
         info.addClass("bnvil-hint");
         info.bindDataSource(SupplierDataSource.of(() -> {
-            long stored = synced != null ? synced.energyStored() : handler.getAmountAsLong();
-            return Component.translatable("gui.bnvil_multiblock.port.energy", stored, capacity);
+            return Component.translatable("gui.bnvil_multiblock.port.energy", port.storedEnergy(), capacity);
         }));
         info.layout(layout -> layout.widthPercent(100).height(LINE));
 

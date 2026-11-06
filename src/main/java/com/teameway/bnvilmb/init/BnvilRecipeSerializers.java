@@ -19,11 +19,10 @@ public class BnvilRecipeSerializers {
         BnvilMultiBlock.MODID
     );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MultiblockRecipe>> MULTIBLOCK =
-        SERIALIZER.register(
-            "multiblock",
-            () -> new RecipeSerializer<>(MultiblockRecipe.MAP_CODEC, MultiblockRecipe.STREAM_CODEC)
-        );
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MultiblockRecipe>> MULTIBLOCK = SERIALIZER.register(
+        "multiblock",
+        () -> new RecipeSerializer<>(MultiblockRecipe.MAP_CODEC, MultiblockRecipe.STREAM_CODEC)
+    );
 
     /**
      * 把序列化器挂到模组事件总线

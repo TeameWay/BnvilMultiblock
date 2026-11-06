@@ -7,44 +7,60 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jspecify.annotations.Nullable;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
- * 端口方块实体基类
+ * 端口方块实体基类。
  *
- * <p>端口归属写入方块实体的 {@code controller_pos} 字段，区块卸载后仍然保留；重新加载后，
- * 结构匹配与结构管理器仍能据此判断端口是否已被其他控制器认领。</p>
+ * <p>端口可以共享，因此 NBT 保存控制器位置列表；旧存档的单个 {@code controller_pos}
+ * 会在读取时迁移成只含一个元素的集合。</p>
  */
 public abstract class AbstractPortBlockEntity extends BlockEntity implements MultiblockPort {
-    private @Nullable BlockPos controllerPos;
+    private final Set<BlockPos> controllerPositions = new LinkedHashSet<>();
 
     protected AbstractPortBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
     @Override
-    public @Nullable BlockPos controllerPos() {
-        return this.controllerPos;
+    public Set<BlockPos> controllerPositions() {
+        return Set.copyOf(this.controllerPositions);
     }
 
     @Override
-    public void setControllerPos(@Nullable BlockPos controllerPos) {
-        if (java.util.Objects.equals(this.controllerPos, controllerPos)) {
-            return;
+    public void addController(BlockPos controllerPos) {
+        if (this.controllerPositions.add(controllerPos.immutable())) {
+            this.setChanged();
         }
-        this.controllerPos = controllerPos;
-        this.setChanged();
+    }
+
+    @Override
+    public void removeController(BlockPos controllerPos) {
+        if (this.controllerPositions.remove(controllerPos)) {
+            this.setChanged();
+        }
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        this.controllerPos = input.read("controller_pos", BlockPos.CODEC).orElse(null);
+        this.controllerPositions.clear();
+        for (BlockPos pos : input.listOrEmpty("controllers", BlockPos.CODEC)) {
+            this.controllerPositions.add(pos.immutable());
+        }
+        if (this.controllerPositions.isEmpty()) {
+            input.read("controller_pos", BlockPos.CODEC).ifPresent(pos -> this.controllerPositions.add(pos.immutable()));
+        }
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        output.storeNullable("controller_pos", BlockPos.CODEC, this.controllerPos);
+        ValueOutput.TypedOutputList<BlockPos> list = output.list("controllers", BlockPos.CODEC);
+        for (BlockPos pos : this.controllerPositions) {
+            list.add(pos);
+        }
     }
 }

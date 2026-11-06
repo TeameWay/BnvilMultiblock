@@ -2,7 +2,6 @@ package com.teameway.bnvilmb.integration.jei.categories;
 
 import com.lowdragmc.lowdraglib2.integration.xei.jei.ModularUIRecipeCategory;
 import com.teameway.bnvilmb.BnvilMultiBlock;
-import com.teameway.bnvilmb.init.BnvilRegistries;
 import com.teameway.bnvilmb.integration.jei.layout.StructureLayout;
 import com.teameway.bnvilmb.integration.jei.ui.MultiblockInfoUI;
 import com.teameway.bnvilmb.multiblock.MultiblockType;
@@ -12,6 +11,8 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * 结构信息分类
@@ -27,19 +28,18 @@ public class MultiblockInfoRecipeCategory extends ModularUIRecipeCategory<Multib
     /**
      * 创建结构信息分类
      *
-     * <p>分类图标取注册表里第一个机器类型的控制器方块，注册表为空时没有图标。</p>
+     * <p>分类图标取传入列表里第一个机器类型的控制器方块，列表为空时没有图标。</p>
      *
      * @param helpers JEI 助手
+     * @param types 全局注册表里的机器类型
      */
-    public MultiblockInfoRecipeCategory(IJeiHelpers helpers) {
+    public MultiblockInfoRecipeCategory(IJeiHelpers helpers, List<MultiblockType> types) {
         super(info -> MultiblockInfoUI.create(info.type()));
-        this.icon = BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)
-            .stream()
+        this.icon = types.stream()
             .findFirst()
-            .map(entry -> helpers.getGuiHelper()
+            .map(type -> helpers.getGuiHelper()
                 .createDrawableItemLike(
-                    entry.get()
-                        .controller()
+                    type.controller()
                         .get().getBlock()
                         .asItem()
                 )

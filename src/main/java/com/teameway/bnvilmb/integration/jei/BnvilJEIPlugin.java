@@ -8,7 +8,6 @@ import com.teameway.bnvilmb.multiblock.MultiblockType;
 import com.teameway.bnvilmb.recipe.CompiledRecipe;
 import com.teameway.bnvilmb.recipe.MultiblockRecipeIndex;
 import com.teameway.bnvilmb.recipe.TypeIndex;
-import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
@@ -37,13 +36,20 @@ public class BnvilJEIPlugin implements IModPlugin {
     }
 
     /**
-     * 取某机器类型当前的配方列表
+     * 取全局注册表里的机器类型。
      *
-     * <p>索引尚未建立时返回空列表。</p>
+     * <p>其他模组通过自己的 {@code BnvilRegistrum} 注册的类型也会出现在这里。</p>
      *
-     * @param machine 机器类型 ID
-     * @return 已按优先级排序的配方
+     * @return 机器类型条目列表
      */
+    private static List<RegisteredType> types() {
+        return BnvilRegistries.types()
+            .entrySet()
+            .stream()
+            .map(entry -> new RegisteredType(entry.getKey().identifier(), entry.getValue()))
+            .toList();
+    }
+
     private static List<CompiledRecipe> recipesOf(Identifier machine) {
         MultiblockRecipeIndex index = MultiblockRecipeIndex.current();
         if (index == null) {
@@ -70,12 +76,17 @@ public class BnvilJEIPlugin implements IModPlugin {
      */
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        List<RegisteredType> types = types();
+        if (types.isEmpty()) {
+            return;
+        }
         IJeiHelpers helpers = registration.getJeiHelpers();
-        registration.addRecipeCategories(new MultiblockInfoRecipeCategory(helpers));
-        for (RegistryEntry<MultiblockType, MultiblockType> entry : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {
-            List<CompiledRecipe> recipes = recipesOf(entry.getId());
+        List<MultiblockType> multiblockTypes = types.stream().map(RegisteredType::type).toList();
+        registration.addRecipeCategories(new MultiblockInfoRecipeCategory(helpers, multiblockTypes));
+        for (RegisteredType entry : types) {
+            List<CompiledRecipe> recipes = recipesOf(entry.id());
             MultiblockRecipeCategory category = new MultiblockRecipeCategory(
-                helpers, typeOf(entry.getId()), entry.get(), recipes
+                helpers, typeOf(entry.id()), entry.type(), recipes
             );
             registration.addRecipeCategories(category);
         }
@@ -90,19 +101,22 @@ public class BnvilJEIPlugin implements IModPlugin {
      */
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
+        List<RegisteredType> types = types();
+        if (types.isEmpty()) {
+            return;
+        }
         registration.addRecipes(
             MultiblockInfoRecipeCategory.RECIPE_TYPE,
-            BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)
-                .stream()
-                .map(entry -> new MultiblockInfoRecipeCategory.MultiblockInfo(entry.getId(), entry.get()))
+            types.stream()
+                .map(entry -> new MultiblockInfoRecipeCategory.MultiblockInfo(entry.id(), entry.type()))
                 .toList()
         );
-        for (RegistryEntry<MultiblockType, MultiblockType> entry : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {
-            List<CompiledRecipe> recipes = recipesOf(entry.getId());
+        for (RegisteredType entry : types) {
+            List<CompiledRecipe> recipes = recipesOf(entry.id());
             if (recipes.isEmpty()) {
                 continue;
             }
-            registration.addRecipes(typeOf(entry.getId()), recipes);
+            registration.addRecipes(typeOf(entry.id()), recipes);
         }
     }
 
@@ -113,10 +127,13 @@ public class BnvilJEIPlugin implements IModPlugin {
      */
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        for (RegistryEntry<MultiblockType, MultiblockType> entry : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {
-            var stack = entry.get().controller().get().getBlock().asItem().getDefaultInstance();
-            registration.addCraftingStation(typeOf(entry.getId()), stack);
+        for (RegisteredType entry : types()) {
+            var stack = entry.type().controller().get().getBlock().asItem().getDefaultInstance();
+            registration.addCraftingStation(typeOf(entry.id()), stack);
             registration.addCraftingStation(MultiblockInfoRecipeCategory.RECIPE_TYPE, stack);
         }
+    }
+
+    private record RegisteredType(Identifier id, MultiblockType type) {
     }
 }

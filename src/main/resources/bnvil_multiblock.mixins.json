@@ -2,7 +2,9 @@
   "required": true,
   "package": "com.teameway.bnvilmb.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": [],
+  "mixins": [
+    "LevelMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

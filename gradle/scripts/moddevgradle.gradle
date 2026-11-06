@@ -3,8 +3,11 @@ neoForge {
 
     accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
+    addModdingDependenciesTo sourceSets.dev
+
     runs {
         configureEach {
+            sourceSet = sourceSets.dev
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'terminal.jline', 'true'
             logLevel = org.slf4j.event.Level.DEBUG
@@ -31,13 +34,14 @@ neoForge {
 
         data {
             clientData()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/dev/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
 
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.dev)
         }
     }
 

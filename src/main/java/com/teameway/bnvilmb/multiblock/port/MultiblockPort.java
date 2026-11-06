@@ -3,11 +3,13 @@ package com.teameway.bnvilmb.multiblock.port;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Set;
+
 /**
- * 多方块端口
+ * 多方块端口。
  *
- * <p>由端口方块实体实现，结构成型时被扫描收集；资源端口再实现 {@link ItemPort}、{@link FluidPort}、
- * {@link EnergyPort}。</p>
+ * <p>端口可以被多个控制器共享，和 GTM 的 {@code MultiblockPartMachine} 一样保存
+ * 控制器位置集合；{@link #canShared()} 为 {@code false} 的端口仍然只允许一个控制器。</p>
  */
 public interface MultiblockPort {
     /**
@@ -21,18 +23,48 @@ public interface MultiblockPort {
     PortTier tier();
 
     /**
-     * @return 当前认领该端口的控制器位置，未认领时为 {@code null}
+     * @return 当前认领该端口的控制器位置，只读
      */
-    default @Nullable BlockPos controllerPos() {
-        return null;
+    Set<BlockPos> controllerPositions();
+
+    /**
+     * @return 是否允许被多个控制器共享，默认允许
+     */
+    default boolean canShared() {
+        return true;
     }
 
     /**
-     * 设置端口归属，由结构管理器在成型与解散时调用
-     *
-     * @param controllerPos 控制器位置，{@code null} 表示解除认领
+     * @param controllerPos 控制器位置
+     * @return 是否已经属于该控制器
      */
-    default void setControllerPos(@Nullable BlockPos controllerPos) {
+    default boolean hasController(BlockPos controllerPos) {
+        return this.controllerPositions().contains(controllerPos);
+    }
+
+    /**
+     * 加入一个控制器。
+     *
+     * @param controllerPos 控制器位置
+     */
+    default void addController(BlockPos controllerPos) {
+    }
+
+    /**
+     * 移除一个控制器。
+     *
+     * @param controllerPos 控制器位置
+     */
+    default void removeController(BlockPos controllerPos) {
+    }
+
+    /**
+     * 兼容旧代码：返回第一个控制器位置。
+     *
+     * @return 第一个控制器位置，没有时为 {@code null}
+     */
+    default @Nullable BlockPos controllerPos() {
+        return this.controllerPositions().stream().findFirst().orElse(null);
     }
 
     /**

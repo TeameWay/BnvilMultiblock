@@ -13,22 +13,18 @@ import com.teameway.bnvilmb.multiblock.StructureController;
 import com.teameway.bnvilmb.multiblock.StructureControllerRegistry;
 import com.teameway.bnvilmb.multiblock.machine.MachineJob;
 import com.teameway.bnvilmb.multiblock.machine.MachineRuntime;
+import com.teameway.bnvilmb.multiblock.pattern.BlockPattern;
+import com.teameway.bnvilmb.multiblock.pattern.PatternError;
+import com.teameway.bnvilmb.multiblock.pattern.PatternState;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
-import com.teameway.bnvilmb.multiblock.port.MultiblockPortScanner;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPortTable;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
-import com.teameway.bnvilmb.multiblock.structure.StructureInstance;
 import com.teameway.bnvilmb.multiblock.structure.StructureManager;
-import com.teameway.bnvilmb.multiblock.structure.StructureMatch;
-import com.teameway.bnvilmb.multiblock.structure.StructurePattern;
-import com.teameway.bnvilmb.multiblock.structure.StructureProblem;
-import dev.anvilcraft.lib.v2.registrum.util.entry.RegistryEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,42 +33,29 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 控制器方块实体
+ * 控制器方块实体。
  *
- * <p>成型判定由 {@link StructureManager} 驱动，这里承担结构生命周期、端口扫描与机器运行时。
- * 线程数组只同步进度、耗时、倍数与配方 ID，任务对象留在服务端。</p>
- *
- * <p>区块加载后向 {@link StructureManager} 注册，方块移除或区块卸载时注销；匹配结果通过
- * {@code onStructure*} 回调进入，运行时、端口摘要与结构错误都在这里落地。</p>
+ * <p>对应 GTM 的 {@code MultiblockControllerMachine}。结构生命周期由 {@link StructureManager}
+ * 驱动，这里负责结构回调、端口表、运行时和同步字段。结构模板是代码定义的 {@link BlockPattern}，
+ * 没有数据包注册表。</p>
  */
 public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEntity {
-    /**
-     * 运行时存在时每隔多少 tick 调用一次 {@code setChanged()}
-     */
     private static final int SAVE_INTERVAL = 20;
-    /**
-     * 端口摘要各段之间的分隔符
-     *
-     * <p>坐标内部用逗号分成三段，这里必须换成竖线，否则解析无法按位次拆分。</p>
-     */
     private static final char SEPARATOR = '|';
-    /**
-     * 解析端口摘要用的分隔正则
-     *
-     * <p>{@link String#split(String)} 接收正则，竖线在正则里表示分支，直接传
-     * {@link #SEPARATOR} 会按单字符切分。</p>
-     */
     private static final String SEPARATOR_REGEX = "\\|";
 
     private final FieldManagedStorage syncStorage = new FieldManagedStorage(this);
     private final List<MachineJob> pendingJobs = new ArrayList<>();
     private @Nullable MachineRuntime runtime;
-    private @Nullable StructureInstance structure;
-    private Direction structureFacing = Direction.NORTH;
+    private @Nullable PatternState structure;
+    private Direction frontFacing = Direction.NORTH;
+    private Direction upwardsFacing = Direction.UP;
+    private boolean flipped;
     private int saveCounter;
 
     @DescSynced
@@ -93,34 +76,26 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     private String variantText = "";
     @DescSynced
     private String structureError = "";
-    /**
-     * 结构里所有端口的摘要，一项一个端口
-     *
-     * <p>格式为 {@code 种类|等级|x,y,z}；成型与结构更新时整体重写，解散时清空。</p>
-     */
     @DescSynced
     private String[] ports = new String[0];
 
-    /**
-     * @param type 方块实体类型
-     * @param pos 方块位置
-     * @param state 方块状态
-     */
     public ControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    /**
-     * @return LDLib2 同步与持久化共用的字段存储
-     */
     @Override
     public IManagedStorage getSyncStorage() {
         return this.syncStorage;
     }
 
     /**
-     * 在服务端向 {@link StructureManager} 注册，区块重新加载后也由这里补回结构引用
+     * @return 控制器方块对应的代码 pattern，未注册时为 {@code null}
      */
+    public @Nullable BlockPattern pattern() {
+        StructureController controller = StructureControllerRegistry.get(this.getBlockState().getBlock());
+        return controller == null ? null : controller.pattern();
+    }
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -129,9 +104,6 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         }
     }
 
-    /**
-     * 方块被移除时注销结构并清空引用
-     */
     @Override
     public void setRemoved() {
         if (this.level instanceof ServerLevel serverLevel && this.structure != null) {
@@ -141,9 +113,6 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         super.setRemoved();
     }
 
-    /**
-     * 区块卸载时注销结构并清空引用
-     */
     @Override
     public void onChunkUnloaded() {
         if (this.level instanceof ServerLevel serverLevel && this.structure != null) {
@@ -154,19 +123,15 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     }
 
     /**
-     * 服务端每 tick 调用
+     * 服务端每 tick 调用。
      *
-     * <p>结构引用为空时先补注册；运行时存在时推进运行时、刷新同步字段，并每
-     * {@value #SAVE_INTERVAL} tick 标记一次存档。</p>
+     * <p>结构检查由 {@link StructureManager} 的待检查队列驱动，这里只推进机器运行时。</p>
      *
      * @param level 服务端世界
      */
     public void serverTick(ServerLevel level) {
         if (this.structure == null) {
             this.structure = StructureManager.get(level).register(this);
-        }
-        if (this.structure != null) {
-            StructureManager.get(level).tick(this.structure);
         }
         MachineRuntime current = this.runtime;
         if (current != null) {
@@ -180,73 +145,65 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     }
 
     /**
-     * 结构成型时建立运行时
+     * 结构成型。
      *
-     * <p>先由 {@link #form} 建立 {@link MachineRuntime}，再回调
-     * {@link StructureController#onFormed}。</p>
-     *
-     * @param match 结构匹配结果
+     * @param state 结构状态
      */
-    public void onStructureFormed(StructureMatch match) {
-        if (!(this.level instanceof ServerLevel serverLevel) || this.structure == null) {
+    public void onStructureFormed(PatternState state) {
+        if (!(this.level instanceof ServerLevel serverLevel)) {
             return;
         }
-        this.form(serverLevel, match);
+        this.form(serverLevel, state);
         StructureController controller = StructureControllerRegistry.get(this.getBlockState().getBlock());
         if (controller != null) {
-            controller.onFormed(serverLevel, this, match);
+            controller.onFormed(serverLevel, this, state);
         }
     }
 
     /**
-     * 结构仍然合法但方块发生变化
+     * 结构仍然合法但方块发生变化。
      *
-     * <p>运行时尚未建立时按成型处理；已建立时只重扫端口并清掉结构错误，不重建运行时。</p>
-     *
-     * @param match 结构匹配结果
+     * @param state 结构状态
      */
-    public void onStructureUpdated(StructureMatch match) {
-        if (!(this.level instanceof ServerLevel serverLevel) || this.structure == null) {
+    public void onStructureUpdated(PatternState state) {
+        if (!(this.level instanceof ServerLevel serverLevel)) {
             return;
         }
         if (this.runtime == null) {
-            this.form(serverLevel, match);
+            this.form(serverLevel, state);
             return;
         }
-        this.refreshPorts(MultiblockPortScanner.scan(serverLevel, match));
+        this.refreshPorts(this.portTable(serverLevel, state));
         this.clearStructureError();
     }
 
     /**
-     * 结构解散
+     * 结构解散。
      *
-     * <p>先回调控制器的 {@link StructureController#onUnformed}，再清掉运行时与端口摘要。</p>
-     *
-     * @param match 最后一次匹配结果，可能为 {@code null}
+     * @param state 结构状态
      */
-    public void onStructureUnformed(@Nullable StructureMatch match) {
+    public void onStructureUnformed(PatternState state) {
         if (this.level instanceof ServerLevel serverLevel) {
             StructureController controller = StructureControllerRegistry.get(this.getBlockState().getBlock());
             if (controller != null) {
-                controller.onUnformed(serverLevel, this);
+                controller.onUnformed(serverLevel, this, state);
             }
         }
         this.unform();
     }
 
     /**
-     * 结构不合法时记录首个问题
+     * 结构不合法时记录首个问题。
      *
-     * <p>只有错误文本变化时才写字段、标记存档并同步，相同的错误不会反复刷同步。</p>
-     *
-     * @param match 失败结果
+     * @param state 失败状态
      */
-    public void onStructureInvalid(StructureMatch match) {
-        String error = match.firstProblem()
-            .map(StructureProblem::describe)
+    public void onStructureInvalid(PatternState state) {
+        String error = state.errors().stream()
+            .findFirst()
+            .map(PatternError::describe)
             .orElse("");
         if (!error.equals(this.structureError)) {
-            BnvilMultiBlock.LOGGER.debug("Structure invalid at {}: {}", this.worldPosition, match.problems());
+            BnvilMultiBlock.LOGGER.debug("Structure invalid at {}: {}", this.worldPosition, state.errors());
             this.structureError = error;
             this.setChanged();
             this.sync(true);
@@ -254,52 +211,56 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     }
 
     /**
-     * 按结构模板找到多方块类型，扫描端口并建立运行时
+     * 建立机器运行时。
      *
-     * <p>类型由 {@link #resolveType} 按结构模板上的标签反查；找不到时只记录错误并保持空闲。
-     * 存档里待恢复的任务会在运行时建好后补回去。</p>
+     * @param level 服务端世界
+     * @param state 结构状态
      */
-    private void form(ServerLevel level, StructureMatch match) {
-        StructureInstance instance = this.structure;
-        if (instance == null) {
-            return;
-        }
-        Holder.Reference<StructurePattern> holder = instance.patternHolder();
-        RegistryEntry<MultiblockType, MultiblockType> type = this.resolveType(holder);
-        if (type == null) {
-            this.structureError = "No matching multiblock type tag";
-            BnvilMultiBlock.LOGGER.warn("Multiblock at {} has no matching type tag; controller stays idle", this.worldPosition);
+    private void form(ServerLevel level, PatternState state) {
+        BlockPattern pattern = state.pattern();
+        Identifier typeId = this.resolveType(pattern);
+        if (typeId == null) {
+            this.structureError = "No matching multiblock type variant";
+            BnvilMultiBlock.LOGGER.warn("Multiblock at {} has no matching type variant; controller stays idle", this.worldPosition);
             this.sync(true);
             return;
         }
-        MultiblockPortTable table = MultiblockPortScanner.scan(level, match);
+        MultiblockPortTable table = this.portTable(level, state);
         this.refreshPorts(table);
-        MachineRuntime created = new MachineRuntime(type.getId(), holder);
+        MachineRuntime created = new MachineRuntime(typeId, pattern);
         created.formed(table);
         if (!this.pendingJobs.isEmpty()) {
             created.restore(this.pendingJobs);
             this.pendingJobs.clear();
         }
         this.runtime = created;
-        this.machineType = type.getId().toString();
+        this.machineType = typeId.toString();
         this.clearStructureError();
         this.refreshStatus();
         this.setChanged();
         this.sync(true);
     }
 
-    /**
-     * 按结构模板上的标签反查多方块类型，标签由注册项 ID 生成
-     */
-    private @Nullable RegistryEntry<MultiblockType, MultiblockType> resolveType(
-        Holder.Reference<StructurePattern> pattern
-    ) {
-        for (RegistryEntry<MultiblockType, MultiblockType> candidate : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {
-            if (pattern.is(TagKey.create(BnvilRegistries.STRUCTURE_PATTERNS, candidate.getId()))) {
-                return candidate;
+    private @Nullable Identifier resolveType(BlockPattern pattern) {
+        Registry<MultiblockType> types = BnvilRegistries.types();
+        for (MultiblockType type : types) {
+            Identifier id = types.getKey(type);
+            if (id != null && pattern.variants().contains(id)) {
+                return id;
             }
         }
         return null;
+    }
+
+    private MultiblockPortTable portTable(ServerLevel level, PatternState state) {
+        List<MultiblockPort> ports = new ArrayList<>();
+        for (BlockPos pos : state.portPositions()) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof MultiblockPort port) {
+                ports.add(port);
+            }
+        }
+        return MultiblockPortTable.of(ports, state.parallelBonus(), state.threadBonus());
     }
 
     private void clearStructureError() {
@@ -311,9 +272,7 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     }
 
     /**
-     * 清掉运行时并回到未成型状态
-     *
-     * <p>运行时存在时才执行清理，包括机器类型、端口摘要与同步状态。</p>
+     * 清掉运行时并回到未成型状态。
      */
     public void unform() {
         MachineRuntime current = this.runtime;
@@ -328,17 +287,12 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         }
     }
 
-    /**
-     * @return 当前机器运行时，未成型时为 {@code null}
-     */
     public @Nullable MachineRuntime runtime() {
         return this.runtime;
     }
 
     /**
-     * 重写端口摘要
-     *
-     * <p>顺序按 {@code PortKind.values()} 分组，组内保持端口表的顺序；数组内容不变时不写字段。</p>
+     * 重写端口摘要。
      */
     private void refreshPorts(MultiblockPortTable table) {
         List<String> entries = new ArrayList<>();
@@ -352,7 +306,7 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
             }
         }
         String[] next = entries.toArray(String[]::new);
-        if (java.util.Arrays.equals(this.ports, next)) {
+        if (Arrays.equals(this.ports, next)) {
             return;
         }
         this.ports = next;
@@ -364,43 +318,22 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         this.ports = new String[0];
     }
 
-    /**
-     * @param index 端口序号
-     * @return 端口方块位置
-     * @throws ArrayIndexOutOfBoundsException 序号越界
-     */
     public BlockPos portPosition(int index) {
         return this.portAt(index).pos();
     }
 
-    /**
-     * @param index 端口序号
-     * @return 端口种类
-     * @throws ArrayIndexOutOfBoundsException 序号越界
-     */
     public PortKind portKind(int index) {
         return PortKind.byName(this.portAt(index).kind());
     }
 
-    /**
-     * @param index 端口序号
-     * @return 摘要中记录的端口等级文本
-     * @throws ArrayIndexOutOfBoundsException 序号越界
-     */
     public String portTier(int index) {
         return this.portAt(index).tier();
     }
 
-    /**
-     * @return 端口数量
-     */
     public int portCount() {
         return this.ports.length;
     }
 
-    /**
-     * 解析一条端口摘要；任一段缺失或数字解析失败时用空坐标兜底
-     */
     private PortEntry portAt(int index) {
         String raw = this.ports[index];
         String[] parts = raw.split(SEPARATOR_REGEX, 3);
@@ -427,11 +360,6 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     private record PortEntry(String kind, String tier, BlockPos pos) {
     }
 
-    /**
-     * 把运行时状态写进同步字段
-     *
-     * <p>数组长度变化时整体重建；空槽位的进度记为 -1，其余字段清零。</p>
-     */
     private void refreshStatus() {
         MachineRuntime current = this.runtime;
         List<MachineJob> jobs = current != null ? current.jobs() : List.of();
@@ -463,68 +391,76 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
                            : current.variants().stream().map(Identifier::toString).sorted().collect(Collectors.joining(", "));
     }
 
-    /**
-     * @return 当前同步的线程槽位数
-     */
     public int threadSlots() {
         return this.threadSlots;
     }
 
-    /**
-     * @return 当前并行数，未成型时为 0
-     */
     public int parallelSlots() {
         return this.parallelSlots;
     }
 
-    /**
-     * @return 机器类型的注册 ID 文本，未成型时为空串
-     */
     public String machineType() {
         return this.machineType;
     }
 
-    /**
-     * @return 形态 ID 列表，以逗号加空格分隔，未成型时为空串
-     */
     public String variantText() {
         return this.variantText;
     }
 
-    /**
-     * @return 最近一次结构错误文本，没有错误时为空串
-     */
     public String structureError() {
         return this.structureError;
     }
 
-    /**
-     * @return 结构朝向，始终为水平方向
-     */
-    public Direction structureFacing() {
-        return this.structureFacing;
+    public Direction frontFacing() {
+        return this.frontFacing;
     }
 
-    /**
-     * 设置控制器朝向；由方块放置或调试命令调用
-     *
-     * <p>传入非水平方向时退回 {@link Direction#NORTH}，已有结构会同步更新朝向。</p>
-     *
-     * @param facing 新的水平朝向
-     */
+    public Direction upwardsFacing() {
+        return this.upwardsFacing;
+    }
+
+    public boolean flipped() {
+        return this.flipped;
+    }
+
+    public Direction structureFacing() {
+        return this.frontFacing;
+    }
+
+    public void setFrontFacing(Direction frontFacing) {
+        this.frontFacing = frontFacing;
+        this.upwardsFacing = normalizeUp(frontFacing, this.upwardsFacing);
+        this.updateStructureOrientation();
+    }
+
+    public void setUpwardsFacing(Direction upwardsFacing) {
+        this.upwardsFacing = normalizeUp(this.frontFacing, upwardsFacing);
+        this.updateStructureOrientation();
+    }
+
+    public void setFlipped(boolean flipped) {
+        this.flipped = flipped;
+        this.updateStructureOrientation();
+    }
+
     public void setStructureFacing(Direction facing) {
-        Direction horizontal = facing.getAxis().isHorizontal() ? facing : Direction.NORTH;
-        this.structureFacing = horizontal;
+        this.setFrontFacing(facing);
+    }
+
+    private static Direction normalizeUp(Direction front, Direction up) {
+        if (up.getAxis() != front.getAxis()) {
+            return up;
+        }
+        return front.getAxis() == Direction.Axis.Y ? Direction.NORTH : Direction.UP;
+    }
+
+    private void updateStructureOrientation() {
         if (this.level instanceof ServerLevel serverLevel && this.structure != null) {
-            StructureManager.get(serverLevel).updateFacing(this.structure, horizontal);
+            StructureManager.get(serverLevel).updateOrientation(this.structure);
         }
         this.setChanged();
     }
 
-    /**
-     * @param slot 线程序号
-     * @return 0 到 1 的进度；序号越界或周期尚未开始时为 0
-     */
     public float progressAt(int slot) {
         if (slot < 0 || slot >= this.threadProgress.length) {
             return 0.0F;
@@ -537,10 +473,6 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         return Math.min(1.0F, progress / (float) duration);
     }
 
-    /**
-     * @param slot 线程序号
-     * @return 配方 ID 文本；序号越界或没有配方时为空串
-     */
     public String recipeIdAt(int slot) {
         if (slot < 0 || slot >= this.threadRecipe.length) {
             return "";
@@ -549,25 +481,14 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         return recipe == null ? "" : recipe;
     }
 
-    /**
-     * @param slot 线程序号
-     * @return 并行批次；序号越界时为 0
-     */
     public int batchAt(int slot) {
         return slot < 0 || slot >= this.threadBatch.length ? 0 : this.threadBatch[slot];
     }
 
-    /**
-     * @param slot 线程序号
-     * @return 周期长度，单位 tick；序号越界时为 0
-     */
     public int durationAt(int slot) {
         return slot < 0 || slot >= this.threadDuration.length ? 0 : this.threadDuration[slot];
     }
 
-    /**
-     * @return 是否有线程正在跑配方
-     */
     public boolean working() {
         for (String recipe : this.threadRecipe) {
             if (recipe != null && !recipe.isEmpty()) {
@@ -577,14 +498,17 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         return false;
     }
 
-    /**
-     * 读取朝向与任务列表；任务先放进待恢复列表，等结构成型后再交给运行时
-     */
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        Direction savedFacing = Direction.byName(input.getStringOr("facing", Direction.NORTH.getSerializedName()));
-        this.structureFacing = savedFacing != null && savedFacing.getAxis().isHorizontal() ? savedFacing : Direction.NORTH;
+        String front = input.getStringOr("front_facing", input.getStringOr("facing", Direction.NORTH.getSerializedName()));
+        Direction savedFront = Direction.byName(front);
+        this.frontFacing = savedFront == null ? Direction.NORTH : savedFront;
+        String up = input.getStringOr("upwards_facing", Direction.UP.getSerializedName());
+        Direction savedUp = Direction.byName(up);
+        this.upwardsFacing = normalizeUp(this.frontFacing, savedUp == null ? Direction.UP : savedUp);
+        this.flipped = input.getBooleanOr("flipped", false);
+
         int maxSlot = -1;
         List<SavedJob> saved = new ArrayList<>();
         for (SavedJob entry : input.listOrEmpty("jobs", SavedJob.CODEC)) {
@@ -603,13 +527,12 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
         }
     }
 
-    /**
-     * 写入朝向与任务列表；运行时存在时存运行时任务，否则存待恢复任务
-     */
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        output.putString("facing", this.structureFacing.getSerializedName());
+        output.putString("front_facing", this.frontFacing.getSerializedName());
+        output.putString("upwards_facing", this.upwardsFacing.getSerializedName());
+        output.putBoolean("flipped", this.flipped);
         List<MachineJob> jobs = this.runtime != null ? this.runtime.jobs() : this.pendingJobs;
         ValueOutput.TypedOutputList<SavedJob> list = output.list("jobs", SavedJob.CODEC);
         for (int slot = 0; slot < jobs.size(); slot++) {

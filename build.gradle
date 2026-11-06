@@ -10,6 +10,20 @@ plugins {
 group = maven_group
 version = mod_version
 
+sourceSets {
+    dev {
+        resources.srcDir 'src/dev/generated/resources'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    devCompileClasspath.extendsFrom compileClasspath
+    devRuntimeClasspath.extendsFrom runtimeClasspath
+    devAnnotationProcessor.extendsFrom annotationProcessor
+}
+
 apply from: "$rootDir/gradle/scripts/moddevgradle.gradle"
 apply from: "$rootDir/gradle/scripts/repositories.gradle"
 apply from: "$rootDir/gradle/scripts/jars.gradle"
@@ -18,18 +32,11 @@ apply from: "$rootDir/dependencies.gradle"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 compileJava.options.encoding = 'UTF-8'
 
 test {
     useJUnitPlatform()
-}
-
-if (gradle.startParameter.offline) {
-    configurations.testRuntimeClasspath {
-        resolutionStrategy.force 'net.neoforged.fancymodloader:junit-fml:12.0.0'
-    }
 }
 
 lombok.version = "1.18.44"

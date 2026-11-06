@@ -17,8 +17,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class BnvilRecipeTypes {
     private static final DeferredRegister<RecipeType<?>> TYPE = DeferredRegister.create(Registries.RECIPE_TYPE, BnvilMultiBlock.MODID);
 
-    public static final DeferredHolder<RecipeType<?>, RecipeType<MultiblockRecipe>> MULTIBLOCK =
-        registerType("multiblock");
+    public static final DeferredHolder<RecipeType<?>, RecipeType<MultiblockRecipe>> MULTIBLOCK = registerType("multiblock");
 
     private static <T extends Recipe<?>> DeferredHolder<RecipeType<?>, RecipeType<T>> registerType(String name) {
         return TYPE.register(name, RecipeType::simple);

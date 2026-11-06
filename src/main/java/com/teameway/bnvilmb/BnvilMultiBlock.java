@@ -2,16 +2,9 @@ package com.teameway.bnvilmb;
 
 import com.mojang.logging.LogUtils;
 import com.teameway.bnvilmb.datagen.BnvilDatagen;
-import com.teameway.bnvilmb.init.BnvilCreativeTabs;
 import com.teameway.bnvilmb.init.BnvilRecipeSerializers;
 import com.teameway.bnvilmb.init.BnvilRecipeTypes;
 import com.teameway.bnvilmb.init.BnvilRegistries;
-import com.teameway.bnvilmb.init.multiblock.BnvilControllerBlockEntities;
-import com.teameway.bnvilmb.init.multiblock.BnvilControllerBlocks;
-import com.teameway.bnvilmb.init.multiblock.BnvilControllers;
-import com.teameway.bnvilmb.init.multiblock.BnvilMachines;
-import com.teameway.bnvilmb.init.multiblock.BnvilPorts;
-import com.teameway.bnvilmb.init.multiblock.BnvilTypes;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -21,8 +14,8 @@ import org.slf4j.Logger;
 /**
  * 模组主入口
  *
- * <p>构造时依次挂载注册表、配方类型与序列化器、控制器、机器、端口与机器类型，最后配置数据生成；
- * 默认创造模式物品栏在创造页注册之后设为 {@code BnvilCreativeTabs.MULTIBLOCK}。</p>
+ * <p>构造时只挂载库自身的注册表、配方类型与序列化器，再配置数据生成。示例机器、控制器、
+ * 端口与结构由开发源集单独注册，不会进入正式模组。</p>
  *
  * <p>{@link #id(String)} 给出本模组命名空间下的 ID，注册表键、JEI 类型与测试 ID 都由它拼出。</p>
  */
@@ -38,9 +31,9 @@ public class BnvilMultiBlock {
     public static BnvilRegistrum REGISTRUM = BnvilRegistrum.create(MODID);
 
     /**
-     * 挂载各注册入口
+     * 挂载库自身的注册入口
      *
-     * <p>注册表、配方与多方块相关的条目都在这里登记，条目本身由各自的注册类定义。</p>
+     * <p>这里只登记注册表与配方基础设施；示例多方块内容由开发源集的 {@code DevContent} 加载。</p>
      *
      * @param modEventBus 模组事件总线，配方类型与序列化器的 DeferredRegister 挂到它上面
      * @param modContainer 模组容器，由 NeoForge 注入
@@ -49,16 +42,6 @@ public class BnvilMultiBlock {
         BnvilRegistries.register();
         BnvilRecipeTypes.register(modEventBus);
         BnvilRecipeSerializers.register(modEventBus);
-
-        BnvilCreativeTabs.register();
-        addTab();
-        
-        BnvilControllerBlocks.register();
-        BnvilControllerBlockEntities.register();
-        BnvilControllers.register();
-        BnvilMachines.register();
-        BnvilPorts.register();
-        BnvilTypes.register();
 
         BnvilDatagen.configureDataGen();
     }
@@ -71,9 +54,5 @@ public class BnvilMultiBlock {
      */
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MODID, path);
-    }
-
-    private static void addTab() {
-        REGISTRUM.defaultCreativeTab(BnvilCreativeTabs.MULTIBLOCK);
     }
 }
