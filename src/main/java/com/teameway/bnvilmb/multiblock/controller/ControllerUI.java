@@ -43,25 +43,6 @@ import java.util.function.Supplier;
  * <p>数据来自控制器方块实体同步过的字段，配方内容由客户端的配方索引反查，界面不持有服务端对象。</p>
  */
 public class ControllerUI {
-    /**
-     * 局部样式：只压缩滚动条，配色来自 {@code lss/dark_paper.lss}
-     *
-     * <p>卡片三态与分隔线写在主题文件里，这里不再重复。</p>
-     *
-     * <p>右栏总共才
-     * {@value ControllerLayout#RIGHT_WIDTH} 像素，
-     * 滚动条与内边距必须收窄；这里的数值与 {@code ControllerLayout.SCROLLER_WIDTH}、
-     * {@code VIEWPORT_PADDING} 必须同步修改。</p>
-     */
-    private static final String STYLES = """
-        scroller-vertical:host {
-          width: 4;
-        }
-        .__scroller_view_view-port__ {
-          padding-all: 1;
-          background: empty;
-        }
-        """;
 
     private ControllerUI() {
     }
@@ -78,6 +59,7 @@ public class ControllerUI {
 
         // 外层只摆按钮窄条与面板两段，自己不画背景，按钮因此落在框架左边框外侧
         UIElement root = new UIElement()
+            .setId("bnvil-controller")
             .layout(layout -> layout
                 .width(ControllerLayout.OUTER_WIDTH)
                 .height(ControllerLayout.HEIGHT)
@@ -91,8 +73,7 @@ public class ControllerUI {
                 .paddingAll(ControllerLayout.PADDING)
                 // panel_bg 主题规则自带 gap-all，会把两栏顶出内容区，这里显式清零
                 .gapAll(0))
-            .addClass("panel_bg")
-            .addLocalStylesheet(STYLES);
+            .addClass("panel_bg");
         // 左栏再分上下：上面是机器信息与配方，下面是物品栏
         UIElement leftSide = new UIElement()
             .layout(layout -> layout
@@ -235,6 +216,19 @@ public class ControllerUI {
     }
 
     /**
+     * 标记为次要信息
+     *
+     * <p>颜色由主题的 {@code .bnvil-hint} 决定，代码里不再写死色值。</p>
+     *
+     * @param label 文本元素
+     * @return 原元素，便于链式调用
+     */
+    private static Label hint(Label label) {
+        label.addClass("bnvil-hint");
+        return label;
+    }
+
+    /**
      * 建一个只有纵向滚动的视图
      *
      * <p>宽度由调用方决定：配方预览按绝对坐标摆放，需要确切的像素宽度，线程卡片流式排布，
@@ -274,6 +268,8 @@ public class ControllerUI {
         private int slots = -1;
         private String rendered = "";
         private @Nullable UIElement panel;
+        private @Nullable Label stateLabel;
+        private String stateClass = "";
 
         private View(ControllerBlockEntity controller) {
             this.controller = controller;
@@ -413,6 +409,33 @@ public class ControllerUI {
                 this.rendered = signature;
                 this.rebuildRecipe();
             }
+            this.updateStateClass();
+        }
+
+        /**
+         * 同步结构状态的颜色
+         *
+         * <p>文本由数据源刷新，这里只管换类。三个状态类互斥，先全部摘掉再加当前那个；
+         * 状态没变就直接返回，避免每 tick 触发一次样式重算。</p>
+         */
+        private void updateStateClass() {
+            if (this.stateLabel == null) {
+                return;
+            }
+            String next;
+            if (this.controller.machineType().isEmpty()) {
+                next = this.controller.structureError().isEmpty()
+                       ? "bnvil-state-idle"
+                       : "bnvil-state-error";
+            } else {
+                next = this.controller.working() ? "bnvil-state-working" : "bnvil-state-idle";
+            }
+            if (next.equals(this.stateClass)) {
+                return;
+            }
+            this.stateLabel.removeClasses("bnvil-state-idle", "bnvil-state-working", "bnvil-state-error");
+            this.stateLabel.addClass(next);
+            this.stateClass = next;
         }
 
         private void rebuildCards(int count) {
@@ -444,15 +467,19 @@ public class ControllerUI {
 
             Label title = new Label();
             title.setText(this.controller.getBlockState().getBlock().getName());
+            title.addClass("bnvil-title");
             info.addChild(line(title));
-            info.addChild(line(bound(() -> stateText(this.controller))));
-            info.addChild(line(bound(() -> variantsText(this.controller))));
-            info.addChild(line(bound(() -> Component.translatable(
+            Label state = bound(() -> stateText(this.controller));
+            state.addClass("bnvil-state-idle");
+            this.stateLabel = state;
+            info.addChild(line(state));
+            info.addChild(line(hint(bound(() -> variantsText(this.controller)))));
+            info.addChild(line(hint(bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.info.parallel", this.controller.parallelSlots()
-            ))));
-            info.addChild(line(bound(() -> Component.translatable(
+            )))));
+            info.addChild(line(hint(bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.info.threads", this.controller.threadSlots()
-            ))));
+            )))));
             return info;
         }
 
@@ -503,6 +530,7 @@ public class ControllerUI {
 
             Label title = new Label();
             title.setText(Component.translatable("gui.bnvil_multiblock.controller.thread.title", slot));
+            title.addClass("bnvil-title");
             clip(title);
 
             Label recipe = bound(() -> Component.translatable(
@@ -513,24 +541,24 @@ public class ControllerUI {
             Label parallel = bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.thread.parallel", this.controller.batchAt(slot)
             ));
-            clip(parallel);
+            clip(hint(parallel));
 
             Label progress = bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.thread.progress", percent(this.controller.progressAt(slot))
             ));
-            clip(progress);
+            clip(hint(progress));
 
             Label tickRow = bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.thread.ticks",
                 ticks(this.elapsed(slot)), ticks(this.controller.durationAt(slot))
             ));
-            clip(tickRow);
+            clip(hint(tickRow));
 
             Label secondRow = bound(() -> Component.translatable(
                 "gui.bnvil_multiblock.controller.thread.seconds",
                 seconds(this.elapsed(slot)), seconds(this.controller.durationAt(slot))
             ));
-            clip(secondRow);
+            clip(hint(secondRow));
 
             card.addChildren(title, recipe, parallel, progress, tickRow, secondRow);
             return card;
@@ -584,22 +612,22 @@ public class ControllerUI {
         private void rebuildRecipe() {
             this.recipeBody.clearAllChildren();
             if (this.selected < 0) {
-                this.recipeBody.addChild(text("gui.bnvil_multiblock.controller.recipe.hint"));
-                this.recipeBody.addChild(text("gui.bnvil_multiblock.controller.recipe.hint_rate"));
+                this.recipeBody.addChild(hint(text("gui.bnvil_multiblock.controller.recipe.hint")));
+                this.recipeBody.addChild(hint(text("gui.bnvil_multiblock.controller.recipe.hint_rate")));
                 return;
             }
             if (this.controller.machineType().isEmpty()) {
-                this.recipeBody.addChild(text("gui.bnvil_multiblock.controller.recipe.hint"));
+                this.recipeBody.addChild(hint(text("gui.bnvil_multiblock.controller.recipe.hint")));
                 return;
             }
             String recipeId = this.recipeId();
             if (recipeId.isEmpty()) {
-                this.recipeBody.addChild(text("gui.bnvil_multiblock.controller.state.idle"));
+                this.recipeBody.addChild(hint(text("gui.bnvil_multiblock.controller.state.idle")));
                 return;
             }
             RecipeView recipe = RecipeView.find(this.controller.machineType(), recipeId);
             if (recipe == null) {
-                this.recipeBody.addChild(text("gui.bnvil_multiblock.controller.recipe.unavailable"));
+                this.recipeBody.addChild(hint(text("gui.bnvil_multiblock.controller.recipe.unavailable")));
                 return;
             }
             this.addSection("gui.bnvil_multiblock.controller.recipe.inputs");
@@ -624,6 +652,7 @@ public class ControllerUI {
         private void addSection(String key) {
             Label label = new Label();
             label.setText(Component.translatable(key));
+            label.addClass("bnvil-section");
             label.layout(layout -> layout.widthPercent(100).height(ControllerLayout.LINE));
             this.recipeBody.addChild(label);
         }
@@ -682,6 +711,7 @@ public class ControllerUI {
                          ? "gui.bnvil_multiblock.controller.recipe.rate_fluid"
                          : "gui.bnvil_multiblock.controller.recipe.rate_item";
             Label label = text(key, NumberFormatUtil.decimal(perTick), NumberFormatUtil.decimal(perSecond));
+            label.addClass("bnvil-hint");
             label.layout(layout -> layout
                 .widthPercent(100)
                 .height(ControllerLayout.LINE)

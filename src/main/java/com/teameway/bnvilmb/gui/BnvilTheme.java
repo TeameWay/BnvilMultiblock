@@ -6,19 +6,18 @@ import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.teameway.bnvilmb.BnvilMultiBlock;
 import net.minecraft.resources.Identifier;
 
-import java.util.List;
-
 /**
  * 界面主题
  *
- * <p>全模组统一用 {@code lss/dark_paper.lss}：由 LDLib2 自带的 paper 主题翻转出的深色版，
- * 选择器与 paper 一致，吃 paper 的组件在这里同样有样式。</p>
+ * <p>全模组共用一份 {@code lss/bnvil.lss}：文件上半部分是基底控件外观，
+ * 下半部分是本模组的界面规则，合在一起是为了让配色只有一处可改。</p>
  *
- * <p>主题集中在此入口设置，界面不会漏套样式。</p>
+ * <p>样式由 {@link StylesheetManager} 在资源重载时注册，改完按 {@code F3 + T} 生效。
+ * 覆盖已有规则时要靠 id 或类权重，不要靠书写顺序。</p>
  */
 public class BnvilTheme {
 
-    private static final Identifier DARK_PAPER = BnvilMultiBlock.id("lss/dark_paper.lss");
+    private static final Identifier THEME = BnvilMultiBlock.id("lss/bnvil.lss");
 
     private BnvilTheme() {
     }
@@ -30,6 +29,6 @@ public class BnvilTheme {
      * @return 带主题的界面
      */
     public static UI of(UIElement root) {
-        return UI.of(root, List.of(StylesheetManager.INSTANCE.getStylesheetSafe(DARK_PAPER)));
+        return UI.of(root, StylesheetManager.INSTANCE.getStylesheetSafe(THEME));
     }
 }

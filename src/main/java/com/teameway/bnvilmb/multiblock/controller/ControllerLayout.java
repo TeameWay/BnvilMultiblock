@@ -7,8 +7,8 @@ package com.teameway.bnvilmb.multiblock.controller;
  * 右栏 {@value #RIGHT_WIDTH}。左块与玩家物品栏同宽，纵向由机器信息与配方说明接物品栏；
  * 右栏高度等于这两段之和，滚动区从头贯到底。</p>
  *
- * <p>宽度紧张，{@link ControllerUI} 用局部样式把滚动条压到 {@value #SCROLLER_WIDTH}、
- * 内边距压到 {@value #VIEWPORT_PADDING}，这里的常数与那份样式必须同步修改，
+ * <p>宽度紧张，{@code lss/bnvil.lss} 把滚动条压到 {@value #SCROLLER_WIDTH}、
+ * 内边距压到 {@value #VIEWPORT_PADDING}；改那份样式时必须同步这里的常数，
  * 否则测量的可用宽度对不上实际渲染宽度。</p>
  */
 public class ControllerLayout {
@@ -113,11 +113,11 @@ public class ControllerLayout {
     public static final int CONTENT_WIDTH = WIDTH - PADDING * 2;
     public static final int CONTENT_HEIGHT = HEIGHT - PADDING * 2;
     /**
-     * 纵向滚动条的宽度，由 {@link ControllerUI} 的局部样式施加。
+     * 纵向滚动条的宽度，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加。
      */
     public static final int SCROLLER_WIDTH = 4;
     /**
-     * 滚动视图内容区的内边距，由 {@link ControllerUI} 的局部样式施加。
+     * 滚动视图内容区的内边距，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加。
      */
     public static final int VIEWPORT_PADDING = 1;
     public static final int SCROLL_CHROME = SCROLLER_WIDTH + VIEWPORT_PADDING * 2;

@@ -1,59 +1,71 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  Dark Paper — the paper layout in a dark palette, for NoWay-Core.
+//  Bnvil 界面主题
 //
-//  Derived from LDLib2's paper.lss: every selector is kept, only the palette is
-//  inverted. Paper's structure notes still apply, so read them in the original.
+//  全模组唯一的 LSS：上半部分是基底，管面板、按钮、槽位、滚动条这些通用控件；
+//  下半部分是本模组自己的界面（控制器、端口方块、端口浮层）。
 //
-//  PALETTE                                    GEOMETRY
-//  bg        #171a1f  canvas, wells           radius  3  slots, bars, tracks
-//  surface   #1e222a  panels, menus           radius  5  controls
-//  raised    #252a33  controls at rest        radius  7  surfaces
-//  hovered   #2d323d  controls under cursor   border  1  hairline, never heavier
-//  sunken    #252a33  inputs, viewports       height 16  controls
-//  line      #1fffffff  hairline (12% white)
-//  line+     #33ffffff  emphasis (20% white)
-//  text      #e4e8ef    dim #9aa6b8    faint #6b7686
-//  accent    #5c86f8    hover #7aa0ff  press #4468d0   wash #3a5c86f8
+//  结构沿用 LDLib2 paper：选择器、圆角、控件高度、内边距都不动；
+//  调色板取自 VSCord 的终端配色（terminal.background / foreground / ansi*）。
 //
-//  The inversion is not a byte-for-byte flip. Surfaces were mapped by role
-//  (canvas -> surface -> raised keeps its ordering) and hairlines swapped from
-//  black to white at the same alpha, but two values needed adjusting:
+//  PALETTE
+//    canvas   #1a1a1a   background 与 ansiBlack 之间，最底层
+//    surface  #222222   terminal.background
+//    raised   #2a2a2a   面板与控件静息态
+//    hovered  #323232
+//    disabled #2e2e2e
+//    deep     #151515   ansiBlack，代码编辑器等深井
+//    line     #1fffffff  12% 白，发丝线
+//    line+    #33ffffff  20% 白
+//    text     #d0d0d0   terminal.foreground，10.3:1
+//    title    #f5f5f5   ansiBrightWhite
+//    dim      #a0a0a0   由 foreground 压暗，6.1:1
+//    faint    #6f6f6f   由 ansiBrightBlack 提亮，仅用于禁用态
+//    accent   #6c99bb   ansiBlue，5.2:1
+//    accent+  #86b6d9   提亮后的悬停色
+//    accent-  #547c99   ansiBrightBlue；这组配色里 bright 反而更暗
+//    success  #7b9246   ansiGreen
+//    warn     #d3a04d   ansiYellow
+//    danger   #a53c23   ansiRed，只做填充与描边，2.5:1 不能当文字
+//    danger+  #d97a5c   提亮后的红字，5.2:1
+//    info     #7dd6cf   ansiCyan
 //
-//  • #14000000 (8% black) became #24ffffff (14% white). The same alpha of white
-//    reads weaker over a dark surface than black does over a light one; at 1px
-//    an 8% white line is invisible.
-//  • The accent keeps paper's hue and gains lightness. #3b6ef6 on #171a1f is
-//    about 3.4:1, which fails normal text; #5c86f8 reaches about 6.1:1.
+//  终端色里的 success / warn / info / magenta 目前在规则里没有对应控件，
+//  列在这里是给后续状态色取用，改状态色时不用再回头翻原配色。
 //
-//  ⚠️ Corner radii read (bottom-left, bottom-right, top-right, top-left) —
-//  the reverse of the CSS order. A title bar wants "0 0 r r", a footer "r r 0 0".
+//  写规则的三条约束：
+//  1. 覆盖已有规则时用 #界面id 或类前缀提高权重（id 100 > 类 10 > 元素 1），
+//     不要靠书写顺序取胜，后加的规则会把它顶掉。
+//  2. 每个类都必须在 Java 侧有唯一的 addClass 位置，不留空选择器。
+//  3. 尺寸（width/height/flex/margin/padding/gap）归 Java 的 ControllerLayout
+//     与 PortUI，写在这里会和内联样式冲突，而内联的优先级更高。
 //
-//  An accent is a statement, so it is spent only where the UI has something to
-//  say: focus, selection, an on switch, a filled bar. Everything else is grey,
-//  and stays out of the way.
+//  ⚠️ 圆角顺序：sdf() 读 左下 右下 右上 左上，与 CSS 相反。
+//  ⚠️ 红底按钮必须用浅色文字：#1a1a1a 在 #a53c23 上只有 2.7:1，这里用 #f5f5f5。
+//
+//  强调色只在有话说的地方用：聚焦、选中、开启、进度。其余全是灰。
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── surfaces ─────────────────────────────────────────────────────────────────
 .panel_bg {
-  background: sdf(#f2171a1f, 7, 1, #1fffffff);
+  background: sdf(#f21a1a1a, 7, 1, #1fffffff);
   padding-all: 6;
   gap-all: 5;
 }
 
 .preview_bg {
-  background: sdf(#171a1f, 6, 1, #1fffffff);
+  background: sdf(#1a1a1a, 6, 1, #1fffffff);
   padding-all: 4;
 }
 
 .configurator_preview_bg {
-  background: sdf(#171a1f, 6, 1, #1fffffff);
+  background: sdf(#1a1a1a, 6, 1, #1fffffff);
   padding-all: 4;
 }
 
 // ── type ─────────────────────────────────────────────────────────────────────
 text, label {
   text-shadow: false;
-  text-color: #e4e8ef;
+  text-color: #d0d0d0;
   font: ldlib2:jetbrains_mono_bold;
 }
 
@@ -61,9 +73,9 @@ text, label {
 // Neutral by default. A screen full of accent-coloured buttons reads as a toy;
 // the accent is kept for the confirm button, where it means something.
 button:host {
-  base-background: sdf(#252a33, 5, 1, #1fffffff);
-  hover-background: sdf(#2d323d, 5, 1, #33ffffff);
-  pressed-background: sdf(#171a1f, 5, 1, #33ffffff);
+  base-background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  hover-background: sdf(#323232, 5, 1, #33ffffff);
+  pressed-background: sdf(#1a1a1a, 5, 1, #33ffffff);
   padding-all: 3;
   height: 16;
 }
@@ -76,37 +88,37 @@ button.__white_icon__ > .__icon__ {
 }
 
 button:host .__button_text__ {
-  text-color: #e4e8ef;
+  text-color: #d0d0d0;
   text-shadow: false;
 }
 
 button:disabled:host {
-  base-background: sdf(#2a2e37, 5, 1, #24ffffff);
+  base-background: sdf(#2e2e2e, 5, 1, #24ffffff);
 }
 
 button:disabled:host .__button_text__ {
-  text-color: #6b7686;
+  text-color: #6f6f6f;
   text-shadow: false;
 }
 
 .__confirm-button__ {
-  base-background: sdf(#5c86f8, 5);
-  hover-background: sdf(#7aa0ff, 5);
-  pressed-background: sdf(#4468d0, 5);
+  base-background: sdf(#6c99bb, 5);
+  hover-background: sdf(#86b6d9, 5);
+  pressed-background: sdf(#547c99, 5);
 }
 
 .__confirm-button__ .__button_text__ {
-  text-color: #171a1f;
+  text-color: #1a1a1a;
 }
 
 .__reject-button__ {
-  base-background: sdf(#f2555a, 5);
-  hover-background: sdf(#ff7579, 5);
-  pressed-background: sdf(#d94a50, 5);
+  base-background: sdf(#a53c23, 5);
+  hover-background: sdf(#c9573a, 5);
+  pressed-background: sdf(#8c3220, 5);
 }
 
 .__reject-button__ .__button_text__ {
-  text-color: #171a1f;
+  text-color: #f5f5f5;
 }
 
 // ── text input ───────────────────────────────────────────────────────────────
@@ -117,32 +129,32 @@ button:disabled:host .__button_text__ {
 // on white. Only the colours are set here; the frame stays with the rules below,
 // which are :host so that a component styling its own field keeps control of it.
 text-field, text-area {
-  text-color: #e4e8ef;
-  cursor-color: #e4e8ef;
+  text-color: #d0d0d0;
+  cursor-color: #d0d0d0;
   text-shadow: false;
 }
 
 text-field:host,
 .__tag-field_text-field__,
 .__search-component_text-field__ {
-  background: sdf(#252a33, 5, 1, #1fffffff);
-  focus-overlay: sdf(#00000000, 5, 1, #5c86f8);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   padding-all: 3;
   font: ldlib2:jetbrains_mono_bold;
 }
 
 search-component:host {
-  background: sdf(#252a33, 5, 1, #1fffffff);
-  focus-overlay: sdf(#00000000, 5, 1, #5c86f8);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   height: 16;
 }
 
 // ── switch ───────────────────────────────────────────────────────────────────
 switch:host {
-  base-background: sdf(#2d323d, 6);
-  pressed-background: sdf(#5c86f8, 6);
-  unmark-background: sdf(#9aa6b8, 5);
-  mark-background: sdf(#171a1f, 5);
+  base-background: sdf(#323232, 6);
+  pressed-background: sdf(#6c99bb, 6);
+  unmark-background: sdf(#a0a0a0, 5);
+  mark-background: sdf(#1a1a1a, 5);
   height: 12;
   width: 22;
   padding-all: 1;
@@ -150,21 +162,21 @@ switch:host {
 
 // ── selector ─────────────────────────────────────────────────────────────────
 selector:host {
-  background: sdf(#252a33, 5, 1, #1fffffff);
-  focus-overlay: sdf(#00000000, 5, 1, #5c86f8);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   height: 16;
 }
 
 selector:host:hovered {
-  background: sdf(#2d323d, 5, 1, #33ffffff);
+  background: sdf(#323232, 5, 1, #33ffffff);
 }
 
 .__selector_button-icon__ {
-  background: sprite(ldlib2:textures/gui/down.png) scale(0.55) color(#9aa6b8);
+  background: sprite(ldlib2:textures/gui/down.png) scale(0.55) color(#a0a0a0);
 }
 
 .__selector_dialog__, .__search-component_dialog__ {
-  background: sdf(#f21e222a, 7, 1, #33ffffff);
+  background: sdf(#f2222222, 7, 1, #33ffffff);
   padding-all: 3;
 }
 
@@ -175,58 +187,58 @@ progress-bar:host {
 
 progress-bar:host label {
   font-size: 6;
-  text-color: #e4e8ef;
+  text-color: #d0d0d0;
   font: ldlib2:jetbrains_mono_bold;
 }
 
 .__progress-bar_bar-container__ {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
   padding-all: 0;
 }
 
 .__progress-bar_bar__ {
-  background: sdf(#5c86f8, 4);
+  background: sdf(#6c99bb, 4);
   padding-all: 0;
 }
 
 // ── slots ────────────────────────────────────────────────────────────────────
 item-slot, .item-slot_bg {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
   hover-overlay: sdf(#24ffffff, 4);
 }
 
 fluid-slot, .fluid-slot_bg {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
 }
 
 // ── colour selector ──────────────────────────────────────────────────────────
 color-selector:host text-field {
-  background: sdf(#252a33, 5, 1, #1fffffff);
-  focus-overlay: sdf(#00000000, 5, 1, #5c86f8);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   padding-all: 3;
   font: ldlib2:jetbrains_mono_bold;
 }
 
 color-selector:host button {
-  base-background: sdf(#252a33, 4, 1, #1fffffff);
-  hover-background: sdf(#2d323d, 4, 1, #33ffffff);
-  pressed-background: sdf(#171a1f, 4, 1, #33ffffff);
+  base-background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  hover-background: sdf(#323232, 4, 1, #33ffffff);
+  pressed-background: sdf(#1a1a1a, 4, 1, #33ffffff);
 }
 
 color-selector:host .__color-selector_alpha-slider__ {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
   margin-right: 3;
   padding-all: 2;
 }
 
 color-selector:host .__color-selector_color-slider__ {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
   margin-bottom: 3;
   padding-all: 2;
 }
 
 color-selector:host .__color-selector_color-preview__ {
-  background: sdf(#252a33, 4, 1, #1fffffff);
+  background: sdf(#2a2a2a, 4, 1, #1fffffff);
   margin-right: 3;
   margin-bottom: 3;
   padding-all: 2;
@@ -234,20 +246,20 @@ color-selector:host .__color-selector_color-preview__ {
 
 // ── toggle ───────────────────────────────────────────────────────────────────
 toggle:host {
-  mark-background: sdf(#3a5c86f8, 4, 1, #5c86f8);
+  mark-background: sdf(#3a6c99bb, 4, 1, #6c99bb);
   height: 14;
 }
 
 .__toggle_button__ {
-  base-background: sdf(#252a33, 4, 1, #1fffffff);
-  hover-background: sdf(#2d323d, 4, 1, #33ffffff);
-  pressed-background: sdf(#171a1f, 4, 1, #33ffffff);
+  base-background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  hover-background: sdf(#323232, 4, 1, #33ffffff);
+  pressed-background: sdf(#1a1a1a, 4, 1, #33ffffff);
 }
 
 toggle:on .__toggle_button__ {
-  base-background: sdf(#3a5c86f8, 4, 1, #5c86f8);
-  hover-background: sdf(#555c86f8, 4, 1, #7aa0ff);
-  pressed-background: sdf(#3a4468d0, 4, 1, #5c86f8);
+  base-background: sdf(#3a6c99bb, 4, 1, #6c99bb);
+  hover-background: sdf(#556c99bb, 4, 1, #86b6d9);
+  pressed-background: sdf(#3a547c99, 4, 1, #6c99bb);
 }
 
 .__toggle_mark-icon__ {
@@ -264,18 +276,18 @@ text-area {
 }
 
 text-area:host {
-  focus-overlay: sdf(#00000000, 5, 1, #5c86f8);
+  focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
 }
 
 // The tree's arrows ship as white sprites. They stay visible on a dark row, but
 // they are tinted to the dim ink so they do not out-shout the label beside them.
 tree-list {
-  collapse-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 188, 240, 5, 5) color(#9aa6b8);
-  expand-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 132, 230, 5, 5) color(#9aa6b8);
+  collapse-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 188, 240, 5, 5) color(#a0a0a0);
+  expand-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 132, 230, 5, 5) color(#a0a0a0);
 }
 
 .__text-area_content-view__ {
-  background: sdf(#252a33, 5, 1, #1fffffff);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
   padding-all: 3;
 }
 
@@ -309,7 +321,7 @@ scroller-horizontal .__scroller_scroll_bar__,
 scroller-vertical .__scroller_scroll_bar__ {
   base-background: sdf(#40ffffff, 3);
   hover-background: sdf(#73ffffff, 3);
-  pressed-background: sdf(#5c86f8, 3);
+  pressed-background: sdf(#6c99bb, 3);
 }
 
 .__scroller_head_button__, .__scroller_tail_button__ {
@@ -321,7 +333,7 @@ scroller-view {
 }
 
 .__scroller_view_view-port__ {
-  background: sdf(#252a33, 5, 1, #1fffffff);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
   padding-all: 3;
 }
 
@@ -350,24 +362,24 @@ slider-horizontal, slider-vertical {
 }
 
 .__slider_track__ {
-  background: sdf(#252a33, 2, 1, #1fffffff);
+  background: sdf(#2a2a2a, 2, 1, #1fffffff);
 }
 
 .__slider_fill__ {
-  background: sdf(#5c86f8, 2);
+  background: sdf(#6c99bb, 2);
 }
 
 .__slider_handle__ {
-  base-background: sdf(#e4e8ef, 3);
-  hover-background: sdf(#5c86f8, 3);
-  pressed-background: sdf(#4468d0, 3);
+  base-background: sdf(#d0d0d0, 3);
+  hover-background: sdf(#6c99bb, 3);
+  pressed-background: sdf(#547c99, 3);
 }
 
 // ── tabs ─────────────────────────────────────────────────────────────────────
 // The header is the same surface as the content, joined by one seam, so a tab
 // strip reads as one card rather than as a lid resting on a box.
 .__tab-view_tab_header_container__ {
-  background: sdf(#252a33, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#2a2a2a, 7 7 0 0, 1, #1fffffff);
   margin-bottom: -1;
   padding-all: 3;
 }
@@ -377,7 +389,7 @@ slider-horizontal, slider-vertical {
 }
 
 .__tab-view_tab_content_container__ {
-  background: sdf(#1e222a, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#222222, 0 0 7 7, 1, #1fffffff);
 }
 
 tab-view .__tab-view_tab_scroller__ {
@@ -387,60 +399,60 @@ tab-view .__tab-view_tab_scroller__ {
 tab:host {
   base-background: empty;
   hover-background: sdf(#1fffffff, 5);
-  pressed-background: sdf(#3a5c86f8, 5);
+  pressed-background: sdf(#3a6c99bb, 5);
   padding-all: 3;
   height: 16;
 }
 
 tab:host:selected {
-  base-background: sdf(#1e222a, 5 5 0 0);
-  hover-background: sdf(#1e222a, 5 5 0 0);
-  pressed-background: sdf(#1e222a, 5 5 0 0);
+  base-background: sdf(#222222, 5 5 0 0);
+  hover-background: sdf(#222222, 5 5 0 0);
+  pressed-background: sdf(#222222, 5 5 0 0);
 }
 
 tab:host:not(tab:selected) label {
-  text-color: #9aa6b8;
+  text-color: #a0a0a0;
   text-shadow: false;
 }
 
 // ── dialog ───────────────────────────────────────────────────────────────────
 .__dialog_title__ {
-  background: sdf(#252a33, 7 7 0 0, 1, #33ffffff);
+  background: sdf(#2a2a2a, 7 7 0 0, 1, #33ffffff);
   transform: translateY(1);
 }
 
 .__dialog_title__ > label {
-  text-color: #e4e8ef;
+  text-color: #d0d0d0;
 }
 
 .__dialog_content-container__ {
-  background: sdf(#f21e222a, 0, 1, #33ffffff);
+  background: sdf(#f2222222, 0, 1, #33ffffff);
 }
 
 .__dialog_button-container__ {
-  background: sdf(#f21e222a, 0 0 7 7, 1, #33ffffff);
+  background: sdf(#f2222222, 0 0 7 7, 1, #33ffffff);
   transform: translateY(-1);
 }
 
 // ── menu ─────────────────────────────────────────────────────────────────────
 menu {
-  background: sdf(#f21e222a, 6, 1, #33ffffff);
-  arrow: sprite(ldlib2:textures/gui/right.png) scale(0.55) color(#9aa6b8);
+  background: sdf(#f2222222, 6, 1, #33ffffff);
+  arrow: sprite(ldlib2:textures/gui/right.png) scale(0.55) color(#a0a0a0);
 }
 
 // ── editor ───────────────────────────────────────────────────────────────────
 .__editor__ code-editor {
-  background: sdf(#0f1115, 6, 1, #33ffffff);
+  background: sdf(#151515, 6, 1, #33ffffff);
 }
 
 .__editor_top__ {
-  background: sdf(#252a33, 6 6 0 0);
+  background: sdf(#2a2a2a, 6 6 0 0);
 }
 
 .__editor__ button:host {
   base-background: sdf(#00000000, 5, 1, #1fffffff);
   hover-background: sdf(#1fffffff, 5, 1, #33ffffff);
-  pressed-background: sdf(#3a5c86f8, 5, 1, #5c86f8);
+  pressed-background: sdf(#3a6c99bb, 5, 1, #6c99bb);
 }
 
 .__editor__ tab:host {
@@ -448,11 +460,11 @@ menu {
 }
 
 .__editor-gizmo-bar__ {
-  background: sdf(#f2171a1f, 6, 1, #33ffffff);
+  background: sdf(#f21a1a1a, 6, 1, #33ffffff);
 }
 
 .__view-container__ {
-  background: sdf(#171a1f);
+  background: sdf(#1a1a1a);
 }
 
 .__view-container_tab-view__ .__tab-view_tab_content_container__ {
@@ -471,13 +483,13 @@ ResourceView .__tab-view_tab_header_container__ .__scroller_view_view-container_
 ResourceView tab:host {
   base-background: empty;
   hover-background: sdf(#1fffffff, 5) scale(0.92);
-  pressed-background: sdf(#3a5c86f8, 5) scale(0.92);
+  pressed-background: sdf(#3a6c99bb, 5) scale(0.92);
 }
 
 ResourceView tab:host:selected {
-  base-background: sdf(#1e222a, 5) scale(0.92);
-  hover-background: sdf(#252a33, 5) scale(0.92);
-  pressed-background: sdf(#252a33, 5) scale(0.92);
+  base-background: sdf(#222222, 5) scale(0.92);
+  hover-background: sdf(#2a2a2a, 5) scale(0.92);
+  pressed-background: sdf(#2a2a2a, 5) scale(0.92);
 }
 
 /* One rounded shape cut in two: the strip rounds the corners facing away from the content, the
@@ -485,47 +497,47 @@ ResourceView tab:host:selected {
    the two borders read as one seam. Which corners those are turns with the placement — and mind the
    radius order, which is top-left, top-right, bottom-right, bottom-left. */
 .__resource-view_placement-left__ .__tab-view_tab_header_container__ {
-  background: sdf(#171a1f, 7 0 0 7, 1, #1fffffff);
+  background: sdf(#1a1a1a, 7 0 0 7, 1, #1fffffff);
   transform: translate(1, 0);
 }
 
 .__resource-view_placement-left__ .__tab-view_tab_content_container__ {
-  background: sdf(#1e222a, 0 7 7 0, 1, #1fffffff);
+  background: sdf(#222222, 0 7 7 0, 1, #1fffffff);
 }
 
 .__resource-view_placement-right__ .__tab-view_tab_header_container__ {
-  background: sdf(#171a1f, 0 7 7 0, 1, #1fffffff);
+  background: sdf(#1a1a1a, 0 7 7 0, 1, #1fffffff);
   transform: translate(-1, 0);
 }
 
 .__resource-view_placement-right__ .__tab-view_tab_content_container__ {
-  background: sdf(#1e222a, 7 0 0 7, 1, #1fffffff);
+  background: sdf(#222222, 7 0 0 7, 1, #1fffffff);
 }
 
 .__resource-view_placement-top__ .__tab-view_tab_header_container__ {
-  background: sdf(#171a1f, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#1a1a1a, 7 7 0 0, 1, #1fffffff);
   transform: translate(0, 1);
 }
 
 .__resource-view_placement-top__ .__tab-view_tab_content_container__ {
-  background: sdf(#1e222a, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#222222, 0 0 7 7, 1, #1fffffff);
 }
 
 .__resource-view_placement-bottom__ .__tab-view_tab_header_container__ {
-  background: sdf(#171a1f, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#1a1a1a, 0 0 7 7, 1, #1fffffff);
   transform: translate(0, -1);
 }
 
 .__resource-view_placement-bottom__ .__tab-view_tab_content_container__ {
-  background: sdf(#1e222a, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#222222, 7 7 0 0, 1, #1fffffff);
 }
 
 .__resource-view_tab-placeholder__ {
-  background: sdf(#3a5c86f8, 5);
+  background: sdf(#3a6c99bb, 5);
 }
 
 .__ui-editor-view_header__ {
-  background: sdf(#1e222a);
+  background: sdf(#222222);
 }
 
 .__ui-editor-view_header__ button {
@@ -535,17 +547,17 @@ ResourceView tab:host:selected {
 .__ui-editor-view_header__ .__toggle_button__ {
   base-background: sdf(#00000000, 4, 1, #1fffffff);
   hover-background: sdf(#1fffffff, 4, 1, #33ffffff);
-  pressed-background: sdf(#3a5c86f8, 4, 1, #5c86f8);
+  pressed-background: sdf(#3a6c99bb, 4, 1, #6c99bb);
 }
 
 .__ui-editor-view_canvas__ {
-  background: #171a1f;
+  background: #1a1a1a;
 }
 
 .__ui-editor-view_builtin-styles-toggle__ {
   height: 14;
   padding-all: 0;
-  mark-background: sdf(#00000000, 4, 1, #5c86f8);
+  mark-background: sdf(#00000000, 4, 1, #6c99bb);
 }
 
 .__ui-editor-view_builtin-styles-toggle__ .__toggle_button__ {
@@ -563,28 +575,28 @@ ResourceView tab:host:selected {
 }
 
 .__editor-window_active__ {
-  background: #5c86f8;
+  background: #6c99bb;
 }
 
 .__editor-window_inactive__ {
-  background: #252a33;
+  background: #2a2a2a;
 }
 
 // ── configurator ─────────────────────────────────────────────────────────────
 .__configurator-group__ .__configurator-group_container__ {
-  background: sdf(#1e222a, 0 6 6 6, 1, #1fffffff);
+  background: sdf(#222222, 0 6 6 6, 1, #1fffffff);
 }
 
 .__configurator-group__ > .__configurator_line__ {
-  background: sdf(#171a1f, 5, 1, #1fffffff);
+  background: sdf(#1a1a1a, 5, 1, #1fffffff);
 }
 
 .__configurator-group__ > .__configurator_line__:hovered:not(:disabled) {
-  background: sdf(#252a33, 5, 1, #33ffffff);
+  background: sdf(#2a2a2a, 5, 1, #33ffffff);
 }
 
 .__configurator-group__ > .__configurator_line__ > .__configurator_label__ {
-  text-color: #9aa6b8;
+  text-color: #a0a0a0;
   text-shadow: false;
 }
 
@@ -595,7 +607,7 @@ ToggleSelectorConfigurator .__toggle_mark-icon__ {
 ToggleSelectorConfigurator .__toggle_button__ {
   base-background: sdf(#00000000, 4, 1, #1fffffff);
   hover-background: sdf(#1fffffff, 4, 1, #33ffffff);
-  pressed-background: sdf(#3a5c86f8, 4, 1, #5c86f8);
+  pressed-background: sdf(#3a6c99bb, 4, 1, #6c99bb);
 }
 
 .__array-configurator_button-group__ {
@@ -604,32 +616,32 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__array-configurator_item_selected__ {
-  background: sdf(#3a5c86f8, 4, 1, #5c86f8);
+  background: sdf(#3a6c99bb, 4, 1, #6c99bb);
 }
 
 // ── node graph ───────────────────────────────────────────────────────────────
 .__blackboard-var-prop_title-bar__ {
-  background: sdf(#252a33, 6 6 0 0, 1, #1fffffff);
+  background: sdf(#2a2a2a, 6 6 0 0, 1, #1fffffff);
 }
 
 .__blackboard-var-prop_content__ {
-  background: sdf(#1e222a, 0 0 6 6, 1, #1fffffff);
+  background: sdf(#222222, 0 0 6 6, 1, #1fffffff);
 }
 
 .__node-graph-view_canvas__ {
-  background: #23272f;
+  background: #1e1e1e;
 }
 
 .__node-graph-view_canvas-view__ {
-  color: #7d8798;
+  color: #7a7a7a;
 }
 
 .__node-element__ {
-  background: sdf(#f2171a1f, 6, 1, #33ffffff);
+  background: sdf(#f21a1a1a, 6, 1, #33ffffff);
 }
 
 .__node-title-element__ {
-  background: sdf(#252a33, 6 6 0 0, 1, #1fffffff);
+  background: sdf(#2a2a2a, 6 6 0 0, 1, #1fffffff);
   padding-bottom: 4;
 }
 
@@ -648,7 +660,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__capsule-node__ {
-  background: sdf(#fa252a33, 8, 1, #33ffffff);
+  background: sdf(#fa2a2a2a, 8, 1, #33ffffff);
 }
 
 .__capsule-node__ .__node-title-element__ {
@@ -666,15 +678,15 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__block-node__ > .__node-title-element__ {
-  background: sdf(#3a5c86f8, 6 6 0 0, 1, #5c86f8);
+  background: sdf(#3a6c99bb, 6 6 0 0, 1, #6c99bb);
 }
 
 .__block-list-container__ {
-  background: sdf(#252a33, 6);
+  background: sdf(#2a2a2a, 6);
 }
 
 .__subgraph-node__ .__node-title-element__ {
-  background: sdf(#2d323d, 6 6 0 0, 1, #33ffffff);
+  background: sdf(#323232, 6 6 0 0, 1, #33ffffff);
 }
 
 .__vertical-port-container__ {
@@ -687,88 +699,131 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__node-preview__ {
-  background: sdf(#252a33, 0 0 6 6, 1, #1fffffff);
+  background: sdf(#2a2a2a, 0 0 6 6, 1, #1fffffff);
   padding-all: 3;
 }
 
 .__item-library__ {
-  background: sdf(#f21e222a, 7, 1, #5c86f8);
+  background: sdf(#f2222222, 7, 1, #6c99bb);
 }
 
 .__item-library_description-panel__ {
-  background: sdf(#f2171a1f, 7, 1, #1fffffff);
+  background: sdf(#f21a1a1a, 7, 1, #1fffffff);
   padding-all: 6;
   gap-all: 5;
 }
 
 // ── keymap ──────────────────────────────────────────────────────────────────
 .__keymap_chord__ {
-  background: sdf(#252a33, 5, 1, #1fffffff);
+  background: sdf(#2a2a2a, 5, 1, #1fffffff);
 }
 
 .__keymap_chord__:hovered {
-  background: sdf(#2a2e37, 5, 1, #33ffffff);
+  background: sdf(#2e2e2e, 5, 1, #33ffffff);
 }
 
 .__keymap_chord__.__capturing__ {
-  background: sdf(#252a33, 5, 1, #5c86f8);
+  background: sdf(#2a2a2a, 5, 1, #6c99bb);
 }
 
 .__keymap_chord-text__ {
-  text-color: #e4e8ef;
+  text-color: #d0d0d0;
   text-shadow: false;
 }
 
 .__keymap_chord__.__conflict__ .__keymap_chord-text__ {
-  text-color: #e0313f;
+  text-color: #d97a5c;
 }
 
-// ── NoWay-Core components ────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+//  模组界面
 //
-// Everything above comes from paper and is theme-wide. The rules below are the
-// modules this mod adds; they are kept in one block so a future paper update can
-// be re-merged without hunting for them.
+//  以下只服务控制器、端口方块与端口浮层；通用控件的外观在上半部分。
+// ═════════════════════════════════════════════════════════════════════════════
 
-// Thread card on the controller screen. Selecting a card only swaps the class,
-// so the three states have to differ in fill and border at once — hover alone
-// would be indistinguishable from selected.
-.controller-thread-card {
-  background: sdf(#252a33, 3, 1, #1fffffff);
+// ── 文本层级 ─────────────────────────────────────────────────────────────────
+// 字体与正文颜色由基底的 `text, label` 统一设置，这里只分层：
+// 标题用 brightWhite，说明退到 dim，配方小节用 accent 标出。
+.bnvil-title {
+  text-color: #f5f5f5;
 }
 
-.controller-thread-card:hover {
-  background: sdf(#2d323d, 3, 1, #33ffffff);
+.bnvil-hint {
+  text-color: #a0a0a0;
 }
 
-.controller-thread-card.controller-thread-selected {
-  background: sdf(#3a5c86f8, 3, 1, #5c86f8);
+.bnvil-section {
+  text-color: #6c99bb;
 }
 
-// Rules between the panes of the controller screen: one vertical between the two
-// columns, two horizontal inside the left column (machine info / recipe /
-// inventory). One pixel wide, so it is a plain rect rather than an sdf — a
-// radius cannot show at this size.
-.controller-divider {
+// 结构状态。三个类互斥，由 ControllerUI 在状态变化时切换。
+.bnvil-state-idle {
+  text-color: #a0a0a0;
+}
+
+.bnvil-state-working {
+  text-color: #6c99bb;
+}
+
+.bnvil-state-error {
+  text-color: #d97a5c;
+}
+
+// ── 控制器 ───────────────────────────────────────────────────────────────────
+// 选中卡片只换类，所以三态必须在填充与描边上同时区分：只改悬停会和选中混淆。
+#bnvil-controller .controller-thread-card {
+  background: sdf(#2a2a2a, 3, 1, #1fffffff);
+  transition: background 0.12;
+}
+
+#bnvil-controller .controller-thread-card:hover {
+  background: sdf(#323232, 3, 1, #33ffffff);
+}
+
+#bnvil-controller .controller-thread-card.controller-thread-selected {
+  background: sdf(#3a6c99bb, 3, 1, #6c99bb);
+}
+
+// 栏与栏之间的分隔线：一像素宽，圆角看不出来，用 rect 即可。
+#bnvil-controller .controller-divider {
   background: rect(#33ffffff);
 }
 
-// Port list floating over the controller screen. It sits above the panes and can
-// be dragged anywhere, so it needs its own surface and a slightly heavier border
-// than a card — otherwise it reads as one more row of the page behind it.
-.port-panel {
-  background: sdf(#1e222a, 4, 1, #40ffffff);
+// ── 紧凑滚动条 ───────────────────────────────────────────────────────────────
+// 右栏只有 149 像素，上半部分的 5 像素滚动条加 3 像素内边距要吃掉 16 像素，
+// 卡片里的配方 ID 会被截得太短。这里压到 4 与 1，并去掉内容区底色。
+// 用 id 前缀是为了压过上半部分的同名规则，而不是靠书写顺序。
+#bnvil-controller scroller-vertical:host,
+#bnvil-port-panel scroller-vertical:host {
+  width: 4;
+}
+
+#bnvil-controller .__scroller_view_view-port__,
+#bnvil-port-panel .__scroller_view_view-port__ {
+  padding-all: 1;
+  background: empty;
+}
+
+// ── 端口浮层 ─────────────────────────────────────────────────────────────────
+// 浮层盖在控制器界面之上且可拖到任意位置，需要自己的表面和比卡片略重的描边，
+// 否则会被读成页面里的又一行。
+// 面板自己就是 #bnvil-port-panel，所以这条用控制器根前缀；
+// 卡片和标题是它的子元素，可以继续用 id 前缀。
+#bnvil-controller .port-panel {
+  background: sdf(#222222, 4, 1, #40ffffff);
   z-index: 10;
 }
 
-.port-panel-title {
-  background: sdf(#252a33, 3);
+#bnvil-port-panel .port-panel-title {
+  background: sdf(#2a2a2a, 3);
 }
 
-.port-panel-card {
-  background: sdf(#252a33, 3, 1, #1fffffff);
+#bnvil-port-panel .port-panel-card {
+  background: sdf(#2a2a2a, 3, 1, #1fffffff);
   z-index: 1;
+  transition: background 0.12;
 }
 
-.port-panel-card:hover {
-  background: sdf(#2d323d, 3, 1, #33ffffff);
+#bnvil-port-panel .port-panel-card:hover {
+  background: sdf(#323232, 3, 1, #33ffffff);
 }

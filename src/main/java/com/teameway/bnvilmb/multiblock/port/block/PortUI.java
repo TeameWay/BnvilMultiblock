@@ -8,13 +8,13 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.FluidSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ProgressBar;
+import com.teameway.bnvilmb.gui.BnvilTheme;
 import com.teameway.bnvilmb.multiblock.port.EnergyPort;
 import com.teameway.bnvilmb.multiblock.port.FluidPort;
 import com.teameway.bnvilmb.multiblock.port.ItemPort;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.block.entity.EnergyPortBlockEntity;
-import com.teameway.bnvilmb.gui.BnvilTheme;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -54,6 +54,7 @@ public class PortUI {
 
         Label title = new Label();
         title.setText(holder.blockState.getBlock().getName());
+        title.addClass("bnvil-title");
         title.layout(layout -> layout.widthPercent(100).height(LINE));
 
         root.addChildren(title, body.element());
@@ -93,6 +94,7 @@ public class PortUI {
         }
 
         Label info = new Label();
+        info.addClass("bnvil-hint");
         info.setText(Component.translatable("gui.bnvil_multiblock.port.slots", size));
         info.layout(layout -> layout.widthPercent(100).height(LINE));
 
@@ -108,6 +110,7 @@ public class PortUI {
         slot.layout(layout -> layout.width(24).height(24));
 
         Label info = new Label();
+        info.addClass("bnvil-hint");
         info.setText(Component.translatable("gui.bnvil_multiblock.port.fluid", port.tier().fluidCapacity()));
         info.layout(layout -> layout.widthPercent(100).height(LINE));
 
@@ -133,6 +136,7 @@ public class PortUI {
         bar.layout(layout -> layout.widthPercent(100));
 
         Label info = new Label();
+        info.addClass("bnvil-hint");
         info.bindDataSource(SupplierDataSource.of(() -> {
             long stored = synced != null ? synced.energyStored() : handler.getAmountAsLong();
             return Component.translatable("gui.bnvil_multiblock.port.energy", stored, capacity);
@@ -146,6 +150,7 @@ public class PortUI {
 
     private static Body controlBody(MultiblockPort port) {
         Label info = new Label();
+        info.addClass("bnvil-hint");
         info.setText(port.portKind() == PortKind.THREAD
                      ? Component.translatable("gui.bnvil_multiblock.port.threads", port.tier().threads())
                      : Component.translatable("gui.bnvil_multiblock.port.parallels", port.tier().parallels()));

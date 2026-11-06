@@ -31,21 +31,6 @@ import net.minecraft.util.Mth;
  * <p>位置使用绝对坐标，面板才能被拖离原位。</p>
  */
 public class PortPanel {
-    /**
-     * 滚动条与内容区的瘦身样式
-     *
-     * <p>主题默认纵向滚动条 5 像素、内容区内边距 3 像素，合计吃掉 16 像素；
-     * 面板只有 160 出头宽，压到 4 与 1 之后卡片才有足够宽度。</p>
-     */
-    private static final String SCROLL_STYLES = """
-        scroller-vertical:host {
-          width: 4;
-        }
-        .__scroller_view_view-port__ {
-          padding-all: 1;
-          background: empty;
-        }
-        """;
 
     /**
      * 卡片高度：两行文字加内边距，等级放不下，挪进了悬浮提示。
@@ -103,6 +88,7 @@ public class PortPanel {
                 .height(height)
                 .flexDirection(FlexDirection.COLUMN)
                 .paddingAll(PADDING))
+            .setId("bnvil-port-panel")
             .addClass("port-panel");
 
         UIElement title = new UIElement()
@@ -113,6 +99,7 @@ public class PortPanel {
             .addClass("port-panel-title");
         Label titleText = new Label();
         titleText.setText(Component.translatable("gui.bnvil_multiblock.port_panel.title", count));
+        titleText.addClass("bnvil-title");
         titleText.layout(layout -> layout.widthPercent(100).height(TITLE_HEIGHT));
         title.addChild(titleText);
         panel.addChild(title);
@@ -137,8 +124,6 @@ public class PortPanel {
             .verticalScrollDisplay(ScrollDisplay.AUTO));
         scroll.addScrollViewChild(list);
         scroll.layout(layout -> layout.widthPercent(100).flex(1));
-        // 瘦身样式只挂在面板子树上，不影响别处
-        scroll.addLocalStylesheet(SCROLL_STYLES);
         panel.addChild(scroll);
         return panel;
     }
