@@ -18,6 +18,15 @@ public final class StructureControllerRegistry {
     private StructureControllerRegistry() {
     }
 
+    /**
+     * 登记控制器
+     *
+     * <p>以 {@link StructureController#block()} 为键。重复登记时映射先指向新实例，再抛出异常，
+     * 旧实例之后查不到。</p>
+     *
+     * @param controller 控制器实例
+     * @throws IllegalStateException 该方块已经登记过控制器
+     */
     public static void register(StructureController controller) {
         StructureController previous = BY_BLOCK.put(controller.block(), controller);
         if (previous != null) {
@@ -25,6 +34,12 @@ public final class StructureControllerRegistry {
         }
     }
 
+    /**
+     * 按控制器方块查找
+     *
+     * @param block 控制器方块
+     * @return 控制器实例，未登记返回 {@code null}
+     */
     public static @Nullable StructureController get(Block block) {
         return BY_BLOCK.get(block);
     }

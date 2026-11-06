@@ -45,8 +45,8 @@ public sealed interface ResourceOutput {
      * 物品产出
      *
      * @param template 物品模板，数量恒为 1，组件由模板携带
-     * @param amount   数量提供器
-     * @param chance   产出概率
+     * @param amount 数量提供器
+     * @param chance 产出概率
      */
     record Items(ItemStackTemplate template, ContextIntProvider amount, float chance) implements ResourceOutput {
         public static final MapCodec<Items> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -57,6 +57,9 @@ public sealed interface ResourceOutput {
         ).apply(instance, (_, template, amount, chance) -> new Items(template, amount, chance)));
 
 
+        /**
+         * @throws IllegalArgumentException {@code chance} 不大于 {@code 0}
+         */
         public Items {
             template = new ItemStackTemplate(template.item(), 1, template.components());
             if (chance <= 0.0F) {
@@ -73,7 +76,7 @@ public sealed interface ResourceOutput {
     /**
      * 流体产出
      *
-     * @param fluid  流体
+     * @param fluid 流体
      * @param amount 数量提供器，单位 mB
      * @param chance 产出概率
      */
@@ -86,6 +89,9 @@ public sealed interface ResourceOutput {
         ).apply(instance, (_, fluid, amount, chance) -> new Fluids(fluid, amount, chance)));
 
 
+        /**
+         * @throws IllegalArgumentException {@code chance} 不大于 {@code 0}
+         */
         public Fluids {
             if (chance <= 0.0F) {
                 throw new IllegalArgumentException("chance must be greater than 0");
@@ -112,6 +118,9 @@ public sealed interface ResourceOutput {
         ).apply(instance, (_, amount, chance) -> new Energy(amount, chance)));
 
 
+        /**
+         * @throws IllegalArgumentException {@code chance} 不大于 {@code 0}
+         */
         public Energy {
             if (chance <= 0.0F) {
                 throw new IllegalArgumentException("chance must be greater than 0");

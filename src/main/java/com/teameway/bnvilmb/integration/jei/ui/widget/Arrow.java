@@ -10,9 +10,11 @@ import net.minecraft.resources.Identifier;
 /**
  * 配方页中间的箭头
  *
- * <p>贴图取自 JEI 配方页，位于 {@code minecraft:gui} 图集：{@code jei:recipe_arrow} 为空心箭头，{@code jei:recipe_arrow_filled} 为实心箭头。</p>
+ * <p>贴图取自 JEI 配方页，位于 {@code minecraft:gui} 图集：{@code jei:recipe_arrow} 为空心箭头，
+ * {@code jei:recipe_arrow_filled} 为实心箭头。</p>
  *
- * <p>动画由两层叠成：底层铺空心箭头，上层实心箭头放进可剪裁容器，容器宽度随 tick 从 0 增长到整张宽度。</p>
+ * <p>动画由两层叠成：底层铺空心箭头，上层实心箭头放进可剪裁容器，
+ * 容器宽度随 tick 从 0 增长到整张宽度。</p>
  */
 public class Arrow {
     private static final Identifier SPRITE_EMPTY = Identifier.fromNamespaceAndPath("jei", "recipe_arrow");
@@ -65,8 +67,8 @@ public class Arrow {
      * 把箭头放到容器水平中线上
      *
      * @param container 容器
-     * @param top       箭头在容器内的纵向位置
-     * @param duration  填满所需的 tick 数
+     * @param top 箭头在容器内的纵向位置
+     * @param duration 填满所需的 tick 数
      * @return 箭头元素，供调用方按需追加子元素
      */
     public static UIElement centerIn(UIElement container, float top, int duration) {
@@ -84,7 +86,7 @@ public class Arrow {
      *
      * <p>JEI 会缓存并复用配方界面，循环播放才能让每次翻到这条配方时都看到动画。</p>
      *
-     * @param mask     剪裁层
+     * @param mask 剪裁层
      * @param duration 填满所需的 tick 数
      */
     private static void animate(UIElement mask, int duration) {

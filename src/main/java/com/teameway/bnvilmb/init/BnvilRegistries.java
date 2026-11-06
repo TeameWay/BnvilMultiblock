@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.RegistryBuilder;
  * 模组自建的注册表
  *
  * <p>结构模板由数据包注册表 {@code bnvil_multiblock:structure_patterns} 承载，
- * 控制器、机器声明与机器类型仍在代码侧注册。</p>
+ * 控制器、机器声明与机器类型仍在代码侧注册，三者的主键都在这个类里声明。</p>
  */
 @EventBusSubscriber(modid = BnvilMultiBlock.MODID)
 public class BnvilRegistries {
@@ -27,9 +27,15 @@ public class BnvilRegistries {
     public static final ResourceKey<Registry<StructureController>> MULTIBLOCK_CONTROLLERS =
         ResourceKey.createRegistryKey(BnvilMultiBlock.id("multiblock_controllers"));
 
+    /**
+     * 机器类型，条目值为 {@link MultiblockType} 实例
+     */
     public static final ResourceKey<Registry<MultiblockType>> MULTIBLOCK_TYPES =
         ResourceKey.createRegistryKey(BnvilMultiBlock.id("multiblock_types"));
 
+    /**
+     * 机器声明，条目值为 {@link MultiblockMachine} 实例，数据生成按它输出结构模板
+     */
     public static final ResourceKey<Registry<MultiblockMachine>> MULTIBLOCKS =
         ResourceKey.createRegistryKey(BnvilMultiBlock.id("multiblocks"));
 
@@ -44,6 +50,8 @@ public class BnvilRegistries {
 
     /**
      * 触发类加载
+     *
+     * <p>三个代码侧注册表在 {@link #onNewRegistry} 里创建，条目由 {@code REGISTRUM} 随后写入。</p>
      */
     public static void register() {
     }
@@ -51,7 +59,8 @@ public class BnvilRegistries {
     /**
      * 注册自定义注册表
      *
-     * <p>NeoForge 在 {@code RegisterEvent} 之前触发本事件，注册表随后即可接收条目。</p>
+     * <p>NeoForge 在 {@code RegisterEvent} 之前触发本事件，注册表随后即可接收条目。
+     * 结构模板走数据包注册表，不在这里创建。</p>
      *
      * @param event 新建注册表事件
      */

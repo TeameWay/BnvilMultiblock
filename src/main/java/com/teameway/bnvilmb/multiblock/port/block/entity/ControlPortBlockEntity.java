@@ -8,7 +8,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * 控制端口方块实体（并行仓 / 线程仓），无资源，只持久化端口归属
+ * 控制端口方块实体，对应并行仓与线程仓
+ *
+ * <p>不创建资源处理器，持久化的状态只有基类里的端口归属。</p>
  */
 public class ControlPortBlockEntity extends AbstractPortBlockEntity {
     private final PortTier tier;

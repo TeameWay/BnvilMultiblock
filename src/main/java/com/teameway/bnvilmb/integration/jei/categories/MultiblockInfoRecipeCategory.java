@@ -14,9 +14,9 @@ import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 独立的多方块结构信息分类
+ * 结构信息分类
  *
- * <p>每个机器类型一条记录，只描述结构本身；预览、点击选框与所需方块清单在同一页里。</p>
+ * <p>每个机器类型一条记录，只描述结构本身。预览、点击选框与所需方块清单都放在同一页里。</p>
  */
 public class MultiblockInfoRecipeCategory extends ModularUIRecipeCategory<MultiblockInfoRecipeCategory.MultiblockInfo> {
     public static final IRecipeType<MultiblockInfo> RECIPE_TYPE =
@@ -24,6 +24,13 @@ public class MultiblockInfoRecipeCategory extends ModularUIRecipeCategory<Multib
 
     private final @Nullable IDrawable icon;
 
+    /**
+     * 创建结构信息分类
+     *
+     * <p>分类图标取注册表里第一个机器类型的控制器方块，注册表为空时没有图标。</p>
+     *
+     * @param helpers JEI 助手
+     */
     public MultiblockInfoRecipeCategory(IJeiHelpers helpers) {
         super(info -> MultiblockInfoUI.create(info.type()));
         this.icon = BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)
@@ -40,38 +47,61 @@ public class MultiblockInfoRecipeCategory extends ModularUIRecipeCategory<Multib
             .orElse(null);
     }
 
+    /**
+     * @return 该分类的配方类型
+     */
     @Override
     public IRecipeType<MultiblockInfo> getRecipeType() {
         return RECIPE_TYPE;
     }
 
+    /**
+     * @return 分类标题的翻译键 {@code gui.bnvil_multiblock.jei.multiblock_info}
+     */
     @Override
     public Component getTitle() {
         return Component.translatable("gui.bnvil_multiblock.jei.multiblock_info");
     }
 
+    /**
+     * @return 分类图标，注册表为空时为 {@code null}
+     */
     @Override
     public @Nullable IDrawable getIcon() {
         return this.icon;
     }
 
+    /**
+     * @param recipe 结构信息记录
+     * @return 记录里的结构定义 ID
+     */
     @Override
     public Identifier getIdentifier(MultiblockInfo recipe) {
         return recipe.id();
     }
 
+    /**
+     * @return 页面宽度，取结构页的面板宽度
+     */
     @Override
     public int getWidth() {
         return StructureLayout.PANEL_WIDTH;
     }
 
+    /**
+     * @return 页面高度，取结构页排版的高度
+     */
     @Override
     public int getHeight() {
         return StructureLayout.INSTANCE.height();
     }
 
     /**
-     * @param id   结构定义 ID
+     * 结构信息页的一条记录
+     *
+     * <p>{@code type} 用来构建页面，{@code id} 作为 JEI 记录标识。</p>
+     *
+     * @param id 结构定义 ID
      * @param type 机器类型
      */
     public record MultiblockInfo(Identifier id, MultiblockType type) {

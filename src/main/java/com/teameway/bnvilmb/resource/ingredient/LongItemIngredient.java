@@ -18,8 +18,8 @@ import java.util.Optional;
  * <p>形状与 anvillib 的 {@code ItemIngredientPredicate} 一致，区别只在 {@code count} 用 {@link Long}
  * 表示，配方可以要求超出 32 位上限的数量。</p>
  *
- * @param items      物品集合，空表示任意物品
- * @param count      需求量，正整数
+ * @param items 物品集合，空表示任意物品
+ * @param count 需求量，正整数
  * @param components 数据组件匹配
  */
 public record LongItemIngredient(Optional<HolderSet<Item>> items, long count, DataComponentMatchers components) {
@@ -33,6 +33,9 @@ public record LongItemIngredient(Optional<HolderSet<Item>> items, long count, Da
             .forGetter(LongItemIngredient::components)
     ).apply(instance, LongItemIngredient::new));
 
+    /**
+     * @throws IllegalArgumentException {@code count} 不大于 {@code 0}
+     */
     public LongItemIngredient {
         if (count <= 0L) {
             throw new IllegalArgumentException("count must be positive");

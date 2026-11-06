@@ -41,13 +41,23 @@ import java.util.function.Consumer;
 /**
  * 结构成型 GameTest
  *
- * <p>26.3 的 GameTest 改为注册表注册；普通客户端不应注册测试实例，否则登录时会把
+ * <p>26.3 的 GameTest 改为注册表注册。普通客户端不应注册测试实例，否则登录时会把
  * 只存在于服务端的测试实例同步到客户端而报错。这里用系统属性
  * {@code -Dbnvil_multiblock.tests=true} 控制，只有 GameTestServer 运行配置会打开。</p>
+ *
+ * <p>七个用例都在 {@code empty5} 空结构里摆放端口与方块，覆盖端口换位、替代方块、
+ * 旋转与朝向、加成统计，以及输入过多且缺少输出的反例。</p>
  */
 @EventBusSubscriber(modid = BnvilMultiBlock.MODID)
 public final class StructureGameTests {
+    /**
+     * 打开测试注册的系统属性名
+     *
+     * <p>未设置或为 false 时，两个注册方法都直接返回。</p>
+     */
     public static final String ENABLE_PROPERTY = "bnvil_multiblock.tests";
+
+    // 固定测试坐标：控制器在正中心，四个端口摆在同一层的四个角
     private static final BlockPos CONTROLLER = new BlockPos(2, 2, 2);
     private static final BlockPos INPUT = new BlockPos(1, 2, 1);
     private static final BlockPos OUTPUT = new BlockPos(3, 2, 1);
@@ -57,6 +67,11 @@ public final class StructureGameTests {
     private StructureGameTests() {
     }
 
+    /**
+     * 注册测试实例类型 {@code bnvil_multiblock:structure}
+     *
+     * @param event 注册事件
+     */
     @SubscribeEvent
     public static void onRegister(RegisterEvent event) {
         if (!Boolean.getBoolean(ENABLE_PROPERTY)) {
@@ -65,6 +80,13 @@ public final class StructureGameTests {
         event.register(Registries.TEST_INSTANCE_TYPE, BnvilMultiBlock.id("structure"), () -> StructureTest.CODEC);
     }
 
+    /**
+     * 注册测试环境与七个用例
+     *
+     * <p>环境用 {@code AllOf} 空列表；每个用例的结构是 {@code empty5}，超时 200 tick。</p>
+     *
+     * @param event GameTest 注册事件
+     */
     @SubscribeEvent
     public static void register(RegisterGameTestsEvent event) {
         if (!Boolean.getBoolean(ENABLE_PROPERTY)) {
@@ -210,6 +232,7 @@ public final class StructureGameTests {
         helper.setBlock(OUTPUT, BnvilPorts.PARALLEL.get());
         helper.setBlock(CONTROLLER, BnvilControllerBlocks.SIMPLE_CONTROLLER.get());
 
+        // 成型校验在 setBlock 之后才跑，先空转 40 次轮询再断言控制器没有 runtime
         int[] waited = {0};
         helper.succeedWhen(() -> {
             waited[0]++;
@@ -221,6 +244,11 @@ public final class StructureGameTests {
         });
     }
 
+    /**
+     * 搭出测试底座
+     *
+     * <p>3x3 铁块铺在 y=1，控制器同一层的前后左右各放一个金块。</p>
+     */
     private static void placeFrame(GameTestHelper helper) {
         for (int x = 1; x <= 3; x++) {
             for (int z = 1; z <= 3; z++) {
@@ -242,8 +270,8 @@ public final class StructureGameTests {
     /**
      * 可序列化的测试实例
      *
-     * <p>只保存测试名与 {@link TestData}；运行方法通过静态表查找。这样服务端注册表同步时
-     * 不会出现 {@code MapCodec.unit(this)} 产生的 Direct holder。</p>
+     * <p>只保存测试名与 {@link TestData}，运行方法通过 {@link #TESTS} 查找；这样服务端注册表
+     * 同步时不会出现 {@code MapCodec.unit(this)} 产生的 Direct holder。</p>
      */
     private static final class StructureTest extends GameTestInstance {
         private static final Map<String, Consumer<GameTestHelper>> TESTS = Map.of(
@@ -277,6 +305,11 @@ public final class StructureGameTests {
             return this.data;
         }
 
+        /**
+         * 查找并执行对应的用例
+         *
+         * @param helper GameTest 辅助对象
+         */
         @Override
         public void run(GameTestHelper helper) {
             Consumer<GameTestHelper> test = TESTS.get(this.testName);
@@ -286,6 +319,9 @@ public final class StructureGameTests {
             test.accept(helper);
         }
 
+        /**
+         * @return 解码本实例的 {@link #CODEC}
+         */
         @Override
         public MapCodec<? extends GameTestInstance> codec() {
             return CODEC;

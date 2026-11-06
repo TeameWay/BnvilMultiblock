@@ -19,7 +19,8 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 /**
  * 能量端口方块实体
  *
- * <p>储量由端口方块每 10 tick 采样一次，经托管字段同步到客户端。</p>
+ * <p>服务端每 {@value #SAMPLE_INTERVAL} tick 把 {@link LongEnergyHandler} 的当前储量写入
+ * {@link DescSynced} 字段，再同步到客户端；容量由等级决定。</p>
  */
 public class EnergyPortBlockEntity extends AbstractPortBlockEntity implements EnergyPort, ISyncPersistRPCBlockEntity {
     private static final int SAMPLE_INTERVAL = 10;
@@ -59,7 +60,7 @@ public class EnergyPortBlockEntity extends AbstractPortBlockEntity implements En
     }
 
     /**
-     * 服务端每 tick 调用，每 {@value #SAMPLE_INTERVAL} tick 采样一次储量
+     * 服务端每 tick 由方块 ticker 调用；累计到 {@value #SAMPLE_INTERVAL} tick 时采样一次储量
      */
     public void serverTick() {
         if (++this.sampleCounter < SAMPLE_INTERVAL) {
@@ -70,12 +71,15 @@ public class EnergyPortBlockEntity extends AbstractPortBlockEntity implements En
     }
 
     /**
-     * @return 上一次采样的储量
+     * @return 上一次采样得到的储量
      */
     public long energyStored() {
         return this.energyStored;
     }
 
+    /**
+     * @return 等级规定的能量容量（FE）
+     */
     public long energyCapacity() {
         return this.tier.energyCapacity();
     }

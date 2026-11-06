@@ -15,6 +15,8 @@ import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
 
 /**
  * 流体端口方块实体
+ *
+ * <p>处理器固定 1 个槽位，单槽容量取自端口等级；库存随方块实体存档读写。</p>
  */
 public class FluidPortBlockEntity extends AbstractPortBlockEntity implements FluidPort {
     private final PortTier tier;

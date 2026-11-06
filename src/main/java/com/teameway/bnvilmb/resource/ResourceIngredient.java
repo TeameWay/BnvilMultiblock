@@ -37,7 +37,7 @@ public sealed interface ResourceIngredient {
     /**
      * 物品输入
      *
-     * @param input    物品集合、数量与组件匹配，数量上限是 {@code long}
+     * @param input 物品集合、数量与组件匹配，数量上限是 {@code long}
      * @param consumed 是否消耗
      */
     record Items(LongItemIngredient input, boolean consumed) implements ResourceIngredient {
@@ -58,7 +58,7 @@ public sealed interface ResourceIngredient {
      * 流体输入，匹配规则使用 NeoForge 的 {@link SizedFluidIngredient}
      *
      * @param ingredient 流体原料（支持 tag 与数量）
-     * @param consumed   是否消耗
+     * @param consumed 是否消耗
      */
     record Fluids(SizedFluidIngredient ingredient, boolean consumed) implements ResourceIngredient {
         public static final MapCodec<Fluids> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(

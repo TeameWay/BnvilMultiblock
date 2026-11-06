@@ -1,13 +1,15 @@
 package com.teameway.bnvilmb.multiblock.port.block;
 
+import com.teameway.bnvilmb.init.multiblock.BnvilPorts;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.PortTier;
-import com.teameway.bnvilmb.init.multiblock.BnvilPorts;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntityEntry;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * 控制端口方块（并行仓 / 线程仓），不承载资源，只贡献数值
+ * 控制端口方块，对应并行仓与线程仓
+ *
+ * <p>不承载物品、流体或能量，只在端口表里贡献线程与并行增量。</p>
  */
 public class ControlPortBlock extends AbstractPortBlock {
     public ControlPortBlock(Properties properties, PortKind portKind, PortTier tier) {

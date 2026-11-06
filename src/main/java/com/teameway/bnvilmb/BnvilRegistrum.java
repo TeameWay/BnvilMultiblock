@@ -21,8 +21,8 @@ import java.util.function.BiFunction;
 /**
  * 模组自己的 Registrum
  *
- * <p>在 Registrum 自带的方块与物品入口之外，提供多方块机器、类型与控制器的注册入口，
- * 条目存放在 {@link BnvilRegistries} 自建的注册表里。</p>
+ * <p>在 Registrum 自带的方块与物品入口之外，补上多方块机器、机器类型与控制器的注册入口，
+ * 条目写进 {@link BnvilRegistries} 自建的注册表。</p>
  */
 public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BnvilRegistrum.class);
@@ -33,6 +33,8 @@ public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
 
     /**
      * 创建注册入口，并挂上模组事件总线
+     *
+     * <p>取不到模组容器时把错误信息写进日志，不抛异常。</p>
      *
      * @param modid 模组 ID
      * @return Registrum 实例
@@ -56,12 +58,12 @@ public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
     /**
      * 注册一个多方块控制器
      *
-     * <p>入口名同时作为结构定义 ID 的路径，也就决定定义 JSON 的文件名。</p>
+     * <p>入口名同时作为结构定义 ID 的路径，决定定义 JSON 的文件名；工厂收到的定义 ID 也用它拼出来。</p>
      *
-     * @param name    入口名
-     * @param block   控制器方块
+     * @param name 入口名
+     * @param block 控制器方块
      * @param factory 控制器工厂，入参为控制器方块与定义 ID
-     * @param <T>     控制器类型
+     * @param <T> 控制器类型
      * @return 构建器，{@code register()} 得到 {@code RegistryEntry}
      */
     public <T extends StructureController> NoConfigBuilder<StructureController, T, BnvilRegistrum> multiblockController(
@@ -80,8 +82,8 @@ public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
     /**
      * 注册一个多方块机器类型
      *
-     * @param name    类型名，同时也是定义 tag 的路径
-     * @param factory 类型工厂
+     * @param name 类型名，同时用作结构注册表 tag 的路径
+     * @param factory 类型工厂，条目求值时才调用
      * @return 构建器
      */
     public NoConfigBuilder<MultiblockType, MultiblockType, BnvilRegistrum> multiblockType(
@@ -94,8 +96,10 @@ public class BnvilRegistrum extends AbstractRegistrum<BnvilRegistrum> {
     /**
      * 注册一台多方块机器声明
      *
-     * @param name    入口名
-     * @param factory 机器声明工厂
+     * <p>声明进入 {@code bnvil_multiblock:multiblocks}，数据生成遍历该注册表输出结构模板 JSON。</p>
+     *
+     * @param name 入口名
+     * @param factory 机器声明工厂，结构模板延迟到需要时才构建
      * @return 构建器，{@code register()} 得到 {@code RegistryEntry}
      */
     public NoConfigBuilder<MultiblockMachine, MultiblockMachine, BnvilRegistrum> multiblock(

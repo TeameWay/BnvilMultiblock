@@ -6,14 +6,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 /**
  * 端口等级
  *
- * <p>各等级共用同一记录，按端口种类取对应字段。</p>
+ * <p>各等级共用同一条记录，按端口种类取对应字段；静态工厂会把不相关的字段置 0。</p>
  *
- * @param name           等级名
- * @param slots          物品槽位数量
- * @param fluidCapacity  流体容量（mB）
+ * @param name 等级名
+ * @param slots 物品槽位数量
+ * @param fluidCapacity 流体容量（mB）
  * @param energyCapacity 能量容量（FE），可超过 {@link Integer#MAX_VALUE}
- * @param threads        线程增量
- * @param parallels      并行增量
+ * @param threads 线程增量
+ * @param parallels 并行增量
  */
 public record PortTier(
     String name,
@@ -35,7 +35,7 @@ public record PortTier(
     /**
      * 只有槽位的物品端口等级
      *
-     * @param name  等级名
+     * @param name 等级名
      * @param slots 槽位数量
      * @return 等级
      */
@@ -46,7 +46,7 @@ public record PortTier(
     /**
      * 只有容量的流体端口等级
      *
-     * @param name     等级名
+     * @param name 等级名
      * @param capacity 容量（mB）
      * @return 等级
      */
@@ -57,7 +57,7 @@ public record PortTier(
     /**
      * 只有容量的能量端口等级
      *
-     * @param name     等级名
+     * @param name 等级名
      * @param capacity 容量（FE）
      * @return 等级
      */
@@ -68,7 +68,7 @@ public record PortTier(
     /**
      * 并行仓等级
      *
-     * @param name      等级名
+     * @param name 等级名
      * @param parallels 并行增量
      * @return 等级
      */
@@ -79,7 +79,7 @@ public record PortTier(
     /**
      * 线程仓等级
      *
-     * @param name    等级名
+     * @param name 等级名
      * @param threads 线程增量
      * @return 等级
      */

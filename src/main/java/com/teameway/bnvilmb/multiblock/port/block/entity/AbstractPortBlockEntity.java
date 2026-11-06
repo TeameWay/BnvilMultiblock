@@ -12,7 +12,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * 端口方块实体基类
  *
- * <p>端口归属写进方块实体 NBT，区块卸载后仍然保留，避免两台控制器在重新加载时争用同一个端口。</p>
+ * <p>端口归属写入方块实体的 {@code controller_pos} 字段，区块卸载后仍然保留；重新加载后，
+ * 结构匹配与结构管理器仍能据此判断端口是否已被其他控制器认领。</p>
  */
 public abstract class AbstractPortBlockEntity extends BlockEntity implements MultiblockPort {
     private @Nullable BlockPos controllerPos;

@@ -20,15 +20,16 @@ import java.util.Locale;
 /**
  * 配方页
  *
- * <p>中部放输入整体、箭头与输出整体，底部三行数值；两个整体与箭头的中心在内容区内等距分布。</p>
+ * <p>中部放输入整体、箭头与输出整体，底部三行数值。两个整体与箭头的中心在内容区内等距分布。</p>
  *
  * <p>整体内部先排物品槽，两种槽都有时另起一行再排流体槽，各自从左往右、从上往下填格。</p>
  *
- * <p>所有元素用绝对坐标摆放：JEI 按元素局部坐标反查槽位，坐标只由下标决定，不会随相邻元素漂移。</p>
+ * <p>槽位、箭头与文字都用绝对坐标摆放：JEI 按元素局部坐标反查槽位，坐标只由下标决定，
+ * 不会随相邻元素漂移。</p>
  */
 public class MultiblockRecipeUI {
     /**
-     * 物品组与流体组之间的纵向间距，与 {@link RecipeContents} 的高度计算保持一致。
+     * 物品组与流体组之间的纵向间距，与 {@link RecipeContents} 的高度计算保持一致
      */
     private static final int GROUP_GAP = 1;
 
@@ -104,7 +105,7 @@ public class MultiblockRecipeUI {
     }
 
     /**
-     * 摆放一个整体：先物品组，两种都有时另起一行再排流体组。
+     * 摆放一个整体：先物品组，两种都有时另起一行再排流体组
      */
     private static void addBlock(
         UIElement content,
@@ -184,7 +185,8 @@ public class MultiblockRecipeUI {
     /**
      * 建物品槽
      *
-     * <p>必须用 {@code xeiRecipeSlot}：JEI 会把登记的槽位交给 LDLib2 的部件做命中测试，该部件只认领可交互的槽位，只登记原料时鼠标悬停无反应，{@code R}/{@code U} 也查不到。</p>
+     * <p>必须用 {@code xeiRecipeSlot}：JEI 会把登记的槽位交给 LDLib2 的部件做命中测试，
+     * 该部件只认领可交互的槽位。只登记原料时鼠标悬停无反应，{@code R}/{@code U} 也查不到。</p>
      *
      * @param entries 物品槽内容
      * @return 槽位元素

@@ -31,13 +31,13 @@ public class RecipeExecutor {
     /**
      * 执行一次配方
      *
-     * @param level      服务端世界
-     * @param table      端口表
-     * @param resources  输入快照
+     * @param level 服务端世界
+     * @param table 端口表
+     * @param resources 输入快照
      * @param allocation 匹配阶段给出的输入分配
-     * @param outputs    产出列表
-     * @param batch      本次执行的并行倍数
-     * @param random     随机源（用于概率产出）
+     * @param outputs 产出列表
+     * @param batch 本次执行的并行倍数，小于 1 时按 1 处理
+     * @param random 随机源（用于概率产出）
      * @return 执行结果
      */
     public static CraftResult craft(
@@ -81,6 +81,13 @@ public class RecipeExecutor {
         return value > Long.MAX_VALUE / Math.max(1, batch) ? Long.MAX_VALUE : value * Math.max(1, batch);
     }
 
+    /**
+     * 按分配结果扣除物品、流体与能量
+     *
+     * <p>能量按 {@code int} 上限分块扣取；任一类取不满就返回 {@code false}，由外层事务回滚。</p>
+     *
+     * @return 是否全部取满
+     */
     private static boolean consumeInputs(Transaction transaction, MachineResources resources, ResourceAllocation allocation) {
         for (int slot = 0; slot < allocation.items().length; slot++) {
             long amount = allocation.items()[slot];
@@ -163,6 +170,11 @@ public class RecipeExecutor {
         return true;
     }
 
+    /**
+     * 按概率逐项塞入产出，数量乘以并行倍数并防溢出
+     *
+     * @return 所有产出是否都放得下
+     */
     private static boolean insertOutputs(
         Transaction transaction,
         MultiblockPortTable table,

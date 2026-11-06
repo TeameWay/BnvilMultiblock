@@ -1,9 +1,9 @@
 package com.teameway.bnvilmb.multiblock.port.block;
 
+import com.teameway.bnvilmb.init.multiblock.BnvilPorts;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.PortTier;
 import com.teameway.bnvilmb.multiblock.port.block.entity.EnergyPortBlockEntity;
-import com.teameway.bnvilmb.init.multiblock.BnvilPorts;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntityEntry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 能量端口方块（能量输入 / 输出）
+ * 能量端口方块，对应能量输入与能量输出
  */
 public class EnergyPortBlock extends AbstractPortBlock {
     public EnergyPortBlock(Properties properties, PortKind portKind, PortTier tier) {

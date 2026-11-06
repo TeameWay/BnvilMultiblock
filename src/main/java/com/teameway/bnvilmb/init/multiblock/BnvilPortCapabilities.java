@@ -18,7 +18,11 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 public class BnvilPortCapabilities {
 
     /**
-     * 注册物品/流体/能量能力
+     * 注册物品、流体与能量能力
+     *
+     * <p>输入与输出端口各注册一份，方块实体类型对不上时返回 {@code null}，该方块不暴露这项能力。</p>
+     *
+     * @param event 能力注册事件
      */
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {

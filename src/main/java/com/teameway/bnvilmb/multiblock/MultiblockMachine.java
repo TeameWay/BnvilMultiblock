@@ -9,11 +9,14 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * 一台多方块机器：定义 ID、控制器入口、结构模板
+ * 一台多方块机器的声明
  *
- * @param id         结构定义 ID，同时也是 datagen 输出的文件名
- * @param controller 控制器入口（{@code bnvil_multiblock:multiblock_controllers} 注册表）
- * @param pattern    结构模板，延迟构建，只在 datagen 与需要时求值
+ * <p>把结构定义 ID、控制器入口与结构模板绑在一起。{@code pattern} 延迟求值，
+ * 只在 datagen 和真正需要模板时调用。</p>
+ *
+ * @param id 结构定义 ID，同时也是 datagen 输出的文件名
+ * @param controller 控制器入口，取自 {@code bnvil_multiblock:multiblock_controllers} 注册表
+ * @param pattern 结构模板，延迟构建
  */
 public record MultiblockMachine(
     Identifier id,
@@ -32,6 +35,9 @@ public record MultiblockMachine(
 
     /**
      * 机器声明的链式构建器
+     *
+     * <p>控制器在调用 {@link MultiblockMachine#builder} 时传入，模板用 {@link #pattern(Supplier)}
+     * 补上；没有模板时 {@link #build} 会抛异常。</p>
      */
     public static class Builder {
         private final RegistryEntry<StructureController, ? extends StructureController> controller;
@@ -42,10 +48,12 @@ public record MultiblockMachine(
         }
 
         /**
-         * 结构模板，用 {@code StructurePattern.builder()} 链式声明
+         * 声明结构模板
          *
-         * @param pattern 模板（延迟构建）
-         * @return 自身
+         * <p>用 {@code StructurePattern.builder()} 链式声明；传入的是 supplier，模板在需要时才构建。</p>
+         *
+         * @param pattern 结构模板（延迟构建）
+         * @return 自身，便于继续链式调用
          */
         public Builder pattern(Supplier<StructurePattern> pattern) {
             this.pattern = pattern;
@@ -55,7 +63,10 @@ public record MultiblockMachine(
         /**
          * 完成声明
          *
+         * <p>定义 ID 取控制器入口的 ID。</p>
+         *
          * @return 机器声明
+         * @throws NullPointerException 没有先调用 {@link #pattern(Supplier)} 设置结构模板
          */
         public MultiblockMachine build() {
             Identifier id = this.controller.getId();

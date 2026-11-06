@@ -15,6 +15,8 @@ import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 
 /**
  * 物品端口方块实体
+ *
+ * <p>槽位数量取自端口等级，库存随方块实体存档读写。</p>
  */
 public class ItemPortBlockEntity extends AbstractPortBlockEntity implements ItemPort {
     private final PortTier tier;

@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 
 /**
- * 多方块配方使用的资源种类
+ * 多方块配方可用的资源种类
  *
- * <p>新增资源种类时在此补充枚举值，并实现对应的 {@link ResourceIngredient} 与
- * {@link ResourceOutput} 变体，配方框架无需改动。</p>
+ * <p>新增种类时在这里补枚举值，再实现对应的 {@link ResourceIngredient} 与 {@link ResourceOutput}；
+ * 配方匹配与执行的代码不用跟着改。</p>
  */
 public enum ResourceKind implements StringRepresentable {
     /**

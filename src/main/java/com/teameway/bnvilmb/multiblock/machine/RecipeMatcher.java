@@ -24,12 +24,15 @@ public class RecipeMatcher {
     /**
      * 找到当前线程可以执行且优先级最高的配方
      *
-     * @param index     配方索引
-     * @param machine   机器类型
-     * @param variants  机器形态
+     * <p>先用索引位图筛掉缺资源的候选，再从高到低尝试并行倍数，返回第一个凑得齐输入的匹配。</p>
+     *
+     * @param index 配方索引
+     * @param machine 机器类型
+     * @param variants 机器形态
      * @param resources 输入快照
-     * @param ledger    预留账本
-     * @return 配方，找不到返回 {@code null}
+     * @param ledger 预留账本
+     * @param maxBatch 并行倍数上限
+     * @return 匹配结果，找不到返回 {@code null}
      */
     public static @Nullable Match findBest(
         MultiblockRecipeIndex index,
@@ -57,11 +60,11 @@ public class RecipeMatcher {
     }
 
     /**
-     * 计算一次配方执行的输入分配
+     * 按单次执行计算输入分配，等同于并行倍数为 1
      *
-     * @param recipe    配方
+     * @param recipe 配方
      * @param resources 输入快照
-     * @param ledger    预留账本
+     * @param ledger 预留账本
      * @return 分配结果；材料不足返回 {@code null}
      */
     public static @Nullable ResourceAllocation plan(
@@ -75,10 +78,12 @@ public class RecipeMatcher {
     /**
      * 计算指定并行倍数的输入分配
      *
-     * @param recipe    配方
+     * <p>消耗型输入先按槽位依次扣除，催化剂在扣完后校验剩余量，因此两者不会共用同一批材料。</p>
+     *
+     * @param recipe 配方
      * @param resources 输入快照
-     * @param ledger    预留账本
-     * @param repeats   并行倍数
+     * @param ledger 预留账本
+     * @param repeats 并行倍数
      * @return 分配结果；材料不足返回 {@code null}
      */
     public static @Nullable ResourceAllocation plan(
@@ -177,10 +182,12 @@ public class RecipeMatcher {
     }
 
     /**
-     * 匹配结果
+     * 一次匹配的结果
      *
-     * @param recipe     配方
-     * @param batch      并行倍数
+     * <p>{@code allocation} 同时是事务阶段实际扣取的依据。</p>
+     *
+     * @param recipe 配方
+     * @param batch 并行倍数
      * @param allocation 输入分配
      */
     public record Match(CompiledRecipe recipe, int batch, ResourceAllocation allocation) {
@@ -201,7 +208,7 @@ public class RecipeMatcher {
      *
      * <p>需求可能已达 {@code long} 上限，再乘并行倍数会溢出为负数，使材料不足被判为充足。</p>
      *
-     * @param value   单次需求
+     * @param value 单次需求
      * @param repeats 并行倍数
      * @return 总量
      */

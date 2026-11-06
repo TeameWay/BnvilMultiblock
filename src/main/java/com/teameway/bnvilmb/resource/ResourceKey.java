@@ -8,6 +8,9 @@ import net.minecraft.resources.Identifier;
  *
  * <p>物品与流体用具体 ID，tag 在编译时展开，能量用固定键。索引只判断资源是否存在，
  * 数量校验留给匹配阶段。</p>
+ *
+ * @param kind 资源种类
+ * @param id 资源 ID，能量取固定键
  */
 public record ResourceKey(ResourceKind kind, Identifier id) {
     /**

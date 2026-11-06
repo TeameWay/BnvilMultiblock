@@ -21,13 +21,27 @@ import java.util.Set;
 /**
  * 结构匹配器
  *
- * <p>端口按 {@link PortRegistry} 的固有种类计数，非端口方块作为替代物做小规模回溯。
- * 槽位位置本身不绑定角色，因此同一组角色可以在任意槽位互换。</p>
+ * <p>端口按 {@link PortRegistry} 的固有种类计数；非端口方块只作为替代方块参与小规模回溯。
+ * 槽位本身不绑定角色，因此同一组角色可以在任意槽位互换。匹配过程中同时累计替代方块提供的
+ * 并行与线程加成。</p>
  */
 public final class StructureMatcher {
     private StructureMatcher() {
     }
 
+    /**
+     * 按模板扫描一次结构
+     *
+     * <p>任一位置未加载时立即返回 {@link StructureMatch.State#UNLOADED}，不再继续扫描。
+     * 固定方块与端口直接判定；可接受替代方块的槽位先收集候选，再按候选数从少到多回溯分配
+     * 角色，分配失败时补充角色数量问题。</p>
+     *
+     * @param level 服务端世界
+     * @param controllerPos 控制器方块坐标
+     * @param facing 控制器当前正面
+     * @param pattern 结构模板
+     * @return 本次判定结果
+     */
     public static StructureMatch match(ServerLevel level, BlockPos controllerPos, Direction facing,
                                        StructurePattern pattern) {
         List<StructureProblem> problems = new ArrayList<>();
@@ -126,6 +140,7 @@ public final class StructureMatcher {
             parallelBonus, threadBonus);
     }
 
+    /** 按槽位角色顺序返回第一个接受该端口种类的角色 */
     private static String roleForPort(StructureSlot slot, StructurePattern pattern, PortKind kind) {
         for (String roleId : slot.roles()) {
             StructureRole role = pattern.roles().get(roleId);
@@ -136,6 +151,7 @@ public final class StructureMatcher {
         return null;
     }
 
+    /** 列出槽位里通过替代方块匹配该方块状态的角色，保持槽位角色顺序 */
     private static List<String> candidates(StructureSlot slot, StructurePattern pattern, BlockState state) {
         List<String> result = new ArrayList<>();
         for (String roleId : slot.roles()) {
@@ -153,6 +169,7 @@ public final class StructureMatcher {
         return result;
     }
 
+    /** 取候选角色中匹配替代方块的最大并行与线程加成 */
     private static Bonus bestBonus(List<String> candidates, StructurePattern pattern, BlockState state) {
         int parallels = 0;
         int threads = 0;
@@ -172,6 +189,7 @@ public final class StructureMatcher {
         return new Bonus(parallels, threads);
     }
 
+    /** 按候选顺序回溯分配角色，并用上限与下限剪枝 */
     private static boolean solve(int index, List<Flexible> flexible, StructurePattern pattern,
                                  Map<String, Integer> counts, int[] assignment) {
         if (index == flexible.size()) {
@@ -199,6 +217,7 @@ public final class StructureMatcher {
         return false;
     }
 
+    /** 用剩余槽位全部让给该角色的上界判断下限是否还够 */
     private static boolean canStillMeetMins(int from, List<Flexible> flexible, StructurePattern pattern,
                                             Map<String, Integer> counts) {
         for (Map.Entry<String, StructureRole> entry : pattern.roles().entrySet()) {
@@ -220,6 +239,7 @@ public final class StructureMatcher {
         return true;
     }
 
+    /** 检查所有角色是否达到下限 */
     private static boolean minsMet(StructurePattern pattern, Map<String, Integer> counts) {
         for (Map.Entry<String, StructureRole> entry : pattern.roles().entrySet()) {
             if (counts.getOrDefault(entry.getKey(), 0) < entry.getValue().min()) {
@@ -229,6 +249,7 @@ public final class StructureMatcher {
         return true;
     }
 
+    /** 回溯失败后为无法达到下限的角色生成问题，若仍无问题则补一条 {@code PATTERN} */
     private static void appendCountProblems(List<StructureProblem> problems, StructurePattern pattern,
                                             Map<String, Integer> fixedCounts, List<Flexible> flexible) {
         for (Map.Entry<String, StructureRole> entry : pattern.roles().entrySet()) {

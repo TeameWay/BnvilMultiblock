@@ -18,7 +18,8 @@ import java.util.Map;
 /**
  * 机器的端口表
  *
- * <p>成型时扫描一次，部件增删时重建；同种类端口合并为一个 {@link CombinedResourceHandler}，容量相加。</p>
+ * <p>成型时扫描一次，部件增删时重建。同方向的物品与流体处理器合并为
+ * {@link CombinedResourceHandler}，容量相加；能量处理器按输入与输出分别保留列表。</p>
  */
 public class MultiblockPortTable {
     private final Map<PortKind, List<MultiblockPort>> byKind;
@@ -98,7 +99,7 @@ public class MultiblockPortTable {
     }
 
     /**
-     * 由端口集合构建端口表
+     * 由端口集合构建端口表，不带替代物加成
      *
      * @param ports 端口集合
      * @return 端口表
@@ -110,9 +111,9 @@ public class MultiblockPortTable {
     /**
      * 由端口集合与替代物加成构建端口表
      *
-     * @param ports           端口集合
-     * @param parallelsBonus  替代物并行加成
-     * @param threadsBonus    替代物线程加成
+     * @param ports 端口集合
+     * @param parallelsBonus 结构替代物提供的并行加成
+     * @param threadsBonus 结构替代物提供的线程加成
      * @return 端口表
      */
     public static MultiblockPortTable of(Collection<MultiblockPort> ports, int parallelsBonus, int threadsBonus) {
@@ -156,19 +157,22 @@ public class MultiblockPortTable {
         return this.byKind.getOrDefault(kind, List.of());
     }
 
+    /**
+     * @return 参与建表的端口数量
+     */
     public int portCount() {
         return this.portCount;
     }
 
     /**
-     * @return 线程数（基础 1 + 线程仓增量）
+     * @return 线程数：基础 1 加线程仓增量与替代物加成，结果至少为 1
      */
     public int threads() {
         return this.threads;
     }
 
     /**
-     * @return 每线程并行倍数（并行仓总增量，至少 1）
+     * @return 每线程并行倍数：并行仓增量与替代物加成之和，结果至少为 1
      */
     public int parallels() {
         return this.parallels;
@@ -203,14 +207,14 @@ public class MultiblockPortTable {
     }
 
     /**
-     * @return 能量输入处理器
+     * @return 能量输入处理器列表
      */
     public List<EnergyHandler> energyInputs() {
         return this.energyInputs;
     }
 
     /**
-     * @return 能量输出处理器
+     * @return 能量输出处理器列表
      */
     public List<EnergyHandler> energyOutputs() {
         return this.energyOutputs;

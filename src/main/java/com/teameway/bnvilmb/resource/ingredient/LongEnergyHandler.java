@@ -11,9 +11,9 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 /**
  * 容量以 {@code long} 记录的能量处理器
  *
- * <p>{@link net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler} 的储量与容量都是 {@code int}，
- * 承载不了超过 {@link Integer#MAX_VALUE} 的能量端口等级；本实现把两者改为 {@code long}。
- * 单次 {@code insert}/{@code extract} 仍按 {@link EnergyHandler} 的约定以 {@code int} 计量。</p>
+ * <p>{@code SimpleEnergyHandler} 的储量与容量都是 {@code int}，承载不了超过 {@link Integer#MAX_VALUE}
+ * 的能量端口等级；本实现把两者改为 {@code long}。单次 {@code insert}/{@code extract} 仍按
+ * {@link EnergyHandler} 的约定以 {@code int} 计量。</p>
  */
 public class LongEnergyHandler implements EnergyHandler, ValueIOSerializable {
     private final long capacity;
@@ -25,13 +25,14 @@ public class LongEnergyHandler implements EnergyHandler, ValueIOSerializable {
      * 以给定容量创建处理器，单次操作上限等于容量
      *
      * @param capacity 容量（FE）
+     * @throws IllegalArgumentException 容量为负
      */
     public LongEnergyHandler(long capacity) {
         this(capacity, capacity);
     }
 
     /**
-     * @param capacity    容量（FE）
+     * @param capacity 容量（FE）
      * @param maxTransfer 单次存入与取出的上限（FE）
      * @throws IllegalArgumentException 任一参数为负
      */

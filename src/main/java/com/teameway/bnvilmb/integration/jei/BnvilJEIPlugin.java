@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * JEI 集成
+ * JEI 集成入口
  *
- * <p>分类按机器类型注册；配方取客户端配方索引里的编译结果，与服务端同源，排序与机器选择配方一致。</p>
+ * <p>分类按机器类型注册。配方取客户端配方索引里的编译结果，与服务端同源，排序与机器选择配方一致。
+ * 结构信息页单独占一个分类，所有机器类型共用。</p>
  */
 @JeiPlugin
 public class BnvilJEIPlugin implements IModPlugin {
@@ -36,7 +37,9 @@ public class BnvilJEIPlugin implements IModPlugin {
     }
 
     /**
-     * 取某机器类型当前的配方列表，索引尚未建立时返回空列表
+     * 取某机器类型当前的配方列表
+     *
+     * <p>索引尚未建立时返回空列表。</p>
      *
      * @param machine 机器类型 ID
      * @return 已按优先级排序的配方
@@ -50,11 +53,21 @@ public class BnvilJEIPlugin implements IModPlugin {
         return type == null ? List.of() : type.recipes();
     }
 
+    /**
+     * @return 固定为 {@code bnvil_multiblock:jei}
+     */
     @Override
     public Identifier getPluginUid() {
         return BnvilMultiBlock.id("jei");
     }
 
+    /**
+     * 注册结构信息分类，再为每个机器类型注册一个配方分类
+     *
+     * <p>配方分类构造时接收该类型当前的配方列表，用来确定整页的统一排版。</p>
+     *
+     * @param registration 分类注册器
+     */
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         IJeiHelpers helpers = registration.getJeiHelpers();
@@ -68,6 +81,13 @@ public class BnvilJEIPlugin implements IModPlugin {
         }
     }
 
+    /**
+     * 注册结构信息记录与各机器类型的配方
+     *
+     * <p>没有配方的机器类型只注册分类，不注册配方内容。</p>
+     *
+     * @param registration 配方注册器
+     */
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(
@@ -86,6 +106,11 @@ public class BnvilJEIPlugin implements IModPlugin {
         }
     }
 
+    /**
+     * 把各机器类型的控制器方块登记为配方分类与结构信息分类的合成站
+     *
+     * @param registration 合成站注册器
+     */
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (RegistryEntry<MultiblockType, MultiblockType> entry : BnvilMultiBlock.REGISTRUM.getAll(BnvilRegistries.MULTIBLOCK_TYPES)) {

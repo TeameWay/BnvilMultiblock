@@ -3,14 +3,15 @@ package com.teameway.bnvilmb.util;
 /**
  * 长数字格式化
  *
- * <p>两种形式：按三位一档缩写并带单位（{@code 114.5K}），以及按千位加逗号的完整数字
- * （{@code 1,145,141,919}）。缩写只截断、不四舍五入，显示值不大于真实值。</p>
+ * <p>两种形式：按三位一档缩写并带单位，例如 {@code 114.5K}；以及按千位加逗号的完整数字，
+ * 例如 {@code 1,145,141,919}。缩写只截断、不四舍五入，显示值不大于真实值。</p>
  *
- * <p>单位依次为 K、M、B、T、P、E，覆盖 {@code long} 的全部取值范围；不足一千的数值原样输出。</p>
+ * <p>单位依次为 K、M、B、T、P、E，覆盖 {@code long} 的全部取值范围；不足一千的数值原样输出。
+ * 流体体积另按 {@code mB} 与 {@code B} 换算，见 {@link #fluidVolume(long)}。</p>
  */
 public class NumberFormatUtil {
     /**
-     * 每一档的单位，下标即档位，0 档不带单位。
+     * 每一档的单位，下标即档位，0 档不带单位
      */
     private static final String[] UNITS = {
         "",
@@ -32,8 +33,8 @@ public class NumberFormatUtil {
     /**
      * 把数值缩写成带单位、保留一位小数的形式
      *
-     * <p>保留一位小数，小数位截断而不四舍五入，显示值不大于真实值；小数位为零时省掉小数点，
-     * 不足一千的数值没有单位，原样输出。</p>
+     * <p>小数位截断而不四舍五入，显示值不大于真实值；小数位为零时省掉小数点。不足一千的数值
+     * 没有单位，原样输出。</p>
      *
      * @param value 原始数值，可为负
      * @return 缩写结果，例如 {@code 114514} 返回 {@code 114.5K}，{@code 1000} 返回 {@code 1K}
@@ -65,10 +66,10 @@ public class NumberFormatUtil {
     /**
      * 保留两位小数的普通数字
      *
-     * <p>用于速率这类需要有小数位的值：绝对值达到一千时交给 {@link #compact(long)} 缩写。</p>
+     * <p>用于速率这类需要小数位的值：绝对值达到一千时交给 {@link #compact(long)} 缩写。</p>
      *
      * @param value 数值，可为负
-     * @return 格式化结果
+     * @return 绝对值不足一千时是两位小数，否则是缩写结果
      */
     public static String decimal(float value) {
         if (Math.abs(value) >= STEP) {
@@ -80,8 +81,9 @@ public class NumberFormatUtil {
     /**
      * 流体体积格式化
      *
-     * <p>按量级切换单位：不足一桶用 {@code mB}，一桶以上用 {@code B} 并保留一位小数，
-     * 超过一千桶改用 {@link #compact(long)} 缩写后再拼 {@code B}，如 {@code 1KB}。换算同样只做截断。</p>
+     * <p>按量级切单位：不足一桶用 {@code mB}，一桶以上用 {@code B} 并保留一位小数，
+     * 超过一千桶改用 {@link #compact(long)} 缩写后再拼 {@code B}，例如 {@code 1KB}。
+     * 换算同样只做截断。</p>
      *
      * <p>十亿桶会显示成 {@code 1BB}，与其他量级缩写的字母保持同一套含义。</p>
      *

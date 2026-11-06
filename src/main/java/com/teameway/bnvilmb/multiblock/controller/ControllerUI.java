@@ -31,14 +31,15 @@ import java.util.function.Supplier;
  * 控制器界面
  *
  * <p>左右两块加中间一道竖线。左块与玩家物品栏同宽，自上而下是机器信息、配方说明与物品栏；
- * 右块与整块内容区等高，是线程卡片列表，点击后左栏切到该线程的配方。</p>
+ * 右块与整块内容区等高，是线程卡片列表，点击卡片后左栏切到该线程的配方。</p>
  *
  * <p>框架左边框之外另有一条窄条，顶端放端口信息栏的开关按钮。按钮放在 {@code panel_bg} 之外，
  * 避免与面板内容抢位置。</p>
  *
  * <p>配方用文字列出数量、名称与平均速率，比一排图标多出数量与吞吐量两项信息。</p>
  *
- * <p>两侧都放在 {@link ScrollerView} 里：线程数与原料条数都没有上限，固定高度加滚动比撑大窗口稳妥。</p>
+ * <p>两侧都放在 {@link ScrollerView} 里：线程数与原料条数都没有上限，固定高度加滚动
+ * 比撑大窗口稳妥。</p>
  *
  * <p>数据来自控制器方块实体同步过的字段，配方内容由客户端的配方索引反查，界面不持有服务端对象。</p>
  */
@@ -50,8 +51,11 @@ public class ControllerUI {
     /**
      * 构建控制器界面
      *
+     * <p>端口面板最后加入，才能盖在框架与两侧内容之上；界面先按当前同步值铺一次，
+     * 之后由 tick 事件刷新。</p>
+     *
      * @param controller 控制器方块实体
-     * @param player     打开界面的玩家
+     * @param player 打开界面的玩家
      * @return 可显示的界面
      */
     public static ModularUI create(ControllerBlockEntity controller, Player player) {
@@ -108,8 +112,8 @@ public class ControllerUI {
     /**
      * 左右两块之间的竖线
      *
-     * <p>用空元素，因为给某一边加边框会吃掉可用宽度，让滚动区内容宽度与
-     * {@code ControllerLayout} 的数值对不上。左右各留 {@link ControllerLayout#DIVIDER_GAP}。</p>
+     * <p>用空元素绘制，避免给某一边加边框吃掉可用宽度，让滚动区内容宽度与
+     * {@link ControllerLayout} 的数值对不上。左右各留 {@link ControllerLayout#DIVIDER_GAP}。</p>
      *
      * @return 竖线元素
      */
@@ -127,7 +131,8 @@ public class ControllerUI {
     /**
      * 左栏内部的横线
      *
-     * <p>与竖线共用同一个类。上下各留 {@link ControllerLayout#DIVIDER_GAP}，与竖线的左右留白一致。</p>
+     * <p>与竖线共用 {@code controller-divider} 类。上下各留
+     * {@link ControllerLayout#DIVIDER_GAP}，与竖线的左右留白一致。</p>
      *
      * @return 横线元素
      */
@@ -144,7 +149,8 @@ public class ControllerUI {
     /**
      * 结构状态
      *
-     * <p>由同步字段推导：没有机器类型是未成型，有配方在跑是工作中，其余为空闲。</p>
+     * <p>由同步字段推导：没有机器类型是未成型，有配方在跑是工作中，其余为空闲。
+     * 未成型时优先显示结构错误文本。</p>
      *
      * @param controller 控制器方块实体
      * @return 状态文本
@@ -189,7 +195,7 @@ public class ControllerUI {
 
     /**
      * @param id 完整 ID
-     * @return 去掉命名空间后的路径，解析失败时原样返回
+     * @return 去掉命名空间后的路径；解析失败时原样返回
      */
     private static String path(String id) {
         Identifier parsed = Identifier.tryParse(id);
@@ -197,7 +203,7 @@ public class ControllerUI {
     }
 
     /**
-     * @param progress 0~1 的进度
+     * @param progress 0 到 1 的进度
      * @return 百分数文本，不带百分号
      */
     private static String percent(float progress) {
@@ -218,7 +224,7 @@ public class ControllerUI {
     /**
      * 标记为次要信息
      *
-     * <p>颜色由主题的 {@code .bnvil-hint} 决定，代码里不再写死色值。</p>
+     * <p>颜色由主题的 {@code .bnvil-hint} 决定，代码里不写死色值。</p>
      *
      * @param label 文本元素
      * @return 原元素，便于链式调用
@@ -231,8 +237,8 @@ public class ControllerUI {
     /**
      * 建一个只有纵向滚动的视图
      *
-     * <p>宽度由调用方决定：配方预览按绝对坐标摆放，需要确切的像素宽度，线程卡片流式排布，
-     * 用百分比撑满。混在一处设置会互相覆盖。</p>
+     * <p>宽度由调用方决定：配方预览按绝对坐标摆放，需要确切的像素宽度；线程卡片流式排布，
+     * 用百分比撑满。两处混在一起设置会互相覆盖。</p>
      *
      * @param content 内容元素
      * @return 滚动视图
@@ -249,7 +255,7 @@ public class ControllerUI {
     /**
      * 界面视图
      *
-     * <p>持有两侧的引用与选中状态。选中项是纯客户端的展示状态，不必同步。</p>
+     * <p>持有两侧的引用与选中状态。选中项是纯客户端的展示状态，不参与同步。</p>
      */
     private static final class View {
         private final ControllerBlockEntity controller;
@@ -297,7 +303,7 @@ public class ControllerUI {
          * 让一行文字在卡片宽度内截断
          *
          * <p>右栏只有 {@value ControllerLayout#RIGHT_CONTENT} 像素，配方 ID 稍长就会溢出。
-         * {@code HIDE} 直接丢弃超出部分，换行会撑高卡片、挤乱上下行。</p>
+         * {@code HIDE} 直接丢弃超出部分；换行会撑高卡片、挤乱上下行。</p>
          *
          * @param label 文本元素
          */
@@ -351,7 +357,7 @@ public class ControllerUI {
         /**
          * 切换端口面板的可见性
          *
-         * <p>改用增删元素会丢掉滚动状态与拖动位置，重建后面板弹回原位。</p>
+         * <p>改用增删元素会丢掉滚动状态与拖动位置，重建后面板会弹回原位。</p>
          */
         private void togglePanel() {
             if (this.panel == null) {
@@ -364,9 +370,9 @@ public class ControllerUI {
         /**
          * 左栏上部：机器信息、横线、配方说明
          *
-         * <p>高度固定为 {@link ControllerLayout#INFO_HEIGHT}，因为它下面还要接横线与物品栏，
-         * 三段之和才是整块内容区的高度。机器信息五行的高度是定值，可直接给它
-         * {@link ControllerLayout#MACHINE_HEIGHT}，配方区吃掉剩余的弹性空间。</p>
+         * <p>高度固定为 {@link ControllerLayout#INFO_HEIGHT}，因为下面还要接横线与物品栏，
+         * 三段之和才是整块内容区的高度。机器信息五行高度是定值，可以直接给它
+         * {@link ControllerLayout#MACHINE_HEIGHT}，配方区占用剩余的弹性空间。</p>
          *
          * @return 信息栏元素
          */
@@ -386,7 +392,7 @@ public class ControllerUI {
         }
 
         /**
-         * 每 tick 校验一次：线程数变了重建卡片，选中线程换了配方就重画左栏
+         * 每 tick 校验一次：线程数变了重建卡片，机器类型或选中线程的配方变了就重画左栏
          *
          * <p>只在比对结果不同时才动手，滚动位置不会被无谓地重置。</p>
          */
@@ -438,6 +444,11 @@ public class ControllerUI {
             this.stateClass = next;
         }
 
+        /**
+         * 按线程数重建卡片；线程数为 0 时放一行占位文本
+         *
+         * @param count 线程槽位数
+         */
         private void rebuildCards(int count) {
             this.slots = count;
             this.cards.clear();
@@ -486,7 +497,7 @@ public class ControllerUI {
         /**
          * 右栏：线程卡片
          *
-         * <p>与整块内容区等高，跨过左侧的信息栏与物品栏两段，因此比左栏更高。</p>
+         * <p>与整块内容区等高，跨过左侧的信息栏与物品栏两段。</p>
          *
          * @return 线程栏元素
          */
@@ -517,6 +528,14 @@ public class ControllerUI {
             return slots;
         }
 
+        /**
+         * 一张线程卡片
+         *
+         * <p>纵向六行：标题、配方 ID、并行倍数、进度、tick 计数与秒数计数，点击切换选中状态。</p>
+         *
+         * @param slot 线程序号
+         * @return 卡片元素
+         */
         private UIElement card(int slot) {
             UIElement card = new UIElement()
                 .layout(layout -> layout
@@ -567,7 +586,7 @@ public class ControllerUI {
         /**
          * 当前线程已经跑了多少 tick
          *
-         * <p>进度乘上周期长度得到 tick 数。取整：卡片这一行要同时放 tick 与秒两个值，
+         * <p>进度乘上周期长度得到 tick 数。取整是因为卡片这一行要同时放 tick 与秒两个值，
          * {@code 9.0} 里的 {@code .0} 只占宽度。</p>
          *
          * @param slot 线程序号
@@ -607,7 +626,7 @@ public class ControllerUI {
         /**
          * 重建左栏的配方信息
          *
-         * <p>配方数据在客户端收到同步之后才有，界面开得更早时查不到，这里显示“未就绪”。</p>
+         * <p>配方数据要等客户端收到同步之后才有，界面开得更早时查不到，这里显示不可用提示。</p>
          */
         private void rebuildRecipe() {
             this.recipeBody.clearAllChildren();
@@ -660,10 +679,10 @@ public class ControllerUI {
         /**
          * 一组物品的逐条说明
          *
-         * <p>每条占一行，形如 {@code 192 × 石头}，数量是并行后的总量，速率补在下一行。</p>
+         * <p>每条占一行，形如 {@code 192 × 石头}；数量是并行后的总量，速率补在下一行。</p>
          *
          * @param entries 物品条目
-         * @param time    单周期耗时，用于折算速率
+         * @param time 单周期耗时，用于折算速率
          */
         private void addItems(List<RecipeView.ItemEntry> entries, int time) {
             for (RecipeView.ItemEntry entry : entries) {
@@ -680,7 +699,7 @@ public class ControllerUI {
          * 一组流体的逐条说明
          *
          * @param entries 流体条目
-         * @param time    单周期耗时，用于折算速率
+         * @param time 单周期耗时，用于折算速率
          */
         private void addFluids(List<RecipeView.FluidEntry> entries, int time) {
             for (RecipeView.FluidEntry entry : entries) {
@@ -694,13 +713,13 @@ public class ControllerUI {
         }
 
         /**
-         * 速率行：既给每 tick，也给每秒
+         * 速率行：同时给出每 tick 与每秒
          *
          * <p>单看一个容易误判：tick 数在长耗时配方里小到看不出来，秒数在短耗时配方里又大到失真。</p>
          *
          * @param amount 一个周期的总量
-         * @param time   周期耗时，单位 tick
-         * @param fluid  是否为流体
+         * @param time 周期耗时，单位 tick
+         * @param fluid 是否为流体
          * @return 速率文本
          */
         private Label rate(long amount, int time, boolean fluid) {
@@ -733,7 +752,7 @@ public class ControllerUI {
         /**
          * 生成一行同宽同高的文本
          *
-         * @param key  语言键
+         * @param key 语言键
          * @param args 格式化参数
          * @return 文本元素
          */
@@ -747,7 +766,7 @@ public class ControllerUI {
         /**
          * 耗能功率
          *
-         * <p>按每 tick 消耗计并向上取整，整除后显示 0 会与有实际消耗矛盾。</p>
+         * <p>按每 tick 消耗计并向上取整；直接整除会显示 0，与有实际消耗矛盾。</p>
          *
          * @param recipe 配方
          * @return 每 tick 消耗，单位 FE/t

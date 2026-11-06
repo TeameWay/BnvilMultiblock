@@ -25,7 +25,8 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 /**
  * 端口界面
  *
- * <p>各端口共用标题与主体的骨架，物品、流体端口直接绑定端口的处理器。</p>
+ * <p>四类端口共用标题与尺寸计算：物品与流体端口把槽位直接绑到端口处理器，能量端口显示储量进度条，
+ * 控制端口显示线程或并行数值。</p>
  */
 public class PortUI {
     private static final int PADDING = 5;
@@ -38,7 +39,11 @@ public class PortUI {
     }
 
     /**
-     * 构建端口界面
+     * 按端口种类构建界面，根节点套用 {@link BnvilTheme}
+     *
+     * @param port 端口
+     * @param holder 界面持有者，标题取其方块状态里的方块名
+     * @return 可直接用于方块 UI 的界面
      */
     public static ModularUI create(MultiblockPort port, BlockUIMenuType.BlockUIHolder holder) {
         UIElement root = new UIElement()

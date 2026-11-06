@@ -24,10 +24,14 @@ import java.util.List;
  * 配方展示数据
  *
  * <p>把 {@link CompiledRecipe} 的多态输入输出展平成界面可用的列表。数量保留 {@code long}，
- * 堆栈只用来取名称与图标，真实数值由 {@link ItemEntry#amount()} 给出。</p>
+ * 堆栈只用来取名称与图标，真实数值由 {@link ItemEntry#amount()} 与 {@link FluidEntry#amount()} 给出。</p>
  *
+ * @param itemInputs 物品输入，每种可选物品各占一项
+ * @param fluidInputs 流体输入
+ * @param itemOutputs 物品产物
+ * @param fluidOutputs 流体产物
  * @param energy 单次执行消耗的能量，单位 FE
- * @param time   单周期耗时，单位 tick
+ * @param time 单周期耗时，单位 tick
  */
 public record RecipeView(
     List<ItemEntry> itemInputs,
@@ -42,7 +46,7 @@ public record RecipeView(
      *
      * <p>客户端索引在配方同步之后才建立，未就绪时返回 {@code null} 由调用方处理。</p>
      *
-     * @param machine  机器类型 ID，未成型时为空串
+     * @param machine 机器类型 ID，未成型时为空串
      * @param recipeId 配方 ID
      * @return 展示数据，索引或配方不存在时返回 {@code null}
      */
@@ -139,12 +143,20 @@ public record RecipeView(
         return (int) Math.clamp(amount, 1L, Integer.MAX_VALUE);
     }
 
+    /**
+     * 取恒定数量，非恒定提供器按 {@code 1} 处理
+     *
+     * @param provider 数量提供器
+     * @return 常量值，提供器不是 {@link ConstantValue} 时返回 {@code 1}
+     */
     private static int constant(ContextIntProvider provider) {
         return provider instanceof ConstantValue(int value) ? value : 1;
     }
 
     /**
-     * @param stack  槽位展示的物品，数量已被压进 {@code int}
+     * 物品槽位的展示数据
+     *
+     * @param stack 槽位展示的物品，数量已被压进 {@code int}
      * @param amount 真实需求量或产出量，可能超出堆栈能表达的范围
      */
     public record ItemEntry(ItemStack stack, long amount) {
@@ -154,7 +166,9 @@ public record RecipeView(
     }
 
     /**
-     * @param stack  流体堆栈，用于取名称与图标
+     * 流体槽位的展示数据
+     *
+     * @param stack 流体堆栈，用于取名称与图标
      * @param amount 真实需求量或产出量，单位 mB
      */
     public record FluidEntry(FluidStack stack, long amount) {

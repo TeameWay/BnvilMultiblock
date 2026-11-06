@@ -21,28 +21,29 @@ import java.util.stream.Stream;
 /**
  * 数量过长的物品槽
  *
- * <p>数量用 {@link NumberFormatUtil#compact(long)} 缩写后画在右下角，仍放不下就等比缩小，避免横穿槽位。</p>
+ * <p>数量先用 {@link NumberFormatUtil#compact(long)} 缩写后画在右下角，仍放不下就按可用宽度等比缩小，
+ * 避免横穿槽位。</p>
  *
- * <p>真实数量用 {@link #setAmount(long)} 以 {@code long} 单独保存，不受堆栈 {@code count} 的
+ * <p>真实数量用 {@link #setAmount(long)} 以 {@code long} 单独保存，不受物品堆栈 {@code count} 的
  * {@code int} 上限截断；缩写只保留量级，精确数量补进悬浮提示。</p>
  *
- * <p>本类也是 JEI 配方页里对应格子的唯一绘制者；XEI 方法全部返回 {@link CompactItemSlot}，
+ * <p>本类同时是 JEI 配方页里对应格子的唯一绘制者；XEI 方法全部返回 {@link CompactItemSlot}，
  * 登记原料之后仍可链式设置数量。</p>
  */
 @LDLRegister(name = "compact-item-slot", group = "inventory", registry = "ldlib2:ui_element", modID = BnvilMultiBlock.MODID)
 public class CompactItemSlot extends ItemSlot {
     /**
-     * 数量文字的右边缘，也是可用宽度：原版起点为 {@code 17 - 字宽}，可用总量为 17 像素。
+     * 数量文字的右边缘，也是可用的宽度上限；原版起点为 {@code 17 - 字宽}，整个格子宽 17 像素
      */
     private static final float TEXT_RIGHT = 17.0F;
     private static final float TEXT_TOP = 9.0F;
     /**
-     * 数量文字的行高，按缩放比例回推顶边时使用。
+     * 数量文字的行高，按缩放比例回推顶边时使用
      */
     private static final float TEXT_HEIGHT = 8.0F;
 
     /**
-     * 单独指定的真实数量，负值表示沿用物品堆栈自带的数量。
+     * 单独指定的真实数量，负值表示沿用物品堆栈自带的数量
      */
     private long amount = -1L;
 
@@ -50,24 +51,26 @@ public class CompactItemSlot extends ItemSlot {
      * 构造一个物品槽
      *
      * <p>注册名 {@code compact-item-slot} 命中不了主题里按元素名匹配的 {@code item-slot} 规则，
-     * 因此挂上 {@code item-slot_bg} 类，让底色与悬浮高亮跟随当前主题。</p>
+     * 所以挂上 {@code item-slot_bg} 类，让底色与悬浮高亮跟随当前主题。</p>
      */
     public CompactItemSlot() {
         addClass("item-slot_bg");
     }
 
     /**
-     * 数量是否已被缩写，绘制与提示共用此判定
+     * 判断数量是否会被缩写
      *
      * @param count 真实数量
-     * @return 缩写结果与真实数字不同时为 true
+     * @return 缩写结果与十进制字符串不同时为 true，数量不超过 1 时一律为 false
      */
     private static boolean isCompacted(long count) {
         return count > 1L && !NumberFormatUtil.compact(count).equals(Long.toString(count));
     }
 
     /**
-     * 指定槽位要显示的数量
+     * 指定槽位显示的数量
+     *
+     * <p>传负数会被夹到 0；{@link #getFullTooltipTexts} 只在数量非负时追加数量行。</p>
      *
      * @param amount 真实数量，可超出 {@code int} 范围
      * @return 自身，便于链式调用
@@ -105,7 +108,7 @@ public class CompactItemSlot extends ItemSlot {
      *
      * <p>备选项通常是同一标签下的全部物品，数量统一取本格真实数量。</p>
      *
-     * @param io               JEI 语义角色
+     * @param io JEI 语义角色
      * @param allPossibleItems 该格可能显示的全部物品
      * @return 自身，便于链式调用
      */
@@ -128,10 +131,10 @@ public class CompactItemSlot extends ItemSlot {
     /**
      * 登记成带概率的 XEI 配方格
      *
-     * <p>只有走过本重载的槽位才会挂上命中测试与原料轮换，悬停可查看原料，{@code R}/{@code U} 才能查配方。
+     * <p>只有走过本重载的槽位才挂命中测试与原料轮换，悬停可查看原料，{@code R}/{@code U} 才能查配方；
      * 概率文字由调用方追加到悬浮提示。</p>
      *
-     * @param io     JEI 语义角色
+     * @param io JEI 语义角色
      * @param chance 产出概率，仅用于 XEI 侧语义
      * @return 自身，便于链式调用
      */
@@ -144,9 +147,9 @@ public class CompactItemSlot extends ItemSlot {
     /**
      * 登记成带概率与备选项的 XEI 配方格
      *
-     * @param io               JEI 语义角色
-     * @param chance           产出概率，仅用于 XEI 侧语义
-     * @param amount           单次产出数量，仅用于 XEI 侧语义
+     * @param io JEI 语义角色
+     * @param chance 产出概率，仅用于 XEI 侧语义
+     * @param amount 单次产出数量，仅用于 XEI 侧语义
      * @param allPossibleItems 该格可能显示的全部物品
      * @return 自身，便于链式调用
      */
@@ -164,8 +167,8 @@ public class CompactItemSlot extends ItemSlot {
     /**
      * 悬浮提示
      *
-     * <p>只有显式调用过 {@link #setAmount(long)} 的格子才追加数量行；沿用堆栈自带数量时数量已在格子上画出，
-     * 再补一行“数量：-1”只会误导。</p>
+     * <p>只有显式调用过 {@link #setAmount(long)} 的格子才追加数量行；沿用堆栈自带数量时，
+     * 数字已经画在格子上，再补一行“数量：-1”只会误导。</p>
      *
      * @param withItemTooltips 是否附带物品自身的原版提示
      * @return 提示文本
@@ -180,6 +183,14 @@ public class CompactItemSlot extends ItemSlot {
         return tooltips;
     }
 
+    /**
+     * 画物品与数量
+     *
+     * <p>数量需要缩写时自己画图标与装饰，再换上缩写后的文字；其余情况整段交给父类。</p>
+     *
+     * @param context 绘制上下文
+     * @param itemStack 要画的物品
+     */
     @Override
     protected void drawItemStack(IGUIContext context, ItemStack itemStack) {
         long count = this.count();
@@ -215,7 +226,7 @@ public class CompactItemSlot extends ItemSlot {
     /**
      * 交给 XEI 的原料
      *
-     * @return 携带当前物品与数量的流
+     * @return 只含当前物品、数量已压进堆栈的流
      */
     private Stream<ItemStack> ingredients() {
         return Stream.of(displayOnly(this.getValue()));
@@ -224,10 +235,11 @@ public class CompactItemSlot extends ItemSlot {
     /**
      * 把真实数量压进物品堆栈的数量字段
      *
-     * <p>堆栈只能表达 {@code int}，超出部分按上限截断，不退化成 0 或负数；XEI 侧的备选项同样走这里。</p>
+     * <p>堆栈只能表达 {@code int}，超出部分按上限截断，不会退化成 0 或负数；XEI 侧的备选项
+     * 也走这里。</p>
      *
      * @param stack 槽位上的物品
-     * @return 带上当前数量的副本
+     * @return 带上当前数量的副本，空堆栈原样返回
      */
     private ItemStack displayOnly(ItemStack stack) {
         return stack.isEmpty() ? stack : stack.copyWithCount(this.stackCount());

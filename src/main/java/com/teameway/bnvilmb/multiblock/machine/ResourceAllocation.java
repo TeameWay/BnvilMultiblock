@@ -5,7 +5,7 @@ package com.teameway.bnvilmb.multiblock.machine;
  *
  * <p>下标是端口池内的槽位序号，值是从该槽取走的数量；能量单独记一个总数。</p>
  *
- * @param items  物品槽取用数量
+ * @param items 物品槽取用数量
  * @param fluids 流体槽取用数量
  * @param energy 能量取用量
  */

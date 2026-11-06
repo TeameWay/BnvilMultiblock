@@ -21,18 +21,26 @@ import java.util.function.Supplier;
  * 数据驱动的多方块结构模板
  *
  * <p>网格字符分两类：{@code mapping} 里的字符是固定方块谓词，{@code slots} 里的字符是槽位。
- * 槽位不绑定角色，角色只约束全局数量，因此端口位置可以互换。</p>
+ * 槽位不绑定角色，角色只约束全局数量，因此端口位置可以在槽位之间互换。</p>
+ *
+ * <p>网格按层书写：一层对应一个 Y 高度，层内每行对应一个 Z，行内每个字符对应一个 X。
+ * 空格表示该位置不参与结构；{@code 0} 必须是固定方块并作为原点，其余偏移都相对它计算。
+ * 单个轴向尺寸不能超过 {@code MAX_SIZE}，即 64。</p>
  */
 public final class StructurePattern {
+    /** 单个轴向允许的最大尺寸 */
     private static final int MAX_SIZE = 64;
 
+    /** 字符键映射编解码器，JSON 中使用单字符字符串作键 */
     public static final Codec<Map<Character, BlockStatePredicate>> MAPPING_CODEC =
         Codec.unboundedMap(Codec.STRING, BlockStatePredicate.CODEC)
             .xmap(StructurePattern::toCharMap, StructurePattern::toStringMap);
+    /** 字符键槽位编解码器，JSON 中使用单字符字符串作键 */
     public static final Codec<Map<Character, StructureSlot>> SLOT_CODEC =
         Codec.unboundedMap(Codec.STRING, StructureSlot.CODEC)
             .xmap(StructurePattern::toCharSlotMap, StructurePattern::toStringSlotMap);
 
+    /** 结构模板编解码器，用于数据包读取与数据生成 */
     public static final Codec<StructurePattern> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         StructureOrientation.CODEC.optionalFieldOf("orientation", StructureOrientation.NONE)
             .forGetter(StructurePattern::orientation),
@@ -57,6 +65,21 @@ public final class StructurePattern {
     private final Vec3i size;
     private final BlockStatePredicate controller;
 
+    /**
+     * 校验网格并建立索引
+     *
+     * <p>构造时复制全部集合，按 Y、Z、X 的顺序遍历网格，把每个非空格字符换算成相对控制器
+     * {@code 0} 的偏移，然后调用 {@link #validate()} 检查槽位与角色约束。</p>
+     *
+     * @param orientation 朝向模式
+     * @param canonicalFront 主朝向，{@code HORIZONTAL} 下必须是水平方向
+     * @param grid 分层网格，外层下标为 Y，中层为 Z，字符串内下标为 X
+     * @param mapping 固定方块字符到谓词的映射
+     * @param slots 槽位字符到槽位定义的映射
+     * @param roles 角色 ID 到角色定义的映射
+     * @throws IllegalArgumentException 网格形状不合法、找不到 {@code 0} 或 {@code 0} 出现在多行、字符未定义、
+     *     槽位与方块字符冲突、角色或槽位约束不成立，或单个轴向尺寸超过 {@code MAX_SIZE}
+     */
     public StructurePattern(
         StructureOrientation orientation,
         Direction canonicalFront,
@@ -138,6 +161,13 @@ public final class StructurePattern {
         this.validate();
     }
 
+    /**
+     * 检查槽位与角色约束
+     *
+     * <p>要求所有槽位定义至少被使用一次，角色的下限总和不超过槽位数；有下限的角色必须被某个
+     * 槽位引用，且每个角色至少接受一种端口或替代方块；同一槽位内的两个角色不能提供同一种端口。
+     * 任一条件不满足时抛异常。</p>
+     */
     private void validate() {
         if (this.positions.isEmpty()) {
             throw new IllegalArgumentException("Structure is empty");
@@ -189,6 +219,12 @@ public final class StructurePattern {
         }
     }
 
+    /**
+     * 定位控制器字符 {@code 0}
+     *
+     * @return {@code 0} 的网格坐标，作为所有偏移的原点
+     * @throws IllegalArgumentException 找不到 {@code 0}，或有多行包含 {@code 0}
+     */
     private Vec3i findController() {
         Vec3i found = null;
         for (int y = 0; y < this.grid.size(); y++) {
@@ -211,6 +247,11 @@ public final class StructurePattern {
         return found;
     }
 
+    /**
+     * 复制网格并校验形状
+     *
+     * <p>所有层必须有相同行数，所有行必须有相同宽度；空网格或空层直接抛异常。</p>
+     */
     private static List<List<String>> copyGrid(List<List<String>> grid) {
         if (grid.isEmpty()) {
             throw new IllegalArgumentException("Grid is empty");
@@ -275,67 +316,122 @@ public final class StructurePattern {
         return result;
     }
 
+    /**
+     * @return 新的构建器
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * @return 朝向模式
+     */
     public StructureOrientation orientation() {
         return this.orientation;
     }
 
+    /**
+     * @return 主朝向，网格坐标按这个方向定义
+     */
     public Direction canonicalFront() {
         return this.canonicalFront;
     }
 
+    /**
+     * @return 分层网格，只读
+     */
     public List<List<String>> grid() {
         return this.grid;
     }
 
+    /**
+     * @return 固定方块字符到谓词的映射
+     */
     public Map<Character, BlockStatePredicate> mapping() {
         return this.mapping;
     }
 
+    /**
+     * @return 槽位字符到槽位定义的映射
+     */
     public Map<Character, StructureSlot> slots() {
         return this.slots;
     }
 
+    /**
+     * @return 角色 ID 到角色定义的映射
+     */
     public Map<String, StructureRole> roles() {
         return this.roles;
     }
 
+    /**
+     * @return 所有非空格字符相对控制器的偏移，按 Y、Z、X 遍历顺序
+     */
     public List<Vec3i> positions() {
         return this.positions;
     }
 
+    /**
+     * @return 槽位偏移，顺序与 {@link #positions()} 中的槽位项一致
+     */
     public List<Vec3i> slotOffsets() {
         return this.slotOffsets;
     }
 
+    /**
+     * @return 结构包围盒尺寸
+     */
     public Vec3i size() {
         return this.size;
     }
 
+    /**
+     * @return 原点 {@code 0} 处的固定方块谓词
+     */
     public BlockStatePredicate controller() {
         return this.controller;
     }
 
+    /**
+     * @param offset 相对控制器的偏移
+     * @return 该偏移是否为槽位
+     */
     public boolean isSlot(Vec3i offset) {
         return this.slotKeys.containsKey(offset);
     }
 
+    /**
+     * @param offset 相对控制器的偏移
+     * @return 槽位字符，非槽位时为 {@code null}
+     */
     public Character keyAt(Vec3i offset) {
         return this.slotKeys.get(offset);
     }
 
+    /**
+     * @param offset 相对控制器的偏移
+     * @return 槽位定义，非槽位时为 {@code null}
+     */
     public StructureSlot slotAt(Vec3i offset) {
         Character key = this.keyAt(offset);
         return key == null ? null : this.slots.get(key);
     }
 
+    /**
+     * @param offset 相对控制器的偏移
+     * @return 固定方块谓词，非固定位置时为 {@code null}
+     */
     public BlockStatePredicate fixedAt(Vec3i offset) {
         return this.fixedCells.get(offset);
     }
 
+    /**
+     * 把槽位偏移旋转到指定朝向
+     *
+     * @param facing 控制器当前正面
+     * @return 旋转后的槽位偏移
+     */
     public List<Vec3i> rotatedSlotOffsets(Direction facing) {
         List<Vec3i> result = new ArrayList<>(this.slotOffsets.size());
         for (Vec3i offset : this.slotOffsets) {
@@ -345,7 +441,10 @@ public final class StructurePattern {
     }
 
     /**
-     * 网格构建器
+     * 结构模板构建器
+     *
+     * <p>{@link #layer(String...)} 每次追加一层，{@link #build()} 时统一复制并校验。
+     * 构建前必须为字符 {@code 0} 注册固定方块映射。</p>
      */
     public static final class Builder {
         private final List<List<String>> grid = new ArrayList<>();
@@ -358,47 +457,105 @@ public final class StructurePattern {
         private Builder() {
         }
 
+        /**
+         * @param orientation 朝向模式
+         * @return 自身
+         */
         public Builder orientation(StructureOrientation orientation) {
             this.orientation = orientation;
             return this;
         }
 
+        /**
+         * @param canonicalFront 主朝向
+         * @return 自身
+         */
         public Builder canonicalFront(Direction canonicalFront) {
             this.canonicalFront = canonicalFront;
             return this;
         }
 
+        /**
+         * 追加一层网格
+         *
+         * @param rows 该层的行，参数顺序即 Z 轴顺序
+         * @return 自身
+         */
         public Builder layer(String... rows) {
             this.grid.add(List.of(rows));
             return this;
         }
 
+        /**
+         * 把字符映射到只匹配指定方块的谓词
+         *
+         * @param key 单字符键
+         * @param block 方块
+         * @return 自身
+         */
         public Builder where(char key, Block block) {
             return this.where(key, BlockStatePredicate.builder().of(block).build());
         }
 
+        /**
+         * 把字符映射到指定方块提供的谓词，调用时立即从 supplier 取值
+         *
+         * @param key 单字符键
+         * @param block 方块提供者
+         * @return 自身
+         */
         public Builder where(char key, Supplier<? extends Block> block) {
             return this.where(key, block.get());
         }
 
+        /**
+         * @param key 单字符键
+         * @param predicate 方块谓词
+         * @return 自身
+         */
         public Builder where(char key, BlockStatePredicate predicate) {
             this.mapping.put(key, predicate);
             return this;
         }
 
+        /**
+         * 登记控制器方块字符
+         *
+         * @param key 单字符键
+         * @param block 控制器方块
+         * @return 自身
+         */
         public Builder controller(char key, Block block) {
             return this.where(key, block);
         }
 
+        /**
+         * @param key 单字符键
+         * @param slot 槽位定义
+         * @return 自身
+         */
         public Builder slot(char key, StructureSlot slot) {
             this.slots.put(key, slot);
             return this;
         }
 
+        /**
+         * 用角色 ID 列表创建槽位
+         *
+         * @param key 单字符键
+         * @param roles 允许的角色 ID，顺序决定候选与诊断顺序
+         * @param allowAir 是否允许该位置为空
+         * @return 自身
+         */
         public Builder slot(char key, List<String> roles, boolean allowAir) {
             return this.slot(key, new StructureSlot(roles, allowAir));
         }
 
+        /**
+         * @param id 角色 ID
+         * @param role 角色定义
+         * @return 自身
+         */
         public Builder role(String id, StructureRole role) {
             this.roles.put(id, role);
             return this;
@@ -407,16 +564,22 @@ public final class StructurePattern {
         /**
          * 只接受一种端口种类的角色
          *
-         * @param id   角色 ID
+         * @param id 角色 ID
          * @param kind 端口种类
-         * @param min  最少数量
-         * @param max  最多数量，{@code -1} 表示不限
+         * @param min 最少数量
+         * @param max 最多数量，{@code -1} 表示不限
          * @return 自身
          */
         public Builder role(String id, PortKind kind, int min, int max) {
             return this.role(id, new StructureRole(List.of(kind), List.of(), min, max));
         }
 
+        /**
+         * 用当前内容构造结构模板
+         *
+         * @return 新的结构模板
+         * @throws IllegalArgumentException 没有为 {@code 0} 注册映射，或模板校验失败
+         */
         public StructurePattern build() {
             if (this.mapping.get('0') == null) {
                 throw new IllegalArgumentException("Controller '0' is not mapped");

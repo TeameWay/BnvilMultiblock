@@ -6,7 +6,8 @@ import net.neoforged.neoforge.transfer.fluid.FluidResource;
 /**
  * 流体端口
  *
- * <p>方块实体应把同一个 {@link ResourceHandler} 注册到 {@code Capabilities.Fluid.BLOCK}。</p>
+ * <p>方块实体应把同一个 {@link ResourceHandler} 注册到 {@code Capabilities.Fluid.BLOCK}；
+ * 端口表按种类收集这些处理器。</p>
  */
 public interface FluidPort extends MultiblockPort {
     /**

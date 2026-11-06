@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 端口方块注册表
  *
- * <p>登记方块对应的端口种类与等级，供扫描、UI、JEI 与调试命令查询；方块实体仍需实现
+ * <p>登记方块对应的端口种类与等级，供结构匹配与 JEI 预览查询；方块实体仍需实现
  * {@link MultiblockPort} 及对应的资源接口。</p>
  */
 public class PortRegistry {
@@ -25,8 +25,9 @@ public class PortRegistry {
      * 注册一个端口方块
      *
      * @param block 方块
-     * @param kind  端口种类
-     * @param tier  端口等级
+     * @param kind 端口种类
+     * @param tier 端口等级
+     * @throws IllegalStateException 同一个方块被重复注册
      */
     public static void register(Block block, PortKind kind, PortTier tier) {
         Descriptor previous = DESCRIPTORS.put(block, new Descriptor(kind, tier));
@@ -60,10 +61,12 @@ public class PortRegistry {
     }
 
     /**
-     * 列出某端口种类的全部方块，供 JEI 预览与数据生成使用
+     * 列出某端口种类的全部方块
+     *
+     * <p>供 JEI 预览按种类枚举方块；每次调用返回新集合，顺序不保证。</p>
      *
      * @param kind 端口种类
-     * @return 方块集合，按注册顺序
+     * @return 该种类的方块集合
      */
     public static Set<Block> blocks(PortKind kind) {
         Set<Block> blocks = new LinkedHashSet<>();
@@ -76,7 +79,7 @@ public class PortRegistry {
     }
 
     /**
-     * 端口描述
+     * 端口方块在注册表里的条目
      *
      * @param kind 端口种类
      * @param tier 端口等级

@@ -3,7 +3,8 @@ package com.teameway.bnvilmb.multiblock.machine;
 /**
  * 线程间预留账本
  *
- * <p>同一 tick 内多个线程依次匹配，后续线程的可用量要扣掉前面线程的预留，避免重复占用；账本按槽位记录，周期结束清空。</p>
+ * <p>同一 tick 内多个线程依次匹配，后续线程的可用量要扣掉前面线程的预留，避免重复占用；
+ * 账本按槽位记录，每 tick 开始时清空。</p>
  */
 public class ReservationLedger {
     private final long[] items;
@@ -11,7 +12,9 @@ public class ReservationLedger {
     private long energy;
 
     /**
-     * @param itemSlots  物品输入槽数量
+     * 按输入槽数量创建账本，初始预留全为 0
+     *
+     * @param itemSlots 物品输入槽数量
      * @param fluidSlots 流体输入槽数量
      */
     public ReservationLedger(int itemSlots, int fluidSlots) {
@@ -19,14 +22,25 @@ public class ReservationLedger {
         this.fluids = new long[fluidSlots];
     }
 
+    /**
+     * @param slot 物品输入槽序号
+     * @return 该槽已预留的数量
+     */
     public long reservedItem(int slot) {
         return this.items[slot];
     }
 
+    /**
+     * @param slot 流体输入槽序号
+     * @return 该槽已预留的数量
+     */
     public long reservedFluid(int slot) {
         return this.fluids[slot];
     }
 
+    /**
+     * @return 已预留的能量
+     */
     public long reservedEnergy() {
         return this.energy;
     }

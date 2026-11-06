@@ -34,10 +34,16 @@ public abstract class AbstractPortBlock extends Block implements EntityBlock, Bl
         this.tier = tier;
     }
 
+    /**
+     * @return 该方块的端口种类
+     */
     public PortKind portKind() {
         return this.portKind;
     }
 
+    /**
+     * @return 该方块的端口等级
+     */
     public PortTier tier() {
         return this.tier;
     }
@@ -75,6 +81,8 @@ public abstract class AbstractPortBlock extends Block implements EntityBlock, Bl
 
     /**
      * 对应的方块实体注册条目
+     *
+     * @return 该方块使用的方块实体注册条目
      */
     protected abstract BlockEntityEntry<? extends BlockEntity> blockEntityEntry();
 }

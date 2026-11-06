@@ -19,7 +19,8 @@ import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
 /**
  * 多方块端口方块与方块实体注册
  *
- * <p>每种端口一个方块、一个等级，容量由方块实体按等级创建。</p>
+ * <p>每种端口一个方块、一个 {@code basic} 等级：物品端口 9 槽位、流体端口 8000 mB、
+ * 能量端口 100000 FE、并行仓 2、线程仓 1；容量与增量由方块实体按等级带上。</p>
  */
 public class BnvilPorts {
     public static final BlockEntry<ItemPortBlock> ITEM_INPUT =
@@ -65,6 +66,10 @@ public class BnvilPorts {
     public static void register() {
     }
 
+    /*
+     * 四种端口走同一套流程：方块工厂里先调用 PortRegistry.register 登记种类与等级，
+     * 再设置硬度 3.0 并自动生成方块物品。
+     */
     private static BlockEntry<ItemPortBlock> itemPort(String name, PortKind kind, PortTier tier) {
         return REGISTRUM
             .block(

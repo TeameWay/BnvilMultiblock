@@ -3,11 +3,12 @@ package com.teameway.bnvilmb.multiblock.machine;
 /**
  * 配方执行结果
  *
- * <p>区分材料不足与输出堵塞，机器状态机据此决定重新搜索配方还是原地等待。</p>
+ * <p>区分材料不足与输出堵塞，机器状态机据此决定重新搜索配方还是原地等待。
+ * 输出堵塞与执行失败的冷却时长见 {@code MachineRuntime} 里的常量。</p>
  */
 public enum CraftResult {
     /**
-     * 执行成功
+     * 输入与产出都完成，事务已提交
      */
     SUCCESS,
     /**
@@ -19,7 +20,7 @@ public enum CraftResult {
      */
     OUTPUT_BLOCKED,
     /**
-     * 执行过程抛异常
+     * 执行过程抛出异常，机器进入较长冷却
      */
     FAILED
 }

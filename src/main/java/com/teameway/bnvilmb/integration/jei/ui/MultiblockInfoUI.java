@@ -39,25 +39,28 @@ import java.util.Set;
 /**
  * 结构信息页
  *
- * <p>左侧一列上下排开：最上面是被点中的方块，下面依次列出同一位置可以换用的其余端口或方块；
+ * <p>左侧一列上下排开：最上面是场景里点中的方块，下面依次列出同一位置可以换用的其余端口或方块。
  * 每格的悬浮提示带上结构对它的数量要求（最多、精确、最少）。在选中格上右键会弹出候选菜单，
  * 菜单项只是普通条目，不注册成 JEI 原料。右侧是结构预览，以控制器为中心；预览右上角两个按钮
  * 分别切换显示层数与高亮可替换方块。底部横排清单列出全部所需方块与数量，种类多时横向滚动。</p>
  */
 public class MultiblockInfoUI {
     /**
-     * 高亮颜色，取偏黄绿以便与场景里的方块区分。
+     * 高亮颜色，取偏黄绿以便与场景里的方块区分
      */
     private static final float HIGHLIGHT_RED = 0.35F;
     private static final float HIGHLIGHT_GREEN = 1.0F;
     private static final float HIGHLIGHT_BLUE = 0.35F;
+    /**
+     * 高亮色块的缩放比例，略大于方块本身
+     */
     private static final float HIGHLIGHT_SCALE = 1.01F;
 
     private MultiblockInfoUI() {
     }
 
     /**
-     * 构建结构信息界面
+     * 按机器类型构建结构信息页
      *
      * @param type 机器类型
      * @return 供 JEI 显示的界面
@@ -95,7 +98,7 @@ public class MultiblockInfoUI {
     }
 
     /**
-     * 左上角的单格：显示场景里点中的方块
+     * 左上角的单格，显示场景里点中的方块
      *
      * @return 槽位
      */
@@ -137,7 +140,7 @@ public class MultiblockInfoUI {
     /**
      * 重填可替代方块列表
      *
-     * @param scroller   列表容器
+     * @param scroller 列表容器
      * @param candidates 该位置允许的全部方块，第一个就是上方格子里已经显示的那个
      */
     private static void fillAlternatives(ScrollerView scroller, List<StructureCandidate> candidates) {
@@ -178,7 +181,7 @@ public class MultiblockInfoUI {
     }
 
     /**
-     * 菜单与提示里用的方块名：方块名后面接数量条件
+     * 菜单项名称：方块名后面接数量条件
      *
      * @param candidate 候选方块
      * @return 名称
@@ -193,8 +196,8 @@ public class MultiblockInfoUI {
      * 底部横排清单，横向滚动
      *
      * @param content 内容区
-     * @param blocks  已排好序的需求方块
-     * @param top     清单上边缘
+     * @param blocks 已排好序的需求方块
+     * @param top 清单上边缘
      */
     private static void addStrip(UIElement content, List<RequiredBlock> blocks, int top) {
         ScrollerView strip = new ScrollerView();
@@ -240,7 +243,7 @@ public class MultiblockInfoUI {
         private final Set<BlockPos> replaceable;
         private final Set<BlockPos> highlighted = new LinkedHashSet<>();
         /**
-         * 当前显示的层序号，自下往上从 {@code 0} 开始；{@code -1} 表示完整结构。
+         * 当前显示的层序号，自下往上从 {@code 0} 开始；{@code -1} 表示完整结构
          */
         private int slice = -1;
         private boolean highlight;
@@ -260,6 +263,8 @@ public class MultiblockInfoUI {
 
         /**
          * 把场景与两个按钮挂到页面上
+         *
+         * <p>没有结构时改为显示一行提示，按钮与选中格的鼠标监听都不创建。</p>
          */
         private void install() {
             if (this.scene == null) {

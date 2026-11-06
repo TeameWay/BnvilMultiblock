@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 单一机器类型的配方索引
  *
- * <p>位序与 {@link #recipes()} 一致，位图从低位到高位遍历即按优先级降序。形态过滤为子集语义，
+ * <p>位序与 {@link #recipes()} 的下标一致，位图从低位到高位遍历即按优先级降序。形态过滤为子集语义，
  * 配方要求的形态必须全部出现在机器当前形态里，无形态要求的配方对任何机器有效。</p>
  */
 public class TypeIndex {
@@ -50,7 +50,7 @@ public class TypeIndex {
      * 留到后续数量校验阶段处理。</p>
      *
      * @param available 当前可用的资源键
-     * @param variants  机器当前形态，必须是不可变集合
+     * @param variants 机器当前形态，必须是不可变集合
      * @return 可修改的候选位图
      */
     public BitSet candidates(Set<ResourceKey> available, Set<Identifier> variants) {

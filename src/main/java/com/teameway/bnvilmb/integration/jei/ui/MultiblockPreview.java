@@ -39,19 +39,34 @@ import java.util.TreeSet;
  * 多方块结构预览
  *
  * <p>把结构模板映射成具体方块状态：固定格取谓词的第一个方块，槽位按角色顺序轮换取一个合法示例，
- * 保证四个角不会都显示成输入总线。写入虚拟世界时整体抬升 {@value #BASE_Y} 格。</p>
+ * 避免四个角都显示成输入总线。写入虚拟世界时整体抬升 {@value #BASE_Y} 格。</p>
  *
- * <p>每个位置同时记下该处允许的全部方块及各自的数量条件，场景里点中方块后可以据此列出可替代项；
- * 需求方块清单按“控制器、端口、其余按数量从多到少”排好序，界面直接照单铺格。</p>
+ * <p>每个位置同时记下该处允许的全部方块及各自的数量条件，场景里点中方块后据此列出可替代项。
+ * 需求方块清单按控制器、端口、其余排序；端口按种类分组，组内与其余方块都按数量从多到少，
+ * 界面直接照单铺格。</p>
  */
 public class MultiblockPreview {
+    /**
+     * 预览世界里的基准高度，结构坐标在此基础上整体抬升
+     */
     private static final int BASE_Y = 64;
     private static final float CAMERA_RANGE = 1.35F;
+    /**
+     * 按结构模板 ID 缓存的预览构建结果
+     */
     private static final Map<Identifier, Structure> STRUCTURES = new LinkedHashMap<>();
 
     private MultiblockPreview() {
     }
 
+    /**
+     * 创建结构预览场景
+     *
+     * <p>客户端世界不可用、结构模板缺失或模板没有可用位置时返回 {@code null}。</p>
+     *
+     * @param machine 机器类型
+     * @return 场景，不可用时为 {@code null}
+     */
     public static @Nullable Scene create(MultiblockType machine) {
         Structure structure = structureOf(machine);
         if (structure == null) {
@@ -83,7 +98,7 @@ public class MultiblockPreview {
      * 某个位置允许放的全部方块
      *
      * @param machine 机器类型
-     * @param pos     预览里的方块坐标
+     * @param pos 预览里的方块坐标
      * @return 候选方块，第一个是预览里实际显示的那个；位置未知时为空
      */
     public static List<StructureCandidate> candidatesAt(MultiblockType machine, BlockPos pos) {
@@ -92,7 +107,9 @@ public class MultiblockPreview {
     }
 
     /**
-     * 结构一共有多少层（按 y 值的不同取值计数）
+     * 结构一共有多少层
+     *
+     * <p>按 y 值的不同取值计数。</p>
      *
      * @param machine 机器类型
      * @return 层数，结构不存在时为 0
@@ -106,7 +123,7 @@ public class MultiblockPreview {
      * 单层的方块坐标
      *
      * @param machine 机器类型
-     * @param index   层序号，自下往上从 {@code 0} 开始；负数或越界表示全部
+     * @param index 层序号，自下往上从 {@code 0} 开始；负数或越界表示全部
      * @return 该层的坐标，越界时返回全部坐标
      */
     public static List<BlockPos> layerPositions(MultiblockType machine, int index) {
@@ -133,9 +150,9 @@ public class MultiblockPreview {
      *
      * <p>重新登记渲染核心后把镜头拉回原位，切换层数时视角不会跟着跳。</p>
      *
-     * @param scene   预览场景
+     * @param scene 预览场景
      * @param machine 机器类型
-     * @param index   层序号，自下往上从 {@code 0} 开始；负数或越界表示全部
+     * @param index 层序号，自下往上从 {@code 0} 开始；负数或越界表示全部
      */
     public static void showLayer(Scene scene, MultiblockType machine, int index) {
         Structure structure = structureOf(machine);
@@ -249,7 +266,7 @@ public class MultiblockPreview {
     /**
      * 统计每个固定格谓词在结构里占的格数
      *
-     * <p>同一映射字符下的格子共用同一个谓词实例，按实例计数即可得到“这一类固定方块要几个”。</p>
+     * <p>同一映射字符下的格子共用同一个谓词实例，按实例计数就能得到这一类固定方块要几个。</p>
      *
      * @param pattern 结构模板
      * @param entries 全部坐标
@@ -271,8 +288,8 @@ public class MultiblockPreview {
      *
      * <p>固定格取谓词里声明的方块；槽位按角色的声明顺序展开，每个角色先列端口、再列替代物。</p>
      *
-     * @param pattern     结构模板
-     * @param offset      相对控制器的坐标
+     * @param pattern 结构模板
+     * @param offset 相对控制器的坐标
      * @param fixedCounts 各固定格谓词在结构里的格数
      * @return 候选方块，位置不存在时为空
      */
@@ -347,7 +364,7 @@ public class MultiblockPreview {
     /**
      * 固定格的候选方块
      *
-     * @param predicate  方块谓词，可为 {@code null}
+     * @param predicate 方块谓词，可为 {@code null}
      * @param exactCount 这类方块在结构里占的格数，负数表示给不出数量
      * @return 候选方块
      */
@@ -365,8 +382,8 @@ public class MultiblockPreview {
     /**
      * 按槽位序号轮换角色，取该角色的第一个候选方块
      *
-     * @param pattern   结构模板
-     * @param offset    相对控制器的坐标
+     * @param pattern 结构模板
+     * @param offset 相对控制器的坐标
      * @param slotIndex 该槽位在全部槽位里的序号，用于错开各槽位的角色
      * @return 示例方块，角色取不到方块时为 {@code null}
      */
@@ -385,9 +402,10 @@ public class MultiblockPreview {
     }
 
     /**
-     * 整理需求方块清单的顺序：控制器、端口、其余，后两组都按数量从多到少
+     * 整理需求方块清单的顺序：控制器、端口、其余；端口按种类分组，组内与其余方块都按数量从多到少，
+     * 同数量按注册 ID
      *
-     * @param counts     各方块出现次数
+     * @param counts 各方块出现次数
      * @param controller 控制器方块，可为 {@code null}
      * @return 已排序的清单
      */
@@ -403,9 +421,11 @@ public class MultiblockPreview {
     }
 
     /**
-     * @param block      方块
+     * 分组序号
+     *
+     * @param block 方块
      * @param controller 控制器方块，可为 {@code null}
-     * @return 分组序号：控制器 0、端口 1、其余 2
+     * @return 控制器 0、端口 1、其余 2
      */
     private static int rank(Block block, @Nullable Block controller) {
         if (block == controller) {
@@ -415,8 +435,10 @@ public class MultiblockPreview {
     }
 
     /**
+     * 端口种类在 {@link PortKind} 里的序号
+     *
      * @param block 方块
-     * @return 端口种类在 {@link PortKind} 里的序号，不是端口时为 0
+     * @return 序号，不是端口时为 0
      */
     private static int portKindOrder(Block block) {
         PortRegistry.Descriptor descriptor = PortRegistry.descriptor(block.defaultBlockState());
@@ -424,6 +446,8 @@ public class MultiblockPreview {
     }
 
     /**
+     * 方块注册 ID
+     *
      * @param block 方块
      * @return 注册 ID，用于同序时的稳定排序
      */
@@ -451,7 +475,7 @@ public class MultiblockPreview {
      * 把预览里显示的那个方块挪到最前
      *
      * @param candidates 候选方块
-     * @param block      当前显示的方块
+     * @param block 当前显示的方块
      * @return 显示方块在最前的列表
      */
     private static List<StructureCandidate> withFirst(List<StructureCandidate> candidates, Block block) {
@@ -466,6 +490,9 @@ public class MultiblockPreview {
         return List.copyOf(ordered);
     }
 
+    /**
+     * 一次构建的结果，由 {@code STRUCTURES} 按结构模板 ID 缓存
+     */
     private record Structure(
         TrackedDummyWorld world,
         List<BlockPos> positions,

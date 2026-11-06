@@ -6,11 +6,18 @@ import org.jspecify.annotations.Nullable;
 /**
  * 多方块端口
  *
- * <p>由端口方块实体实现，成型时被扫描收集；资源端口另实现 {@link ItemPort}、{@link FluidPort}、{@link EnergyPort}。</p>
+ * <p>由端口方块实体实现，结构成型时被扫描收集；资源端口再实现 {@link ItemPort}、{@link FluidPort}、
+ * {@link EnergyPort}。</p>
  */
 public interface MultiblockPort {
+    /**
+     * @return 端口种类
+     */
     PortKind portKind();
 
+    /**
+     * @return 端口等级
+     */
     PortTier tier();
 
     /**
@@ -21,9 +28,9 @@ public interface MultiblockPort {
     }
 
     /**
-     * 设置端口归属；由结构管理器在成型/解散时调用
+     * 设置端口归属，由结构管理器在成型与解散时调用
      *
-     * @param controllerPos 控制器位置，{@code null} 表示释放
+     * @param controllerPos 控制器位置，{@code null} 表示解除认领
      */
     default void setControllerPos(@Nullable BlockPos controllerPos) {
     }

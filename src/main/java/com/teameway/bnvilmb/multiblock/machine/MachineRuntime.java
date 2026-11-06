@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * 机器运行时
  *
- * <p>每个线程一个 job 槽；并行倍数在任务开始时确定，执行时按实际输入复核，不够就缩小批次或放弃任务。</p>
+ * <p>每个线程一个任务槽；并行倍数在任务开始时确定，执行时按实际输入复核，不够就缩小批次或放弃任务。</p>
  */
 public class MachineRuntime {
     private static final int BLOCKED_COOLDOWN = 20;
@@ -37,7 +37,9 @@ public class MachineRuntime {
     private ReservationLedger ledger;
 
     /**
-     * @param machine    机器类型
+     * 创建运行时，成型前端口表与预留账本为空
+     *
+     * @param machine 机器类型
      * @param pattern 当前结构模板
      */
     public MachineRuntime(Identifier machine, Holder.Reference<StructurePattern> pattern) {
@@ -46,7 +48,9 @@ public class MachineRuntime {
     }
 
     /**
-     * 结构成型
+     * 结构成型，按端口表初始化并行倍数、预留账本与线程槽位
+     *
+     * <p>任务列表收缩或扩展到 {@code table.threads()} 个槽位，多出的任务直接丢弃。</p>
      *
      * @param table 端口表
      */
@@ -66,7 +70,7 @@ public class MachineRuntime {
     }
 
     /**
-     * 结构解散
+     * 结构解散，端口表、账本与任务一起清空
      */
     public void unformed() {
         this.ports = null;
@@ -77,6 +81,8 @@ public class MachineRuntime {
 
     /**
      * 服务端每 tick 调用
+     *
+     * <p>先按索引版本刷新形态并清空预留账本，再逐线程补任务或推进已有任务。</p>
      *
      * @param level 服务端世界
      */
@@ -162,6 +168,11 @@ public class MachineRuntime {
         return this.variants.containsAll(recipe.variants());
     }
 
+    /**
+     * 索引版本变化时重算机器形态
+     *
+     * <p>对配方声明的每个形态，只有当前结构模板持有对应 tag 时才计入。</p>
+     */
     private void refreshVariants(MultiblockRecipeIndex index) {
         if (this.indexVersion == index.version()) {
             return;
@@ -184,6 +195,9 @@ public class MachineRuntime {
         BnvilMultiBlock.LOGGER.debug("Machine {} variants: {}", this.machine, this.variants);
     }
 
+    /**
+     * 从当前批次往下重试分配，返回第一个能凑齐输入的批次
+     */
     private RecipeMatcher.@Nullable Match allocate(
         CompiledRecipe recipe,
         int batch,
@@ -202,7 +216,7 @@ public class MachineRuntime {
     /**
      * 读档恢复任务（允许空槽位）
      *
-     * @param saved 按槽位排列的任务列表
+     * @param saved 按槽位排列的任务列表，可以含 {@code null} 空槽位
      */
     public void restore(List<MachineJob> saved) {
         this.jobs.clear();
@@ -220,6 +234,9 @@ public class MachineRuntime {
         return java.util.Collections.unmodifiableList(new java.util.ArrayList<>(this.jobs));
     }
 
+    /**
+     * @return 机器类型
+     */
     public Identifier machine() {
         return this.machine;
     }
@@ -232,7 +249,7 @@ public class MachineRuntime {
     }
 
     /**
-     * @return 机器当前形态
+     * @return 机器当前形态，由结构模板持有的 tag 决定
      */
     public Set<Identifier> variants() {
         return this.variants;

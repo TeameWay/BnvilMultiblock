@@ -1,19 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  Bnvil 界面主题
 //
-//  全模组唯一的 LSS：上半部分是基底，管面板、按钮、槽位、滚动条这些通用控件；
-//  下半部分是本模组自己的界面（控制器、端口方块、端口浮层）。
+//  全模组唯一的 LSS。上半部分是基底，管面板、按钮、槽位、滚动条这些通用控件；
+//  下半部分只服务本模组的控制器、端口方块与端口浮层。
 //
-//  结构沿用 LDLib2 paper：选择器、圆角、控件高度、内边距都不动；
-//  调色板取自 VSCord 的终端配色（terminal.background / foreground / ansi*）。
-//
-//  PALETTE
+//  PALETTE（对比度都按 surface #222222 计）
 //    canvas   #1a1a1a   background 与 ansiBlack 之间，最底层
 //    surface  #222222   terminal.background
 //    raised   #2a2a2a   面板与控件静息态
 //    hovered  #323232
 //    disabled #2e2e2e
-//    deep     #151515   ansiBlack，代码编辑器等深井
+//    deep     #151515   ansiBlack，代码编辑器这类深色底
 //    line     #1fffffff  12% 白，发丝线
 //    line+    #33ffffff  20% 白
 //    text     #d0d0d0   terminal.foreground，10.3:1
@@ -22,7 +19,7 @@
 //    faint    #6f6f6f   由 ansiBrightBlack 提亮，仅用于禁用态
 //    accent   #6c99bb   ansiBlue，5.2:1
 //    accent+  #86b6d9   提亮后的悬停色
-//    accent-  #547c99   ansiBrightBlue；这组配色里 bright 反而更暗
+//    accent-  #547c99   ansiBrightBlue，这组配色里 bright 反而更暗
 //    success  #7b9246   ansiGreen
 //    warn     #d3a04d   ansiYellow
 //    danger   #a53c23   ansiRed，只做填充与描边，2.5:1 不能当文字
@@ -30,22 +27,22 @@
 //    info     #7dd6cf   ansiCyan
 //
 //  终端色里的 success / warn / info / magenta 目前在规则里没有对应控件，
-//  列在这里是给后续状态色取用，改状态色时不用再回头翻原配色。
+//  先列出来，以后加状态色直接取，不用回头翻原配色。
 //
 //  写规则的三条约束：
 //  1. 覆盖已有规则时用 #界面id 或类前缀提高权重（id 100 > 类 10 > 元素 1），
 //     不要靠书写顺序取胜，后加的规则会把它顶掉。
-//  2. 每个类都必须在 Java 侧有唯一的 addClass 位置，不留空选择器。
+//  2. 每个类都要在 Java 侧有唯一的 addClass 位置，不留空选择器。
 //  3. 尺寸（width/height/flex/margin/padding/gap）归 Java 的 ControllerLayout
-//     与 PortUI，写在这里会和内联样式冲突，而内联的优先级更高。
+//     与 PortUI；写在这里会和内联样式冲突，而内联的优先级更高。
 //
-//  ⚠️ 圆角顺序：sdf() 读 左下 右下 右上 左上，与 CSS 相反。
-//  ⚠️ 红底按钮必须用浅色文字：#1a1a1a 在 #a53c23 上只有 2.7:1，这里用 #f5f5f5。
+//  注意：sdf() 的四个圆角依次读 左上 右上 右下 左下，与 CSS 同序。
+//  注意：红底按钮必须用浅色文字。#1a1a1a 在 #a53c23 上只有 2.7:1，这里用 #f5f5f5。
 //
-//  强调色只在有话说的地方用：聚焦、选中、开启、进度。其余全是灰。
+//  强调色只用在需要表态的地方：聚焦、选中、开启、进度；其余控件保持灰色。
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── surfaces ─────────────────────────────────────────────────────────────────
+// ── 表面 ─────────────────────────────────────────────────────────────────────
 .panel_bg {
   background: sdf(#f21a1a1a, 7, 1, #1fffffff);
   padding-all: 6;
@@ -62,16 +59,15 @@
   padding-all: 4;
 }
 
-// ── type ─────────────────────────────────────────────────────────────────────
+// ── 文字 ─────────────────────────────────────────────────────────────────────
 text, label {
   text-shadow: false;
   text-color: #d0d0d0;
   font: ldlib2:jetbrains_mono_bold;
 }
 
-// ── button ───────────────────────────────────────────────────────────────────
-// Neutral by default. A screen full of accent-coloured buttons reads as a toy;
-// the accent is kept for the confirm button, where it means something.
+// ── 按钮 ─────────────────────────────────────────────────────────────────────
+// 默认中性。满屏强调色按钮会让界面像玩具；强调色只留给确认按钮，那里它才真的表示同意。
 button:host {
   base-background: sdf(#2a2a2a, 5, 1, #1fffffff);
   hover-background: sdf(#323232, 5, 1, #33ffffff);
@@ -80,8 +76,7 @@ button:host {
   height: 16;
 }
 
-// Icons authored white are already legible on this theme's dark buttons, so the
-// white_icon hint leaves them alone instead of tinting them to the label ink.
+// 图标本身是白色的，在这套深色按钮上已经看得清，所以 white_icon 提示不把它染成文字色。
 button:host > .__white_icon__,
 button.__white_icon__ > .__icon__ {
   color: #ffffff;
@@ -121,13 +116,11 @@ button:disabled:host .__button_text__ {
   text-color: #f5f5f5;
 }
 
-// ── text input ───────────────────────────────────────────────────────────────
-// ⚠️ Fields draw their own text, so `text, label` never reaches it, and TEXT_COLOR
-// defaults to white with CURSOR_COLOR near it. Set without :host on purpose: that
-// pseudo matches only elements which are not internal to another component, so a
-// colour selector's own fields are outside it — which is how they came out white
-// on white. Only the colours are set here; the frame stays with the rules below,
-// which are :host so that a component styling its own field keeps control of it.
+// ── 文本输入 ─────────────────────────────────────────────────────────────────
+// 注意：输入框自己画文字，`text, label` 管不到它；TEXT_COLOR 默认白色，CURSOR_COLOR
+// 也接近白色。这里故意不写 :host：该伪类只匹配不属于其他组件的元素，颜色选择器
+// 内部的输入框落在它外面，之前白底白字就是这么来的。这里只设颜色，边框留给下面
+// 带 :host 的规则，组件给自己的输入框设样式时仍能接管。
 text-field, text-area {
   text-color: #d0d0d0;
   cursor-color: #d0d0d0;
@@ -149,7 +142,7 @@ search-component:host {
   height: 16;
 }
 
-// ── switch ───────────────────────────────────────────────────────────────────
+// ── 开关 ─────────────────────────────────────────────────────────────────────
 switch:host {
   base-background: sdf(#323232, 6);
   pressed-background: sdf(#6c99bb, 6);
@@ -160,7 +153,7 @@ switch:host {
   padding-all: 1;
 }
 
-// ── selector ─────────────────────────────────────────────────────────────────
+// ── 下拉选择 ─────────────────────────────────────────────────────────────────
 selector:host {
   background: sdf(#2a2a2a, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
@@ -180,7 +173,7 @@ selector:host:hovered {
   padding-all: 3;
 }
 
-// ── progress bar ─────────────────────────────────────────────────────────────
+// ── 进度条 ───────────────────────────────────────────────────────────────────
 progress-bar:host {
   height: 8;
 }
@@ -201,7 +194,7 @@ progress-bar:host label {
   padding-all: 0;
 }
 
-// ── slots ────────────────────────────────────────────────────────────────────
+// ── 槽位 ─────────────────────────────────────────────────────────────────────
 item-slot, .item-slot_bg {
   background: sdf(#2a2a2a, 4, 1, #1fffffff);
   hover-overlay: sdf(#24ffffff, 4);
@@ -211,7 +204,7 @@ fluid-slot, .fluid-slot_bg {
   background: sdf(#2a2a2a, 4, 1, #1fffffff);
 }
 
-// ── colour selector ──────────────────────────────────────────────────────────
+// ── 颜色选择器 ───────────────────────────────────────────────────────────────
 color-selector:host text-field {
   background: sdf(#2a2a2a, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
@@ -244,7 +237,7 @@ color-selector:host .__color-selector_color-preview__ {
   padding-all: 2;
 }
 
-// ── toggle ───────────────────────────────────────────────────────────────────
+// ── 切换开关 ─────────────────────────────────────────────────────────────────
 toggle:host {
   mark-background: sdf(#3a6c99bb, 4, 1, #6c99bb);
   height: 14;
@@ -269,7 +262,7 @@ toggle:on .__toggle_button__ {
   flex: 1;
 }
 
-// ── text area ────────────────────────────────────────────────────────────────
+// ── 文本域 ───────────────────────────────────────────────────────────────────
 text-area {
   scroller-view-margin: 8;
   font: ldlib2:jetbrains_mono_bold;
@@ -279,8 +272,8 @@ text-area:host {
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
 }
 
-// The tree's arrows ship as white sprites. They stay visible on a dark row, but
-// they are tinted to the dim ink so they do not out-shout the label beside them.
+// 树形列表的箭头贴图是白色的。深色行上本来就看得到，这里仍把它染成暗色文字，
+// 免得它比旁边的标签还抢眼。
 tree-list {
   collapse-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 188, 240, 5, 5) color(#a0a0a0);
   expand-icon: sprite(ldlib2:textures/gui/icon/gdp_icons.png, 132, 230, 5, 5) color(#a0a0a0);
@@ -301,9 +294,9 @@ tree-list {
   margin-left: 2;
 }
 
-// ── scrollers ────────────────────────────────────────────────────────────────
-// Rail and thumb only. The end buttons are gone: nobody has clicked a scrollbar
-// arrow since the mouse wheel, and they cost two chunks of every scroller.
+// ── 滚动条 ───────────────────────────────────────────────────────────────────
+// 只留轨道和滑块。两端按钮已经去掉：滚轮之后没人再点滚动条箭头，
+// 它们还要占掉每个滚动条的两段空间。
 scroller-horizontal:host {
   height: 5;
 }
@@ -347,7 +340,7 @@ scroller-view {
   margin-left: 2;
 }
 
-// ── slider ───────────────────────────────────────────────────────────────────
+// ── 滑块 ─────────────────────────────────────────────────────────────────────
 slider-horizontal:host {
   height: 10;
 }
@@ -375,9 +368,9 @@ slider-horizontal, slider-vertical {
   pressed-background: sdf(#547c99, 3);
 }
 
-// ── tabs ─────────────────────────────────────────────────────────────────────
-// The header is the same surface as the content, joined by one seam, so a tab
-// strip reads as one card rather than as a lid resting on a box.
+// ── 标签页 ───────────────────────────────────────────────────────────────────
+// 页头与内容用同一块表面，中间只留一条缝，一排标签读起来才是一张卡片，
+// 而不是盖在盒子上的盖子。
 .__tab-view_tab_header_container__ {
   background: sdf(#2a2a2a, 7 7 0 0, 1, #1fffffff);
   margin-bottom: -1;
@@ -415,7 +408,7 @@ tab:host:not(tab:selected) label {
   text-shadow: false;
 }
 
-// ── dialog ───────────────────────────────────────────────────────────────────
+// ── 对话框 ───────────────────────────────────────────────────────────────────
 .__dialog_title__ {
   background: sdf(#2a2a2a, 7 7 0 0, 1, #33ffffff);
   transform: translateY(1);
@@ -434,13 +427,13 @@ tab:host:not(tab:selected) label {
   transform: translateY(-1);
 }
 
-// ── menu ─────────────────────────────────────────────────────────────────────
+// ── 菜单 ─────────────────────────────────────────────────────────────────────
 menu {
   background: sdf(#f2222222, 6, 1, #33ffffff);
   arrow: sprite(ldlib2:textures/gui/right.png) scale(0.55) color(#a0a0a0);
 }
 
-// ── editor ───────────────────────────────────────────────────────────────────
+// ── 编辑器 ───────────────────────────────────────────────────────────────────
 .__editor__ code-editor {
   background: sdf(#151515, 6, 1, #33ffffff);
 }
@@ -492,10 +485,9 @@ ResourceView tab:host:selected {
   pressed-background: sdf(#2a2a2a, 5) scale(0.92);
 }
 
-/* One rounded shape cut in two: the strip rounds the corners facing away from the content, the
-   content rounds the ones facing away from the strip, and each is nudged a pixel into the other so
-   the two borders read as one seam. Which corners those are turns with the placement — and mind the
-   radius order, which is top-left, top-right, bottom-right, bottom-left. */
+/* 一个圆角形状切成两半：页头圆朝外的那侧，内容圆另一侧，各自向对方挪一像素，
+   两条边就并成一条缝。圆哪几个角跟着 placement 变；注意圆角顺序是
+   左上、右上、右下、左下。 */
 .__resource-view_placement-left__ .__tab-view_tab_header_container__ {
   background: sdf(#1a1a1a, 7 0 0 7, 1, #1fffffff);
   transform: translate(1, 0);
@@ -582,7 +574,7 @@ ResourceView tab:host:selected {
   background: #2a2a2a;
 }
 
-// ── configurator ─────────────────────────────────────────────────────────────
+// ── 配置器 ───────────────────────────────────────────────────────────────────
 .__configurator-group__ .__configurator-group_container__ {
   background: sdf(#222222, 0 6 6 6, 1, #1fffffff);
 }
@@ -619,7 +611,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
   background: sdf(#3a6c99bb, 4, 1, #6c99bb);
 }
 
-// ── node graph ───────────────────────────────────────────────────────────────
+// ── 节点图 ───────────────────────────────────────────────────────────────────
 .__blackboard-var-prop_title-bar__ {
   background: sdf(#2a2a2a, 6 6 0 0, 1, #1fffffff);
 }
@@ -713,7 +705,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
   gap-all: 5;
 }
 
-// ── keymap ──────────────────────────────────────────────────────────────────
+// ── 按键映射 ─────────────────────────────────────────────────────────────────
 .__keymap_chord__ {
   background: sdf(#2a2a2a, 5, 1, #1fffffff);
 }
@@ -738,12 +730,12 @@ ToggleSelectorConfigurator .__toggle_button__ {
 // ═════════════════════════════════════════════════════════════════════════════
 //  模组界面
 //
-//  以下只服务控制器、端口方块与端口浮层；通用控件的外观在上半部分。
+//  下面只服务控制器、端口方块与端口浮层；通用控件的外观都在上半部分。
 // ═════════════════════════════════════════════════════════════════════════════
 
 // ── 文本层级 ─────────────────────────────────────────────────────────────────
 // 字体与正文颜色由基底的 `text, label` 统一设置，这里只分层：
-// 标题用 brightWhite，说明退到 dim，配方小节用 accent 标出。
+// 标题用 title，说明退到 dim，配方小节用 accent。
 .bnvil-title {
   text-color: #f5f5f5;
 }
@@ -770,7 +762,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 // ── 控制器 ───────────────────────────────────────────────────────────────────
-// 选中卡片只换类，所以三态必须在填充与描边上同时区分：只改悬停会和选中混淆。
+// 选中卡片只换类名，填充和描边都要区分三态；只改悬停色的话，选中和悬停分不出来。
 #bnvil-controller .controller-thread-card {
   background: sdf(#2a2a2a, 3, 1, #1fffffff);
   transition: background 0.12;
@@ -790,9 +782,9 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 // ── 紧凑滚动条 ───────────────────────────────────────────────────────────────
-// 右栏只有 149 像素，上半部分的 5 像素滚动条加 3 像素内边距要吃掉 16 像素，
-// 卡片里的配方 ID 会被截得太短。这里压到 4 与 1，并去掉内容区底色。
-// 用 id 前缀是为了压过上半部分的同名规则，而不是靠书写顺序。
+// 右栏只有 149 像素宽。上半部分的 5 像素滚动条加 3 像素内边距要吃掉 16 像素，
+// 卡片里的配方 ID 会被截得太短，这里压到 4 和 1，并去掉内容区底色。
+// 用 id 前缀是为了压过上半部分的同名规则，不靠书写顺序。
 #bnvil-controller scroller-vertical:host,
 #bnvil-port-panel scroller-vertical:host {
   width: 4;
@@ -805,7 +797,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 // ── 端口浮层 ─────────────────────────────────────────────────────────────────
-// 浮层盖在控制器界面之上且可拖到任意位置，需要自己的表面和比卡片略重的描边，
+// 浮层盖在控制器界面之上，还能拖到任意位置，需要自己的表面和比卡片略重的描边，
 // 否则会被读成页面里的又一行。
 // 面板自己就是 #bnvil-port-panel，所以这条用控制器根前缀；
 // 卡片和标题是它的子元素，可以继续用 id 前缀。

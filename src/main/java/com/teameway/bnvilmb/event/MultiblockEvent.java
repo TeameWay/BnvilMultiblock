@@ -9,6 +9,11 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import static com.teameway.bnvilmb.BnvilMultiBlock.REGISTRUM;
 
+/**
+ * 公共初始化阶段的控制器登记
+ *
+ * <p>没有限定 {@code Dist}，服务端与客户端都会执行。</p>
+ */
 @EventBusSubscriber(modid = BnvilMultiBlock.MODID)
 public class MultiblockEvent {
     /**

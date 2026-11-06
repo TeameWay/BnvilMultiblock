@@ -45,6 +45,8 @@ public class MultiblockRecipeIndex {
     }
 
     /**
+     * 取当前索引
+     *
      * @return 当前索引，未构建时返回 {@code null}
      */
     public static @Nullable MultiblockRecipeIndex current() {
@@ -54,8 +56,10 @@ public class MultiblockRecipeIndex {
     /**
      * 从配方表重建索引
      *
+     * <p>重建结束后新索引成为 {@link #current()}，并记录一条含类型数、配方数、资源键数与耗时的日志。</p>
+     *
      * @param recipeMap 配方表
-     * @param reason    触发原因，仅用于日志
+     * @param reason 触发原因，仅用于日志
      * @return 新索引
      */
     public static MultiblockRecipeIndex rebuild(RecipeMap recipeMap, String reason) {
@@ -119,7 +123,7 @@ public class MultiblockRecipeIndex {
     }
 
     /**
-     * @return 索引版本号，配方重载后递增
+     * @return 索引版本号，每次重建递增
      */
     public long version() {
         return this.version;
@@ -135,6 +139,9 @@ public class MultiblockRecipeIndex {
         return this.types.get(machine);
     }
 
+    /**
+     * @return 索引中的配方条数
+     */
     public int recipeCount() {
         return this.recipeCount;
     }

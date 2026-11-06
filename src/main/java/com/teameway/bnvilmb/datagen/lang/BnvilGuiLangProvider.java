@@ -3,10 +3,22 @@ package com.teameway.bnvilmb.datagen.lang;
 import dev.anvilcraft.lib.v2.registrum.providers.RegistrumLangProvider;
 
 /**
- * 图形界面文本
+ * 本模组的界面文本
+ *
+ * <p>键按前缀分组：{@code gui.bnvil_multiblock.controller.*} 是控制器状态、线程与配方信息，
+ * {@code port_kind.*} 与 {@code port.*} 是端口名称与端口面板，{@code jei.*} 是 JEI 配方页，
+ * {@code slot.count} 是物品槽标题，{@code structure.bnvil_multiblock.problem.*} 是结构成型失败的原因。</p>
+ *
+ * <p>文本里的 {@code %s} 在显示时由调用方填参；进度条目写作 {@code %s%%}，多出的那个百分号
+ * 用来在结果里输出字面量 {@code %}。</p>
  */
 public class BnvilGuiLangProvider {
 
+    /**
+     * 写入全部界面文本
+     *
+     * @param provider 接收这些键值对的 Registrum 语言 provider
+     */
     public static void init(RegistrumLangProvider provider) {
         provider.add("gui.bnvil_multiblock.controller.state.unformed", "Structure not formed");
         provider.add("gui.bnvil_multiblock.controller.state.idle", "Idle");

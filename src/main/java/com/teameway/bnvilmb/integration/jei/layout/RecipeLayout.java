@@ -7,44 +7,46 @@ import java.util.List;
 /**
  * 配方页排版
  *
- * <p>输入整体、箭头与输出整体的中心在内容区内等距分布，间距由较宽的一侧决定，一侧槽位少时只是整体变窄。</p>
+ * <p>输入整体、箭头与输出整体的中心在内容区内等距分布。间距由较宽的一侧决定，一侧槽位少时
+ * 整个整体变窄，中心位置不变。</p>
  *
- * <p>所有坐标相对面板内容区左上角，供绝对定位直接使用。</p>
+ * <p>所有坐标都相对面板内容区左上角，可以直接用于绝对定位。</p>
  *
- * @param columns   该分类单侧允许的最大列数
- * @param inputWidth  输入整体在最宽配方下的宽度
+ * @param columns 该分类单侧允许的最大列数
+ * @param inputWidth 输入整体在最宽配方下的宽度
  * @param outputWidth 输出整体在最宽配方下的宽度
- * @param bodyHeight  中部区域高度，取两侧整体高度与箭头高度的最大值
+ * @param bodyHeight 中部区域高度，取两侧整体高度与箭头高度的最大值
  */
 public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bodyHeight) {
     /**
-     * 每侧最多三列。
+     * 每侧最多三列
      */
     public static final int MAX_COLUMNS = 3;
     /**
-     * 底部固定三行：耗时、总耗能、耗能功率。
+     * 底部固定三行：耗时、总耗能、耗能功率
      */
     public static final int TEXT_LINES = 3;
     /**
-     * 中部内容块与底部文字之间的纵向间距。
+     * 中部内容块与底部文字之间的纵向间距
      */
     private static final int TEXT_GAP = 24;
     /**
-     * 中部整行相对内容区顶部的下移量，用于让槽位与箭头视觉上更居中。
+     * 中部整行相对内容区顶部的下移量，用于让槽位与箭头视觉上更居中
      */
     private static final int BODY_OFFSET = 6;
     /**
-     * 整体之间允许的最小间隔，避免槽位贴到箭头或页面边缘。
+     * 整体之间允许的最小间隔，避免槽位贴到箭头或页面边缘
      */
     private static final int MIN_GAP = 4;
 
     /**
      * 按该分类全部配方计算统一排版
      *
-     * <p>列数取所有配方里最宽的一侧，再用最终列数重算高度：列数改变会改变换行位置，按 1 列估算会偏小。</p>
+     * <p>列数取所有配方里最宽的一侧，再用最终列数重算高度。列数改变会改变换行位置，
+     * 按 1 列估算会偏小。</p>
      *
      * @param recipes 该分类的配方
-     * @return 排版
+     * @return 统一排版
      */
     public static RecipeLayout of(List<RecipeContents> recipes) {
         int widest = 1;
@@ -75,7 +77,11 @@ public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bod
     }
 
     /**
-     * @return 整页高度
+     * 整页高度
+     *
+     * <p>上下内边距、中部下移量、中部区域、中部与文字之间的间距，再加三行文本占的高度。</p>
+     *
+     * @return 面板总高度
      */
     public int height() {
         return JeiLayout.PANEL_PADDING * 2 + BODY_OFFSET + this.bodyHeight + TEXT_GAP
@@ -85,7 +91,7 @@ public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bod
     /**
      * 三者中心之间的间距
      *
-     * <p>取能同时满足两侧约束的最大值：靠页边的一侧至少留 {@link #MIN_GAP}，另一侧按较宽整体折算。</p>
+     * <p>取能同时满足两侧约束的最大值：靠页边的一侧至少留 {@code MIN_GAP}，另一侧按较宽整体折算。</p>
      *
      * @return 中心间距
      */
@@ -97,7 +103,7 @@ public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bod
     }
 
     /**
-     * 箭头左边缘，始终落在内容区水平中线上
+     * 箭头左边缘落在内容区水平中线上
      *
      * @return 左边缘
      */
@@ -106,9 +112,9 @@ public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bod
     }
 
     /**
-     * 按整体宽度算出它应放的左边缘，使其中心与箭头中心相差一个 {@link #centerGap()}
+     * 按整体宽度算出左边缘，使整体中心与箭头中心相差 {@link #centerGap()}
      *
-     * @param width  整体实际宽度
+     * @param width 整体实际宽度
      * @param before 是否位于箭头左侧
      * @return 左边缘
      */
@@ -122,22 +128,30 @@ public record RecipeLayout(int columns, int inputWidth, int outputWidth, int bod
     }
 
     /**
-     * @return 箭头在内容区内的纵向位置
+     * 箭头在内容区内的纵向位置
+     *
+     * @return 纵向位置
      */
     public int arrowTop() {
         return BODY_OFFSET + (this.bodyHeight - JeiLayout.ARROW_HEIGHT) / 2;
     }
 
     /**
-     * @return 底部文字块在内容区内的纵向位置
+     * 底部文字块在内容区内的纵向位置
+     *
+     * @return 纵向位置
      */
     public int textTop() {
         return BODY_OFFSET + this.bodyHeight + TEXT_GAP;
     }
 
     /**
+     * 整体在内容区内的纵向位置
+     *
+     * <p>整体高度不一致时保持垂直居中。</p>
+     *
      * @param blockHeight 整体实际高度
-     * @return 整体的纵向位置，整体高度不一致时保持垂直居中
+     * @return 纵向位置
      */
     public int blockTop(int blockHeight) {
         return BODY_OFFSET + Math.max(0, (this.bodyHeight - blockHeight) / 2);

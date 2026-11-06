@@ -3,68 +3,67 @@ package com.teameway.bnvilmb.multiblock.controller;
 /**
  * 控制器界面度量
  *
- * <p>横向分三段：左块 {@value #LEFT_WIDTH}，一道 {@value #DIVIDER_WIDTH} 像素的分隔线，
- * 右栏 {@value #RIGHT_WIDTH}。左块与玩家物品栏同宽，纵向由机器信息与配方说明接物品栏；
+ * <p>横向分三段：左块 {@value #LEFT_WIDTH} 像素、一道 {@value #DIVIDER_WIDTH} 像素的分隔线、
+ * 右栏 {@value #RIGHT_WIDTH} 像素。左块与玩家物品栏同宽，纵向由机器信息与配方说明接物品栏；
  * 右栏高度等于这两段之和，滚动区从头贯到底。</p>
  *
- * <p>宽度紧张，{@code lss/bnvil.lss} 把滚动条压到 {@value #SCROLLER_WIDTH}、
- * 内边距压到 {@value #VIEWPORT_PADDING}；改那份样式时必须同步这里的常数，
- * 否则测量的可用宽度对不上实际渲染宽度。</p>
+ * <p>宽度紧张，{@code lss/bnvil.lss} 把滚动条压到 {@value #SCROLLER_WIDTH} 像素、内边距压到
+ * {@value #VIEWPORT_PADDING} 像素。改样式时必须同步这里的常数，否则测量的可用宽度与实际渲染宽度对不上。</p>
  */
 public class ControllerLayout {
     public static final int INVENTORY_COLUMNS = 9;
     /**
-     * 槽位边长，与 {@code ItemSlot} 的默认尺寸一致。
+     * 槽位边长，与 {@code ItemSlot} 的默认尺寸一致
      */
     public static final int SLOT = 18;
     /**
-     * {@code InventorySlots} 在快捷栏上方固定的间距。
+     * {@code InventorySlots} 在快捷栏上方留出的间距
      */
     public static final int HOTBAR_GAP = 5;
     public static final int INVENTORY_WIDTH = INVENTORY_COLUMNS * SLOT;
     /**
-     * 玩家物品栏的高度：三行主背包、一道间距、一行快捷栏。
+     * 玩家物品栏高度：三行主背包、一道间距、一行快捷栏
      */
     public static final int INVENTORY_HEIGHT = 4 * SLOT + HOTBAR_GAP;
     /**
-     * {@code panel_bg} 施加的内边距。
+     * {@code panel_bg} 施加的内边距
      */
     public static final int PADDING = 5;
     /**
-     * 左栏宽度，与物品栏对齐。
+     * 左栏宽度，与物品栏宽度一致
      */
     public static final int LEFT_WIDTH = INVENTORY_WIDTH;
     /**
-     * 右栏宽度。
+     * 右栏宽度
      *
-     * <p>卡片是一行一条的配方 ID，比左栏内文宽一些，否则会被截得太狠。</p>
+     * <p>卡片一行一条配方 ID，再窄就会被截掉大半。</p>
      */
     public static final int RIGHT_WIDTH = 149;
     /**
      * 左右两块之间竖线的宽度
      *
-     * <p>线本身只占 1 像素，留白由 {@link #DIVIDER_GAP} 提供；线画粗会读成一条色带。</p>
+     * <p>线本身只占 1 像素，留白由 {@link #DIVIDER_GAP} 提供；画粗后会读成一条色带。</p>
      */
     public static final int DIVIDER_WIDTH = 1;
     /**
      * 左栏内部横线的厚度
      *
-     * <p>与竖线分开命名：一个量宽，一个量高，合成一个常数会让
-     * {@code .width(DIVIDER)} 与 {@code .height(DIVIDER)} 含义混淆。</p>
+     * <p>与竖线分开命名：一个量宽，一个量高；合成一个常数会让 {@code .width(DIVIDER)}
+     * 与 {@code .height(DIVIDER)} 的含义混在一起。</p>
      */
     public static final int DIVIDER_HEIGHT = 1;
     /**
      * 端口信息栏开关按钮的边长
      *
-     * <p>正方形，放在左栏左侧的窄条里。它只承载一个图标，横条会让人以为还有文字。</p>
+     * <p>按钮是正方形，放在左栏左侧的窄条里。上面只有一个字母 P，做成横条会显得还该有别的文字。</p>
      */
     public static final int TOGGLE_SIZE = 14;
     public static final int TOGGLE_GAP = 2;
     /**
-     * 面板左侧窄条的宽度，等于按钮宽加两侧留白
+     * 面板左侧窄条的宽度，等于按钮边长加两侧留白
      *
      * <p>窄条在 {@code panel_bg} 之外，按钮站在框架左边框外侧，因此不计入 {@link #WIDTH}，
-     * 由 {@link #OUTER_WIDTH} 另行加上。</p>
+     * 由 {@link #OUTER_WIDTH} 另外加上。</p>
      */
     public static final int RAIL_WIDTH = TOGGLE_SIZE + TOGGLE_GAP * 2;
     /**
@@ -86,23 +85,23 @@ public class ControllerLayout {
     /**
      * 左栏上部机器信息与配方这一段的高度
      *
-     * <p>再加上横线与物品栏才是内容区高度，所以比信息本身少算一道线。</p>
+     * <p>再加上横线与物品栏才是内容区高度，所以这里比信息本身少算一道线。</p>
      */
     public static final int INFO_HEIGHT = 138;
     /**
-     * 一行文本的高度，与 {@code Label} 的默认行高一致。
+     * 一行文本的高度，与 {@code Label} 的默认行高一致
      */
     public static final int LINE = 10;
     public static final int LINE_GAP = 1;
     /**
      * 机器信息区的高度：五行文字与四道行距
      *
-     * <p>五行依次是名称、状态、形态、并行、线程，行数固定，因此可以直接算出高度，
-     * 让配方区用剩余的弹性空间。</p>
+     * <p>五行依次是名称、状态、形态、并行、线程。行数固定，可以直接算出高度，
+     * 让配方区占用剩余的弹性空间。</p>
      */
     public static final int MACHINE_HEIGHT = 5 * LINE + 4 * LINE_GAP;
     /**
-     * 面板高度：左栏上段、一道横线的留白与线、物品栏，再加两侧内边距。
+     * 面板高度：左栏上段、一道横线及其上下留白、物品栏，再加两侧内边距
      *
      * <p>横线的上下留白是 margin，同样占内容区高度；漏掉它会让左栏比内容区高出
      * {@code DIVIDER_GAP * 2}，把物品栏挤出面板。</p>
@@ -113,11 +112,11 @@ public class ControllerLayout {
     public static final int CONTENT_WIDTH = WIDTH - PADDING * 2;
     public static final int CONTENT_HEIGHT = HEIGHT - PADDING * 2;
     /**
-     * 纵向滚动条的宽度，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加。
+     * 纵向滚动条的宽度，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加
      */
     public static final int SCROLLER_WIDTH = 4;
     /**
-     * 滚动视图内容区的内边距，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加。
+     * 滚动视图内容区的内边距，由 {@code lss/bnvil.lss} 的 {@code #bnvil-controller} 规则施加
      */
     public static final int VIEWPORT_PADDING = 1;
     public static final int SCROLL_CHROME = SCROLLER_WIDTH + VIEWPORT_PADDING * 2;
@@ -133,11 +132,11 @@ public class ControllerLayout {
     /**
      * 卡片高度：上下内边距、{@link #CARD_LINES} 行文字与相应的行距
      *
-     * <p>每项单独一行，不会因为一行放不下而在运行过程中被截掉一截。</p>
+     * <p>每项占一行，运行过程中不会因为一行放不下而被截掉一截。</p>
      */
     public static final int CARD_HEIGHT = CARD_PADDING * 2 + LINE * CARD_LINES + CARD_GAP * (CARD_LINES - 1);
     /**
-     * 配方说明里速率行的缩进，与主行区分层级。
+     * 配方说明里速率行的缩进，用来与主行区分层级
      */
     public static final int INDENT = 6;
 
