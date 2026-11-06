@@ -5,6 +5,7 @@ import com.teameway.bnvilmb.multiblock.StructureController;
 import com.teameway.bnvilmb.multiblock.StructureControllerRegistry;
 import com.teameway.bnvilmb.multiblock.controller.ControllerBlockEntity;
 import com.teameway.bnvilmb.multiblock.pattern.BlockPattern;
+import com.teameway.bnvilmb.multiblock.pattern.PatternError;
 import com.teameway.bnvilmb.multiblock.pattern.PatternState;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
 import net.minecraft.core.BlockPos;
@@ -263,7 +264,7 @@ public final class StructureManager {
             if (this.addClaim(pos, state.controllerPos())) {
                 state.claimedPorts().add(pos);
             } else {
-                state.setErrors(List.of(com.teameway.bnvilmb.multiblock.pattern.PatternError.shared(pos)));
+                state.setErrors(List.of(PatternError.shared(pos)));
                 success = false;
             }
         }

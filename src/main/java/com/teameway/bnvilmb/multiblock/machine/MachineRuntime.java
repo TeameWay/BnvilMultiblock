@@ -67,6 +67,57 @@ public class MachineRuntime {
     }
 
     /**
+     * 按新的端口表重调并行与线程槽位
+     *
+     * <p>扩容补空槽；缩容从末尾丢弃任务，丢弃前按该任务的配方与批次扣一次输入，
+     * 进度和输入都不返还。端口提供量变化时由控制器调用。</p>
+     *
+     * @param table 新的端口表
+     */
+    public void retune(MultiblockPortTable table) {
+        this.ports = table;
+        this.parallels = table.parallels();
+        int target = table.threads();
+        while (this.jobs.size() > target) {
+            MachineJob dropped = this.jobs.remove(this.jobs.size() - 1);
+            if (dropped != null) {
+                this.swallow(dropped);
+            }
+        }
+        while (this.jobs.size() < target) {
+            this.jobs.add(null);
+        }
+        BnvilMultiBlock.LOGGER.debug(
+            "Machine {} retuned: {} thread(s), {} parallel(s)", this.machine, table.threads(), table.parallels()
+        );
+    }
+
+    /**
+     * 丢弃任务时扣除它本应消耗的输入
+     *
+     * @param job 被丢弃的任务
+     */
+    private void swallow(MachineJob job) {
+        MultiblockRecipeIndex index = MultiblockRecipeIndex.current();
+        MultiblockPortTable table = this.ports;
+        if (index == null || table == null) {
+            return;
+        }
+        CompiledRecipe recipe = job.resolve(index, this.machine);
+        if (recipe == null) {
+            return;
+        }
+        MachineResources resources = MachineResources.of(table);
+        ReservationLedger ledger = new ReservationLedger(resources.itemSlotCount(), resources.fluidSlotCount());
+        ResourceAllocation allocation = RecipeMatcher.plan(recipe, resources, ledger, job.batch());
+        if (allocation != null && RecipeExecutor.consume(resources, allocation)) {
+            BnvilMultiBlock.LOGGER.debug(
+                "Machine {} dropped thread job {} and consumed its inputs", this.machine, job.recipeId()
+            );
+        }
+    }
+
+    /**
      * 结构解散，端口表、账本与任务一起清空
      */
     public void unformed() {

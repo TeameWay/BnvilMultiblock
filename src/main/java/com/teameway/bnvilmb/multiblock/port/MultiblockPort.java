@@ -3,6 +3,7 @@ package com.teameway.bnvilmb.multiblock.port;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,6 +27,18 @@ public interface MultiblockPort {
      * @return 当前认领该端口的控制器位置，只读
      */
     Set<BlockPos> controllerPositions();
+
+    /**
+     * 返回客户端界面可用的控制器位置
+     *
+     * <p>方块实体在客户端不持有服务端的归属集合，具体实现应返回同步字段里的列表；
+     * 没有同步数据的实现退回 {@link #controllerPositions()}。</p>
+     *
+     * @return 控制器位置列表
+     */
+    default List<BlockPos> visibleControllers() {
+        return List.copyOf(this.controllerPositions());
+    }
 
     /**
      * @return 是否允许被多个控制器共享，默认允许

@@ -69,6 +69,29 @@ public class RecipeExecutor {
     }
 
     /**
+     * 只扣除一次输入，不产生任何产出
+     *
+     * <p>线程数或并行数缩容时，被丢弃的任务按这个入口结算输入。事务失败时整体回滚，
+     * 调用方只关心是否扣到。</p>
+     *
+     * @param resources 输入快照
+     * @param allocation 输入分配
+     * @return 是否全部扣除
+     */
+    public static boolean consume(MachineResources resources, ResourceAllocation allocation) {
+        try (Transaction transaction = Transaction.openRoot()) {
+            if (!consumeInputs(transaction, resources, allocation)) {
+                return false;
+            }
+            transaction.commit();
+            return true;
+        } catch (RuntimeException exception) {
+            BnvilMultiBlock.LOGGER.error("Multiblock input consumption failed", exception);
+            return false;
+        }
+    }
+
+    /**
      * 相乘并饱和到 {@link Long#MAX_VALUE}
      *
      * <p>产出数量与并行倍数都可能很大，直接相乘会溢出为负数，该产出会被当作零而静默跳过。</p>

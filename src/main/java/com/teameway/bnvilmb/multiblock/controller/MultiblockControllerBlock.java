@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.teameway.bnvilmb.ui.BnvilUi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * 多方块控制器方块基类。
  *
  * <p>控制器方块的开箱行为集中在这里：放置时写入六向朝向、只在服务端提供 ticker、右键打开
- * {@link ControllerUI}。具体方块只需实现 {@link EntityBlock#newBlockEntity(BlockPos, BlockState)}
+ * {@link BnvilUi}。具体方块只需实现 {@link EntityBlock#newBlockEntity(BlockPos, BlockState)}
  * 返回自己的控制器方块实体。</p>
  */
 public abstract class MultiblockControllerBlock extends Block implements EntityBlock, BlockUIMenuType.BlockUI {
@@ -130,7 +131,7 @@ public abstract class MultiblockControllerBlock extends Block implements EntityB
     @Override
     public ModularUI createUI(BlockUIMenuType.BlockUIHolder holder) {
         if (holder.player.level().getBlockEntity(holder.pos) instanceof ControllerBlockEntity controller) {
-            return ControllerUI.create(controller, holder.player);
+            return BnvilUi.controller(controller, holder.player);
         }
         return new ModularUI(UI.of(new UIElement()), holder.player);
     }

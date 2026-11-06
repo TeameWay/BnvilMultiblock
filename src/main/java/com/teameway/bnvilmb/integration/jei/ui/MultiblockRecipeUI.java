@@ -4,12 +4,12 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.FluidSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.teameway.bnvilmb.gui.BnvilTheme;
 import com.teameway.bnvilmb.integration.jei.layout.JeiLayout;
 import com.teameway.bnvilmb.integration.jei.layout.RecipeLayout;
 import com.teameway.bnvilmb.integration.jei.ui.widget.Arrow;
 import com.teameway.bnvilmb.ldlib.slot.CompactItemSlot;
 import com.teameway.bnvilmb.recipe.CompiledRecipe;
+import com.teameway.bnvilmb.ui.theme.BnvilTheme;
 import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.network.chat.Component;
 

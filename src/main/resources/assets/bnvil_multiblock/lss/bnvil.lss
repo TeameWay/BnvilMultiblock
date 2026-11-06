@@ -4,30 +4,31 @@
 //  全模组唯一的 LSS。上半部分是基底，管面板、按钮、槽位、滚动条这些通用控件；
 //  下半部分只服务本模组的控制器、端口方块与端口浮层。
 //
-//  PALETTE（对比度都按 surface #222222 计）
-//    canvas   #1a1a1a   background 与 ansiBlack 之间，最底层
-//    surface  #222222   terminal.background
-//    raised   #2a2a2a   面板与控件静息态
-//    hovered  #323232
-//    disabled #2e2e2e
-//    deep     #151515   ansiBlack，代码编辑器这类深色底
+//  PALETTE（对比度都按 surface #2d2d2d 计）
+//    canvas   #1f1f1f   预览与编辑画布，比面板再深一层
+//    surface  #2d2d2d   terminal.background，主面板底
+//    raised   #363636   卡片、按钮、槽位静息态
+//    hovered  #3f3f3f
+//    disabled #333333
+//    deep     #191919   代码编辑器这类深色底
 //    line     #1fffffff  12% 白，发丝线
 //    line+    #33ffffff  20% 白
-//    text     #d0d0d0   terminal.foreground，10.3:1
-//    title    #f5f5f5   ansiBrightWhite
-//    dim      #a0a0a0   由 foreground 压暗，6.1:1
-//    faint    #6f6f6f   由 ansiBrightBlack 提亮，仅用于禁用态
-//    accent   #6c99bb   ansiBlue，5.2:1
-//    accent+  #86b6d9   提亮后的悬停色
-//    accent-  #547c99   ansiBrightBlue，这组配色里 bright 反而更暗
-//    success  #7b9246   ansiGreen
-//    warn     #d3a04d   ansiYellow
-//    danger   #a53c23   ansiRed，只做填充与描边，2.5:1 不能当文字
-//    danger+  #d97a5c   提亮后的红字，5.2:1
-//    info     #7dd6cf   ansiCyan
+//    text     #d0d0d0   8.9:1
+//    title    #f5f5f5   12.6:1
+//    dim      #a0a0a0   5.3:1
+//    faint    #6f6f6f   仅用于禁用态
+//    accent   #6c99bb   4.5:1，只做填充、描边与进度
+//    accent+  #86b6d9   悬停
+//    accent-  #547c99   按下
+//    error    #f58e8e   6.0:1
+//    success  #a9d3ab   8.3:1
+//    warn     #fed37e   9.7:1
+//    input    #7aabd4   5.6:1
+//    output   #dadbaa   9.6:1
 //
-//  终端色里的 success / warn / info / magenta 目前在规则里没有对应控件，
-//  先列出来，以后加状态色直接取，不用回头翻原配色。
+//  语义色只用于文字，一屏之内一个色只表示一件事：红=错误、绿=正确、黄=警告、
+//  蓝=输入、橄榄黄=产出。warn 目前没有控件使用，先留在调色板里；等界面真的
+//  出现警告文本时再建类，避免空选择器。
 //
 //  写规则的三条约束：
 //  1. 覆盖已有规则时用 #界面id 或类前缀提高权重（id 100 > 类 10 > 元素 1），
@@ -37,25 +38,25 @@
 //     与 PortUI；写在这里会和内联样式冲突，而内联的优先级更高。
 //
 //  注意：sdf() 的四个圆角依次读 左上 右上 右下 左下，与 CSS 同序。
-//  注意：红底按钮必须用浅色文字。#1a1a1a 在 #a53c23 上只有 2.7:1，这里用 #f5f5f5。
+//  注意：红底按钮必须用浅色文字。#1f1f1f 在 #a53c23 上只有 2.6:1，这里用 #f5f5f5。
 //
 //  强调色只用在需要表态的地方：聚焦、选中、开启、进度；其余控件保持灰色。
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── 表面 ─────────────────────────────────────────────────────────────────────
 .panel_bg {
-  background: sdf(#f21a1a1a, 7, 1, #1fffffff);
+  background: sdf(#f22d2d2d, 7, 1, #1fffffff);
   padding-all: 6;
   gap-all: 5;
 }
 
 .preview_bg {
-  background: sdf(#1a1a1a, 6, 1, #1fffffff);
+  background: sdf(#1f1f1f, 6, 1, #1fffffff);
   padding-all: 4;
 }
 
 .configurator_preview_bg {
-  background: sdf(#1a1a1a, 6, 1, #1fffffff);
+  background: sdf(#1f1f1f, 6, 1, #1fffffff);
   padding-all: 4;
 }
 
@@ -69,9 +70,9 @@ text, label {
 // ── 按钮 ─────────────────────────────────────────────────────────────────────
 // 默认中性。满屏强调色按钮会让界面像玩具；强调色只留给确认按钮，那里它才真的表示同意。
 button:host {
-  base-background: sdf(#2a2a2a, 5, 1, #1fffffff);
-  hover-background: sdf(#323232, 5, 1, #33ffffff);
-  pressed-background: sdf(#1a1a1a, 5, 1, #33ffffff);
+  base-background: sdf(#363636, 5, 1, #1fffffff);
+  hover-background: sdf(#3f3f3f, 5, 1, #33ffffff);
+  pressed-background: sdf(#1f1f1f, 5, 1, #33ffffff);
   padding-all: 3;
   height: 16;
 }
@@ -88,7 +89,7 @@ button:host .__button_text__ {
 }
 
 button:disabled:host {
-  base-background: sdf(#2e2e2e, 5, 1, #24ffffff);
+  base-background: sdf(#333333, 5, 1, #24ffffff);
 }
 
 button:disabled:host .__button_text__ {
@@ -103,7 +104,7 @@ button:disabled:host .__button_text__ {
 }
 
 .__confirm-button__ .__button_text__ {
-  text-color: #1a1a1a;
+  text-color: #1f1f1f;
 }
 
 .__reject-button__ {
@@ -130,24 +131,24 @@ text-field, text-area {
 text-field:host,
 .__tag-field_text-field__,
 .__search-component_text-field__ {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   padding-all: 3;
   font: ldlib2:jetbrains_mono_bold;
 }
 
 search-component:host {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   height: 16;
 }
 
 // ── 开关 ─────────────────────────────────────────────────────────────────────
 switch:host {
-  base-background: sdf(#323232, 6);
+  base-background: sdf(#3f3f3f, 6);
   pressed-background: sdf(#6c99bb, 6);
   unmark-background: sdf(#a0a0a0, 5);
-  mark-background: sdf(#1a1a1a, 5);
+  mark-background: sdf(#1f1f1f, 5);
   height: 12;
   width: 22;
   padding-all: 1;
@@ -155,13 +156,13 @@ switch:host {
 
 // ── 下拉选择 ─────────────────────────────────────────────────────────────────
 selector:host {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   height: 16;
 }
 
 selector:host:hovered {
-  background: sdf(#323232, 5, 1, #33ffffff);
+  background: sdf(#3f3f3f, 5, 1, #33ffffff);
 }
 
 .__selector_button-icon__ {
@@ -169,7 +170,7 @@ selector:host:hovered {
 }
 
 .__selector_dialog__, .__search-component_dialog__ {
-  background: sdf(#f2222222, 7, 1, #33ffffff);
+  background: sdf(#f22d2d2d, 7, 1, #33ffffff);
   padding-all: 3;
 }
 
@@ -185,7 +186,7 @@ progress-bar:host label {
 }
 
 .__progress-bar_bar-container__ {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
   padding-all: 0;
 }
 
@@ -196,42 +197,42 @@ progress-bar:host label {
 
 // ── 槽位 ─────────────────────────────────────────────────────────────────────
 item-slot, .item-slot_bg {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
   hover-overlay: sdf(#24ffffff, 4);
 }
 
 fluid-slot, .fluid-slot_bg {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
 }
 
 // ── 颜色选择器 ───────────────────────────────────────────────────────────────
 color-selector:host text-field {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   focus-overlay: sdf(#00000000, 5, 1, #6c99bb);
   padding-all: 3;
   font: ldlib2:jetbrains_mono_bold;
 }
 
 color-selector:host button {
-  base-background: sdf(#2a2a2a, 4, 1, #1fffffff);
-  hover-background: sdf(#323232, 4, 1, #33ffffff);
-  pressed-background: sdf(#1a1a1a, 4, 1, #33ffffff);
+  base-background: sdf(#363636, 4, 1, #1fffffff);
+  hover-background: sdf(#3f3f3f, 4, 1, #33ffffff);
+  pressed-background: sdf(#1f1f1f, 4, 1, #33ffffff);
 }
 
 color-selector:host .__color-selector_alpha-slider__ {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
   margin-right: 3;
   padding-all: 2;
 }
 
 color-selector:host .__color-selector_color-slider__ {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
   margin-bottom: 3;
   padding-all: 2;
 }
 
 color-selector:host .__color-selector_color-preview__ {
-  background: sdf(#2a2a2a, 4, 1, #1fffffff);
+  background: sdf(#363636, 4, 1, #1fffffff);
   margin-right: 3;
   margin-bottom: 3;
   padding-all: 2;
@@ -244,9 +245,9 @@ toggle:host {
 }
 
 .__toggle_button__ {
-  base-background: sdf(#2a2a2a, 4, 1, #1fffffff);
-  hover-background: sdf(#323232, 4, 1, #33ffffff);
-  pressed-background: sdf(#1a1a1a, 4, 1, #33ffffff);
+  base-background: sdf(#363636, 4, 1, #1fffffff);
+  hover-background: sdf(#3f3f3f, 4, 1, #33ffffff);
+  pressed-background: sdf(#1f1f1f, 4, 1, #33ffffff);
 }
 
 toggle:on .__toggle_button__ {
@@ -280,7 +281,7 @@ tree-list {
 }
 
 .__text-area_content-view__ {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   padding-all: 3;
 }
 
@@ -326,7 +327,7 @@ scroller-view {
 }
 
 .__scroller_view_view-port__ {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
   padding-all: 3;
 }
 
@@ -355,7 +356,7 @@ slider-horizontal, slider-vertical {
 }
 
 .__slider_track__ {
-  background: sdf(#2a2a2a, 2, 1, #1fffffff);
+  background: sdf(#363636, 2, 1, #1fffffff);
 }
 
 .__slider_fill__ {
@@ -372,7 +373,7 @@ slider-horizontal, slider-vertical {
 // 页头与内容用同一块表面，中间只留一条缝，一排标签读起来才是一张卡片，
 // 而不是盖在盒子上的盖子。
 .__tab-view_tab_header_container__ {
-  background: sdf(#2a2a2a, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#363636, 7 7 0 0, 1, #1fffffff);
   margin-bottom: -1;
   padding-all: 3;
 }
@@ -382,7 +383,7 @@ slider-horizontal, slider-vertical {
 }
 
 .__tab-view_tab_content_container__ {
-  background: sdf(#222222, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#2d2d2d, 0 0 7 7, 1, #1fffffff);
 }
 
 tab-view .__tab-view_tab_scroller__ {
@@ -398,9 +399,9 @@ tab:host {
 }
 
 tab:host:selected {
-  base-background: sdf(#222222, 5 5 0 0);
-  hover-background: sdf(#222222, 5 5 0 0);
-  pressed-background: sdf(#222222, 5 5 0 0);
+  base-background: sdf(#2d2d2d, 5 5 0 0);
+  hover-background: sdf(#2d2d2d, 5 5 0 0);
+  pressed-background: sdf(#2d2d2d, 5 5 0 0);
 }
 
 tab:host:not(tab:selected) label {
@@ -410,7 +411,7 @@ tab:host:not(tab:selected) label {
 
 // ── 对话框 ───────────────────────────────────────────────────────────────────
 .__dialog_title__ {
-  background: sdf(#2a2a2a, 7 7 0 0, 1, #33ffffff);
+  background: sdf(#363636, 7 7 0 0, 1, #33ffffff);
   transform: translateY(1);
 }
 
@@ -419,27 +420,27 @@ tab:host:not(tab:selected) label {
 }
 
 .__dialog_content-container__ {
-  background: sdf(#f2222222, 0, 1, #33ffffff);
+  background: sdf(#f22d2d2d, 0, 1, #33ffffff);
 }
 
 .__dialog_button-container__ {
-  background: sdf(#f2222222, 0 0 7 7, 1, #33ffffff);
+  background: sdf(#f22d2d2d, 0 0 7 7, 1, #33ffffff);
   transform: translateY(-1);
 }
 
 // ── 菜单 ─────────────────────────────────────────────────────────────────────
 menu {
-  background: sdf(#f2222222, 6, 1, #33ffffff);
+  background: sdf(#f22d2d2d, 6, 1, #33ffffff);
   arrow: sprite(ldlib2:textures/gui/right.png) scale(0.55) color(#a0a0a0);
 }
 
 // ── 编辑器 ───────────────────────────────────────────────────────────────────
 .__editor__ code-editor {
-  background: sdf(#151515, 6, 1, #33ffffff);
+  background: sdf(#191919, 6, 1, #33ffffff);
 }
 
 .__editor_top__ {
-  background: sdf(#2a2a2a, 6 6 0 0);
+  background: sdf(#363636, 6 6 0 0);
 }
 
 .__editor__ button:host {
@@ -453,11 +454,11 @@ menu {
 }
 
 .__editor-gizmo-bar__ {
-  background: sdf(#f21a1a1a, 6, 1, #33ffffff);
+  background: sdf(#f21f1f1f, 6, 1, #33ffffff);
 }
 
 .__view-container__ {
-  background: sdf(#1a1a1a);
+  background: sdf(#1f1f1f);
 }
 
 .__view-container_tab-view__ .__tab-view_tab_content_container__ {
@@ -480,48 +481,48 @@ ResourceView tab:host {
 }
 
 ResourceView tab:host:selected {
-  base-background: sdf(#222222, 5) scale(0.92);
-  hover-background: sdf(#2a2a2a, 5) scale(0.92);
-  pressed-background: sdf(#2a2a2a, 5) scale(0.92);
+  base-background: sdf(#2d2d2d, 5) scale(0.92);
+  hover-background: sdf(#363636, 5) scale(0.92);
+  pressed-background: sdf(#363636, 5) scale(0.92);
 }
 
 /* 一个圆角形状切成两半：页头圆朝外的那侧，内容圆另一侧，各自向对方挪一像素，
    两条边就并成一条缝。圆哪几个角跟着 placement 变；注意圆角顺序是
    左上、右上、右下、左下。 */
 .__resource-view_placement-left__ .__tab-view_tab_header_container__ {
-  background: sdf(#1a1a1a, 7 0 0 7, 1, #1fffffff);
+  background: sdf(#1f1f1f, 7 0 0 7, 1, #1fffffff);
   transform: translate(1, 0);
 }
 
 .__resource-view_placement-left__ .__tab-view_tab_content_container__ {
-  background: sdf(#222222, 0 7 7 0, 1, #1fffffff);
+  background: sdf(#2d2d2d, 0 7 7 0, 1, #1fffffff);
 }
 
 .__resource-view_placement-right__ .__tab-view_tab_header_container__ {
-  background: sdf(#1a1a1a, 0 7 7 0, 1, #1fffffff);
+  background: sdf(#1f1f1f, 0 7 7 0, 1, #1fffffff);
   transform: translate(-1, 0);
 }
 
 .__resource-view_placement-right__ .__tab-view_tab_content_container__ {
-  background: sdf(#222222, 7 0 0 7, 1, #1fffffff);
+  background: sdf(#2d2d2d, 7 0 0 7, 1, #1fffffff);
 }
 
 .__resource-view_placement-top__ .__tab-view_tab_header_container__ {
-  background: sdf(#1a1a1a, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#1f1f1f, 7 7 0 0, 1, #1fffffff);
   transform: translate(0, 1);
 }
 
 .__resource-view_placement-top__ .__tab-view_tab_content_container__ {
-  background: sdf(#222222, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#2d2d2d, 0 0 7 7, 1, #1fffffff);
 }
 
 .__resource-view_placement-bottom__ .__tab-view_tab_header_container__ {
-  background: sdf(#1a1a1a, 0 0 7 7, 1, #1fffffff);
+  background: sdf(#1f1f1f, 0 0 7 7, 1, #1fffffff);
   transform: translate(0, -1);
 }
 
 .__resource-view_placement-bottom__ .__tab-view_tab_content_container__ {
-  background: sdf(#222222, 7 7 0 0, 1, #1fffffff);
+  background: sdf(#2d2d2d, 7 7 0 0, 1, #1fffffff);
 }
 
 .__resource-view_tab-placeholder__ {
@@ -529,7 +530,7 @@ ResourceView tab:host:selected {
 }
 
 .__ui-editor-view_header__ {
-  background: sdf(#222222);
+  background: sdf(#2d2d2d);
 }
 
 .__ui-editor-view_header__ button {
@@ -543,7 +544,7 @@ ResourceView tab:host:selected {
 }
 
 .__ui-editor-view_canvas__ {
-  background: #1a1a1a;
+  background: #1f1f1f;
 }
 
 .__ui-editor-view_builtin-styles-toggle__ {
@@ -571,20 +572,20 @@ ResourceView tab:host:selected {
 }
 
 .__editor-window_inactive__ {
-  background: #2a2a2a;
+  background: #363636;
 }
 
 // ── 配置器 ───────────────────────────────────────────────────────────────────
 .__configurator-group__ .__configurator-group_container__ {
-  background: sdf(#222222, 0 6 6 6, 1, #1fffffff);
+  background: sdf(#2d2d2d, 0 6 6 6, 1, #1fffffff);
 }
 
 .__configurator-group__ > .__configurator_line__ {
-  background: sdf(#1a1a1a, 5, 1, #1fffffff);
+  background: sdf(#1f1f1f, 5, 1, #1fffffff);
 }
 
 .__configurator-group__ > .__configurator_line__:hovered:not(:disabled) {
-  background: sdf(#2a2a2a, 5, 1, #33ffffff);
+  background: sdf(#363636, 5, 1, #33ffffff);
 }
 
 .__configurator-group__ > .__configurator_line__ > .__configurator_label__ {
@@ -613,15 +614,15 @@ ToggleSelectorConfigurator .__toggle_button__ {
 
 // ── 节点图 ───────────────────────────────────────────────────────────────────
 .__blackboard-var-prop_title-bar__ {
-  background: sdf(#2a2a2a, 6 6 0 0, 1, #1fffffff);
+  background: sdf(#363636, 6 6 0 0, 1, #1fffffff);
 }
 
 .__blackboard-var-prop_content__ {
-  background: sdf(#222222, 0 0 6 6, 1, #1fffffff);
+  background: sdf(#2d2d2d, 0 0 6 6, 1, #1fffffff);
 }
 
 .__node-graph-view_canvas__ {
-  background: #1e1e1e;
+  background: #252525;
 }
 
 .__node-graph-view_canvas-view__ {
@@ -629,11 +630,11 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__node-element__ {
-  background: sdf(#f21a1a1a, 6, 1, #33ffffff);
+  background: sdf(#f21f1f1f, 6, 1, #33ffffff);
 }
 
 .__node-title-element__ {
-  background: sdf(#2a2a2a, 6 6 0 0, 1, #1fffffff);
+  background: sdf(#363636, 6 6 0 0, 1, #1fffffff);
   padding-bottom: 4;
 }
 
@@ -652,7 +653,7 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__capsule-node__ {
-  background: sdf(#fa2a2a2a, 8, 1, #33ffffff);
+  background: sdf(#fa363636, 8, 1, #33ffffff);
 }
 
 .__capsule-node__ .__node-title-element__ {
@@ -674,11 +675,11 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__block-list-container__ {
-  background: sdf(#2a2a2a, 6);
+  background: sdf(#363636, 6);
 }
 
 .__subgraph-node__ .__node-title-element__ {
-  background: sdf(#323232, 6 6 0 0, 1, #33ffffff);
+  background: sdf(#3f3f3f, 6 6 0 0, 1, #33ffffff);
 }
 
 .__vertical-port-container__ {
@@ -691,31 +692,31 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__node-preview__ {
-  background: sdf(#2a2a2a, 0 0 6 6, 1, #1fffffff);
+  background: sdf(#363636, 0 0 6 6, 1, #1fffffff);
   padding-all: 3;
 }
 
 .__item-library__ {
-  background: sdf(#f2222222, 7, 1, #6c99bb);
+  background: sdf(#f22d2d2d, 7, 1, #6c99bb);
 }
 
 .__item-library_description-panel__ {
-  background: sdf(#f21a1a1a, 7, 1, #1fffffff);
+  background: sdf(#f21f1f1f, 7, 1, #1fffffff);
   padding-all: 6;
   gap-all: 5;
 }
 
 // ── 按键映射 ─────────────────────────────────────────────────────────────────
 .__keymap_chord__ {
-  background: sdf(#2a2a2a, 5, 1, #1fffffff);
+  background: sdf(#363636, 5, 1, #1fffffff);
 }
 
 .__keymap_chord__:hovered {
-  background: sdf(#2e2e2e, 5, 1, #33ffffff);
+  background: sdf(#333333, 5, 1, #33ffffff);
 }
 
 .__keymap_chord__.__capturing__ {
-  background: sdf(#2a2a2a, 5, 1, #6c99bb);
+  background: sdf(#363636, 5, 1, #6c99bb);
 }
 
 .__keymap_chord-text__ {
@@ -724,18 +725,17 @@ ToggleSelectorConfigurator .__toggle_button__ {
 }
 
 .__keymap_chord__.__conflict__ .__keymap_chord-text__ {
-  text-color: #d97a5c;
+  text-color: #f58e8e;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  模组界面
 //
-//  下面只服务控制器、端口方块与端口浮层；通用控件的外观都在上半部分。
+//  控制器、端口与浮窗共用这里的类；通用控件的外观都在上半部分。
 // ═════════════════════════════════════════════════════════════════════════════
 
 // ── 文本层级 ─────────────────────────────────────────────────────────────────
-// 字体与正文颜色由基底的 `text, label` 统一设置，这里只分层：
-// 标题用 title，说明退到 dim，配方小节用 accent。
+// 字体与正文颜色由基底的 `text, label` 统一设置，这里只分层。
 .bnvil-title {
   text-color: #f5f5f5;
 }
@@ -744,78 +744,125 @@ ToggleSelectorConfigurator .__toggle_button__ {
   text-color: #a0a0a0;
 }
 
-.bnvil-section {
-  text-color: #6c99bb;
+.bnvil-input {
+  text-color: #7aabd4;
 }
 
-// 结构状态。三个类互斥，由 ControllerUI 在状态变化时切换。
+.bnvil-output {
+  text-color: #dadbaa;
+}
+
 .bnvil-state-idle {
   text-color: #a0a0a0;
 }
 
 .bnvil-state-working {
-  text-color: #6c99bb;
+  text-color: #a9d3ab;
 }
 
 .bnvil-state-error {
-  text-color: #d97a5c;
+  text-color: #f58e8e;
 }
 
-// ── 控制器 ───────────────────────────────────────────────────────────────────
-// 选中卡片只换类名，填充和描边都要区分三态；只改悬停色的话，选中和悬停分不出来。
-#bnvil-controller .controller-thread-card {
-  background: sdf(#2a2a2a, 3, 1, #1fffffff);
+// ── 侧边按钮 ─────────────────────────────────────────────────────────────────
+// 16×16 的小方块，只放一个字母；文字用 8 号字，避免在按钮里挤成两行。
+.bnvil-side-button {
+  base-background: sdf(#2d2d2d, 4, 1, #1fffffff);
+  hover-background: sdf(#3f3f3f, 4, 1, #33ffffff);
+  pressed-background: sdf(#1f1f1f, 4, 1, #33ffffff);
+  padding-all: 0;
+}
+
+.bnvil-side-button .__button_text__ {
+  text-color: #d0d0d0;
+  font-size: 8;
+}
+
+// ── 线程卡片 ─────────────────────────────────────────────────────────────────
+// 选中态换填充与描边；进度底衬由 Java 按实时进度叠一层绝对定位的绿色。
+.bnvil-thread-card {
+  background: sdf(#363636, 3, 1, #1fffffff);
   transition: background 0.12;
 }
 
-#bnvil-controller .controller-thread-card:hover {
-  background: sdf(#323232, 3, 1, #33ffffff);
+.bnvil-thread-card:hover {
+  background: sdf(#3f3f3f, 3, 1, #33ffffff);
 }
 
-#bnvil-controller .controller-thread-card.controller-thread-selected {
+.bnvil-thread-card.bnvil-thread-selected {
   background: sdf(#3a6c99bb, 3, 1, #6c99bb);
 }
 
-// 栏与栏之间的分隔线：一像素宽，圆角看不出来，用 rect 即可。
-#bnvil-controller .controller-divider {
-  background: rect(#33ffffff);
-}
-
-// ── 紧凑滚动条 ───────────────────────────────────────────────────────────────
-// 右栏只有 149 像素宽。上半部分的 5 像素滚动条加 3 像素内边距要吃掉 16 像素，
-// 卡片里的配方 ID 会被截得太短，这里压到 4 和 1，并去掉内容区底色。
-// 用 id 前缀是为了压过上半部分的同名规则，不靠书写顺序。
-#bnvil-controller scroller-vertical:host,
-#bnvil-port-panel scroller-vertical:host {
-  width: 4;
-}
-
-#bnvil-controller .__scroller_view_view-port__,
-#bnvil-port-panel .__scroller_view_view-port__ {
-  padding-all: 1;
-  background: empty;
-}
-
-// ── 端口浮层 ─────────────────────────────────────────────────────────────────
-// 浮层盖在控制器界面之上，还能拖到任意位置，需要自己的表面和比卡片略重的描边，
-// 否则会被读成页面里的又一行。
-// 面板自己就是 #bnvil-port-panel，所以这条用控制器根前缀；
-// 卡片和标题是它的子元素，可以继续用 id 前缀。
-#bnvil-controller .port-panel {
-  background: sdf(#222222, 4, 1, #40ffffff);
-  z-index: 10;
-}
-
-#bnvil-port-panel .port-panel-title {
-  background: sdf(#2a2a2a, 3);
-}
-
-#bnvil-port-panel .port-panel-card {
-  background: sdf(#2a2a2a, 3, 1, #1fffffff);
-  z-index: 1;
+// ── 端口卡片 ─────────────────────────────────────────────────────────────────
+.bnvil-port-card {
+  background: sdf(#363636, 3, 1, #1fffffff);
   transition: background 0.12;
 }
 
-#bnvil-port-panel .port-panel-card:hover {
-  background: sdf(#323232, 3, 1, #33ffffff);
+.bnvil-port-card:hover {
+  background: sdf(#3f3f3f, 3, 1, #33ffffff);
+}
+
+// ── 浮窗 ─────────────────────────────────────────────────────────────────────
+// 浮窗盖在 main 之上，需要自己的表面和比卡片略重的描边。
+.bnvil-floating-panel {
+  background: sdf(#2d2d2d, 4, 1, #40ffffff);
+}
+
+.bnvil-floating-title {
+  background: sdf(#363636, 3);
+}
+
+.bnvil-floating-close {
+  padding-all: 0;
+}
+
+.bnvil-floating-close .__button_text__ {
+  text-color: #d0d0d0;
+}
+
+// ── 信息框与物品框 ───────────────────────────────────────────────────────────
+// 控制器信息和物品总线都套一层与物品栏等宽的框。
+.bnvil-info-box {
+  background: sdf(#363636, 4, 1, #1fffffff);
+}
+
+.bnvil-item-box {
+  background: sdf(#363636, 4, 1, #1fffffff);
+}
+
+.bnvil-divider {
+  background: rect(#33ffffff);
+}
+
+// ── 流体框 ───────────────────────────────────────────────────────────────────
+.bnvil-fluid-box {
+  background: sdf(#363636, 4, 1, #1fffffff);
+}
+
+// ── 加减框 ───────────────────────────────────────────────────────────────────
+.bnvil-stepper {
+  background: sdf(#363636, 4, 1, #1fffffff);
+}
+
+text-field.bnvil-stepper-field {
+  background: sdf(#2d2d2d, 3, 1, #1fffffff);
+  padding-all: 1;
+}
+
+// ── 紧凑滚动条 ───────────────────────────────────────────────────────────────
+// main 与浮窗都不宽，滚动条压到 4 像素，内容区去掉底色与多余内边距。
+// 用根 id 前缀压过上半部分的同名规则，不靠书写顺序。
+#bnvil-ui scroller-vertical:host {
+  width: 4;
+}
+
+#bnvil-ui .__scroller_view_vertical-scroller__ {
+  width: 4;
+  margin-left: 0;
+}
+
+#bnvil-ui .__scroller_view_view-port__ {
+  padding-all: 0;
+  background: empty;
 }

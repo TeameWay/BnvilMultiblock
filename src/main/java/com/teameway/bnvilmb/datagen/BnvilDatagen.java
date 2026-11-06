@@ -1,7 +1,9 @@
 package com.teameway.bnvilmb.datagen;
 
 import com.teameway.bnvilmb.BnvilMultiBlock;
+import com.teameway.bnvilmb.datagen.lang.BnvilGuiLangProvider;
 import com.teameway.bnvilmb.datagen.lang.BnvilLangGenerator;
+import com.teameway.bnvilmb.datagen.lang.ZhCnLangProvider;
 import dev.anvilcraft.lib.v2.registrum.providers.ProviderType;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
@@ -18,5 +20,6 @@ public class BnvilDatagen {
             return;
         }
         REGISTRUM.addDataGenerator(ProviderType.LANG, BnvilLangGenerator::accept);
+        REGISTRUM.addDataGenerator(ZhCnLangProvider.TYPE, BnvilGuiLangProvider::initZhCn);
     }
 }

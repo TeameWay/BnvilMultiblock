@@ -19,6 +19,7 @@ import com.teameway.bnvilmb.multiblock.pattern.PatternState;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPortTable;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
+import com.teameway.bnvilmb.multiblock.port.PortRef;
 import com.teameway.bnvilmb.multiblock.structure.StructureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -178,6 +179,24 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
     }
 
     /**
+     * 端口提供量变化后重建端口表并重调运行时
+     *
+     * <p>线程仓或并行仓改数字时由端口方块实体调用。缩容丢弃的任务槽会按当前配方扣除一次输入，
+     * 进度与输入都不返还。</p>
+     */
+    public void onPortSettingsChanged() {
+        if (!(this.level instanceof ServerLevel serverLevel) || this.structure == null || this.runtime == null) {
+            return;
+        }
+        MultiblockPortTable table = this.portTable(serverLevel, this.structure);
+        this.refreshPorts(table);
+        this.runtime.retune(table);
+        this.refreshStatus();
+        this.setChanged();
+        this.sync(true);
+    }
+
+    /**
      * 结构解散。
      *
      * @param state 结构状态
@@ -328,6 +347,17 @@ public class ControllerBlockEntity extends BlockEntity implements ISyncPersistRP
 
     public String portTier(int index) {
         return this.portAt(index).tier();
+    }
+
+    /**
+     * 读取一个端口的界面摘要
+     *
+     * @param index 端口序号
+     * @return 端口摘要
+     */
+    public PortRef portRefAt(int index) {
+        PortEntry entry = this.portAt(index);
+        return new PortRef(PortKind.byName(entry.kind()), entry.tier(), entry.pos());
     }
 
     public int portCount() {

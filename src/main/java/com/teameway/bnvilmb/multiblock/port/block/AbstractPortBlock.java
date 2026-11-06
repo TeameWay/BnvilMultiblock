@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.teameway.bnvilmb.multiblock.port.MultiblockPort;
 import com.teameway.bnvilmb.multiblock.port.PortKind;
 import com.teameway.bnvilmb.multiblock.port.PortTier;
+import com.teameway.bnvilmb.ui.BnvilUi;
 import dev.anvilcraft.lib.v2.registrum.util.entry.BlockEntityEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,7 +75,7 @@ public abstract class AbstractPortBlock extends Block implements EntityBlock, Bl
     @Override
     public ModularUI createUI(BlockUIMenuType.BlockUIHolder holder) {
         if (holder.player.level().getBlockEntity(holder.pos) instanceof MultiblockPort port) {
-            return PortUI.create(port, holder);
+            return BnvilUi.port(port, holder);
         }
         return new ModularUI(UI.of(new UIElement()), holder.player);
     }

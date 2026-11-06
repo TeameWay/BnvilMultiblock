@@ -28,13 +28,12 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-            // 测试实例只在 GameTestServer 注册，普通客户端不能注册，否则登录同步会报 Direct holder
             systemProperty 'bnvil_multiblock.tests', 'true'
         }
 
         data {
             clientData()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/dev/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
 

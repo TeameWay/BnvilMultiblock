@@ -11,8 +11,10 @@ group = maven_group
 version = mod_version
 
 sourceSets {
+    main {
+        resources.srcDir 'src/generated/resources'
+    }
     dev {
-        resources.srcDir 'src/dev/generated/resources'
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
     }

@@ -30,13 +30,14 @@ public final class DevContent {
      */
     @SubscribeEvent
     public static void onConstruct(FMLConstructModEvent event) {
+        BnvilCreativeTabs.register();
+        BnvilMultiBlock.REGISTRUM.defaultCreativeTab(BnvilCreativeTabs.MULTIBLOCK);
+
         BnvilControllerBlocks.register();
         BnvilControllerBlockEntities.register();
         BnvilControllers.register();
         BnvilMachines.register();
         BnvilPorts.register();
         BnvilTypes.register();
-        BnvilCreativeTabs.register();
-        BnvilMultiBlock.REGISTRUM.defaultCreativeTab(BnvilCreativeTabs.MULTIBLOCK);
     }
 }
